@@ -122,6 +122,6 @@ ghci
             if (curType === null)
                 return null;
             else
-            return [curBestRange, curType.replace(/([A-Za-z0-9]+\.)+/g, ' ')];
+            return [curBestRange, curType.replace(/([A-Za-z0-9]+\.)+/g, '')];
     }
 }
