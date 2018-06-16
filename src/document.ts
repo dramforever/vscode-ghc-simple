@@ -47,7 +47,10 @@ repl
 --ghc-options=-Wall`.split('\n'));
                     } else {
                         console.log('Found bare ghci');
-                        this.makeGhci(`ghci
+                        this.makeGhci(`stack
+exec
+ghci
+--
 -fno-diagnostics-show-caret
 -fdiagnostics-color=never
 -ferror-spans
