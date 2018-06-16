@@ -63,7 +63,7 @@ function checkHaskell(document: vscode.TextDocument) {
             docManagers.set(document, docMgr);
         }
 
-        const loadP = docMgr.load();
+        const loadP = docMgr.reload();
         loadP.then((result) => {
             console.log(result);
 

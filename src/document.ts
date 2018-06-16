@@ -8,6 +8,7 @@ export class DocumentManager implements Disposable {
     path: string;
     typeCache: null | string[];
     starting: Thenable<void>;
+    loading: Thenable<void>
 
     makeGhci(ghciCommand: string[]) {
         this.ghci = new GhciManager(
@@ -71,11 +72,16 @@ ghci
         this.ghci.dispose();
     }
 
-    load(): Thenable<string[]> {
+    async loadP(): Promise<string[]> {
+        await this.starting;
+        return await this.ghci.sendCommand([':set +c', ':l ' + this.path]);
+    }
+
+    reload(): Promise<string[]> {
         this.clear();
-        return this.starting.then(() => {
-            return this.ghci.sendCommand([':set +c', ':l ' + this.path])
-        });
+        const pr = this.loadP();
+        this.loading = pr.then(() => undefined);
+        return pr;
     }
 
     async getType(sel: Selection | Position | Range): Promise<null | [Range, string]> {
@@ -87,41 +93,37 @@ ghci
         }
         // this.typeCache = [];
 
-        await this.load();
+        await this.loading;
 
-        const typesP: string[] =
+        const typesB: string[] =
             this.typeCache === null
                 ? await this.ghci.sendCommand(':all-types')
                 : this.typeCache;
 
-        const strs = await typesP;
+        this.typeCache = typesB;
 
-            if (this.typeCache === null) {
-                this.typeCache = strs;
-            }
+        const strTypes = typesB.filter((x) => x.startsWith(this.path));
+        const allTypes = strTypes.map((x) =>
+            /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(this.path.length)));
 
-            const strTypes = strs.filter((x) => x.startsWith(this.path));
-            const allTypes = strTypes.map((x) =>
-                /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(this.path.length)));
-
-            // console.log(`Sel = ${selRange.start.line},${selRange.start.character} - ${selRange.end.line},${selRange.end.character}`);
+        // console.log(`Sel = ${selRange.start.line},${selRange.start.character} - ${selRange.end.line},${selRange.end.character}`);
 
         let curBestRange: null | Range = null, curType: null | string = null;
 
-            for (let [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
-                const curRange = new Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
-                // console.log(`${curRange.start.line},${curRange.start.character} - ${curRange.end.line},${curRange.end.character}`);
-                if (curRange.contains(selRangeOrPos)) {
-                    if (curBestRange === null || curBestRange.contains(curRange)) {
-                        curBestRange = curRange;
-                        curType = type;
-                    }
+        for (let [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
+            const curRange = new Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
+            // console.log(`${curRange.start.line},${curRange.start.character} - ${curRange.end.line},${curRange.end.character}`);
+            if (curRange.contains(selRangeOrPos)) {
+                if (curBestRange === null || curBestRange.contains(curRange)) {
+                    curBestRange = curRange;
+                    curType = type;
                 }
             }
+        }
 
-            if (curType === null)
-                return null;
-            else
+        if (curType === null)
+            return null;
+        else
             return [curBestRange, curType.replace(/([A-Za-z0-9]+\.)+/g, '')];
     }
 }
