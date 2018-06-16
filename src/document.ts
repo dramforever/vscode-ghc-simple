@@ -78,7 +78,7 @@ ghci
         });
     }
 
-    getType(sel: Selection | Position | Range) {
+    async getType(sel: Selection | Position | Range): Promise<null | [Range, string]> {
         let selRangeOrPos: Range | Position;
         if (sel instanceof Selection) {
             selRangeOrPos = new Range(sel.start, sel.end);
@@ -87,12 +87,15 @@ ghci
         }
         // this.typeCache = [];
 
-        let typesP =
-            this.typeCache === null
-                ? this.starting.then(() => this.load().then(() => this.ghci.sendCommand(':all-types')))
-                : Promise.resolve(this.typeCache);
+        await this.load();
 
-        return typesP.then((strs) => {
+        const typesP: string[] =
+            this.typeCache === null
+                ? await this.ghci.sendCommand(':all-types')
+                : this.typeCache;
+
+        const strs = await typesP;
+
             if (this.typeCache === null) {
                 this.typeCache = strs;
             }
@@ -103,7 +106,8 @@ ghci
 
             // console.log(`Sel = ${selRange.start.line},${selRange.start.character} - ${selRange.end.line},${selRange.end.character}`);
 
-            let curBestRange = null, curType = null;
+        let curBestRange: null | Range = null, curType: null | string = null;
+
             for (let [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
                 const curRange = new Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
                 // console.log(`${curRange.start.line},${curRange.start.character} - ${curRange.end.line},${curRange.end.character}`);
@@ -118,7 +122,6 @@ ghci
             if (curType === null)
                 return null;
             else
-                return [curBestRange, curType.replace(/([A-Za-z0-9]+\.)+/g, '')];
-        })
+            return [curBestRange, curType.replace(/([A-Za-z0-9]+\.)+/g, ' ')];
     }
 }
