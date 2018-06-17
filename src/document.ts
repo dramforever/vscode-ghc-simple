@@ -24,43 +24,24 @@ export class DocumentManager implements Disposable {
         this.path = path_;
         this.ghci = null;
         this.ext = ext
-        this.starting = this.start();
+        const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -Wall'
+        this.starting = this.start().then(() => { this.ghci.sendCommand(configure) });
     }
 
     start(): Thenable<void> {
         return vscode.workspace.findFiles('stack.yaml').then((isStack) => {
             if (isStack.length > 0) {
                 this.ext.outputChannel.appendLine('Found stack-based');
-                this.makeGhci(`stack
-repl
---ghci-options=-fno-diagnostics-show-caret
---ghci-options=-fdiagnostics-color=never
---ghci-options=-ferror-spans
---ghci-options=-fdefer-type-errors
---ghci-options=-Wall`.split('\n'));
+                this.makeGhci(['stack', 'repl']);
             } else {
                 return vscode.workspace.findFiles('**/*.cabal').then((isCabal) => {
                     let ghciCommand: string[];
                     if (isCabal.length > 0) {
                         this.ext.outputChannel.appendLine('Found cabal based');
-                        this.makeGhci(`cabal
-repl
---ghc-options=-fno-diagnostics-show-caret
---ghc-options=-fdiagnostics-color=never
---ghc-options=-ferror-spans
---ghc-options=-fdefer-type-errors
---ghc-options=-Wall`.split('\n'));
+                        this.makeGhci(['cabal', 'repl']);
                     } else {
                         this.ext.outputChannel.appendLine('Found bare ghci');
-                        this.makeGhci(`stack
-exec
-ghci
---
--fno-diagnostics-show-caret
--fdiagnostics-color=never
--ferror-spans
--fdefer-type-errors
--Wall`.split('\n'));
+                        this.makeGhci(['stack', 'exec', 'ghci']);
                     }
 
                 })
