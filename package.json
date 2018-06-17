@@ -1,7 +1,12 @@
 {
     "name": "vscode-ghc-simple",
-    "displayName": "Simple GHC Integration for VSCode",
-    "description": "Integrates GHC without GHC API madness",
+    "displayName": "Simple GHC (Haskell) Integration",
+    "description": "Simple Haskell support using only GHCi",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dramforever/vscode-ghc-simple"
+    },
+    "license": "ISC",
     "version": "0.0.1",
     "publisher": "dramforever",
     "engines": {
