@@ -30,13 +30,11 @@ export function registerRangeType(ext: ExtensionState) {
         const sel = event.selections[0];
 
         selTimeout = setTimeout(() => {
-            console.log(`(${sel.start.line},${sel.start.character})-(${sel.end.line},${sel.end.character})`);
             if (docManagers.has(event.textEditor.document)) {
                 const mgr = docManagers.get(event.textEditor.document);
                 mgr.getType(sel).then((res) => {
                     if (res !== null) {
                         const [range, type] = res;
-                        console.log(type);
                         event.textEditor.setDecorations(decoCurrent, [{
                             hoverMessage: type,
                             range: range

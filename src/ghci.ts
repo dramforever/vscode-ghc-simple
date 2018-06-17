@@ -26,7 +26,6 @@ export class GhciManager implements Disposable {
         this.args = args;
         this.options = options;
         this.output = ext.outputChannel;
-        console.log('Start!');
     }
 
     makeReadline(stream): readline.ReadLine {
@@ -48,7 +47,6 @@ export class GhciManager implements Disposable {
     }
 
     stop(): Promise<{}> {
-        console.log('Stop!');
         return this.sendCommand(':q');
     }
 
@@ -97,11 +95,9 @@ export class GhciManager implements Disposable {
     }
 
     handleLine(line: string) {
-        console.log('ghci | %s', line);
+        this.output.appendLine(`ghci | ${line}`);
         if (this.currentCommand === null) {
             // Ignore stray line
-
-            // console.log('stray line');
         } else {
             if (this.currentCommand.barrier === line) {
                 this.currentCommand.resolve(this.currentCommand.lines);
@@ -122,10 +118,10 @@ export class GhciManager implements Disposable {
         let isFirst = true;
         for (let c of commands) {
             if (isFirst) {
-                console.log('    -> ' + c);
+                this.output.appendLine('    -> ' + c);
                 isFirst = false;
             } else {
-                console.log('    |> ' + c);
+                this.output.appendLine('    |> ' + c);
             }
 
             this.proc.stdin.write(c + '\n');

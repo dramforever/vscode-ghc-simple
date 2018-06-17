@@ -26,7 +26,6 @@ export function parseMessages(messages: string[]):
 
     while (messages.length > 0) {
         const heading = messages.shift();
-        console.log(heading);
 
         if (/^(Ok|Failed),(.*) loaded.$/.test(heading))
             break;

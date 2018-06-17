@@ -3,7 +3,7 @@ import { DocumentManager } from "./document";
 import { ExtensionState } from './extension-state';
 
 export class HaskellCompletion implements vscode.CompletionItemProvider {
-    constructor(public docManagers: Map<vscode.TextDocument, DocumentManager>) {
+    constructor(public ext: ExtensionState) {
 
     }
 
@@ -12,8 +12,8 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         position: vscode.Position,
         token: vscode.CancellationToken):
         Promise<null | vscode.CompletionList> {
-        if (this.docManagers.has(document)) {
-            const mgr = this.docManagers.get(document) as DocumentManager;
+        if (this.ext.docManagers.has(document)) {
+            const mgr = this.ext.docManagers.get(document) as DocumentManager;
             const firstInLine = position.with({ character: 0 });
             const line = document.getText(new vscode.Range(firstInLine, position));
             if (line.trim() !== '') {
@@ -34,7 +34,7 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
                     });
                     return new vscode.CompletionList(items, true);
                 } else {
-                    console.log('Bad completion response');
+                    this.ext.outputChannel.appendLine('Bad completion response');
                     return null;
                 }
             } else {
@@ -48,5 +48,5 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
 
 export function registerCompletion(ext: ExtensionState) {
     ext.context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        { language: 'haskell', scheme: 'file'} , new HaskellCompletion(ext.docManagers), ' '));
+        { language: 'haskell', scheme: 'file'} , new HaskellCompletion(ext), ' '));
 }

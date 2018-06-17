@@ -30,7 +30,7 @@ export class DocumentManager implements Disposable {
     start(): Thenable<void> {
         return vscode.workspace.findFiles('stack.yaml').then((isStack) => {
             if (isStack.length > 0) {
-                console.log('Found stack-based');
+                this.ext.outputChannel.appendLine('Found stack-based');
                 this.makeGhci(`stack
 repl
 --ghci-options=-fno-diagnostics-show-caret
@@ -42,7 +42,7 @@ repl
                 return vscode.workspace.findFiles('**/*.cabal').then((isCabal) => {
                     let ghciCommand: string[];
                     if (isCabal.length > 0) {
-                        console.log('Found cabal based');
+                        this.ext.outputChannel.appendLine('Found cabal based');
                         this.makeGhci(`cabal
 repl
 --ghc-options=-fno-diagnostics-show-caret
@@ -51,7 +51,7 @@ repl
 --ghc-options=-fdefer-type-errors
 --ghc-options=-Wall`.split('\n'));
                     } else {
-                        console.log('Found bare ghci');
+                        this.ext.outputChannel.appendLine('Found bare ghci');
                         this.makeGhci(`stack
 exec
 ghci
@@ -110,13 +110,10 @@ ghci
         const allTypes = strTypes.map((x) =>
             /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(this.path.length)));
 
-        // console.log(`Sel = ${selRange.start.line},${selRange.start.character} - ${selRange.end.line},${selRange.end.character}`);
-
         let curBestRange: null | Range = null, curType: null | string = null;
 
         for (let [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
             const curRange = new Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
-            // console.log(`${curRange.start.line},${curRange.start.character} - ${curRange.end.line},${curRange.end.character}`);
             if (curRange.contains(selRangeOrPos)) {
                 if (curBestRange === null || curBestRange.contains(curRange)) {
                     curBestRange = curRange;

@@ -61,7 +61,6 @@ function stopMgr(document: vscode.TextDocument, ext: ExtensionState) {
 
 function checkHaskell(document: vscode.TextDocument, ext: ExtensionState) {
     if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs')) {
-        console.log('check');
         let docMgr: DocumentManager = null;
 
         if (ext.docManagers.has(document)) {
@@ -73,11 +72,7 @@ function checkHaskell(document: vscode.TextDocument, ext: ExtensionState) {
 
         const loadP = docMgr.reload();
         loadP.then((result) => {
-            console.log(result);
-
             const normPath = normalizePath(document.uri.fsPath);
-
-            console.log(normPath);
 
             const parsed = parseMessages(result);
 
