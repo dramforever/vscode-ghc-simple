@@ -94,9 +94,31 @@ export class DocumentManager implements Disposable {
             }
         }
 
-        if (curType === null)
+        if (curType === null) {
             return null;
-        else
-            return [curBestRange, curType.replace(/([A-Za-z0-9]+\.)+/g, '')];
+        } else {
+            const re = /[A-Za-z0-9_'.]*/g
+            const typeVariables = curType.match(re).filter((u) => u.length && /[a-z]/.test(u[0]));
+            const forallPart = `forall ${[...new Set(typeVariables)].join(' ')}.`
+            const res = await this.ghci.sendCommand([
+                ':set -XExplicitForAll',
+                `:kind! ${forallPart} ${curType}`]);
+
+            const resolved: null | string = (() => {
+                if (res.length > 1 && res[0].startsWith(`${curType} ::`)) {
+                    res.shift(); // Skip first kind line
+                    res[0] = res[0].slice(1); // Skip '=' on second line
+                    return res.join(' ').replace(/\s{2,}/g, ' ');
+                } else {
+                    return null;
+                }
+            })();
+
+            if (resolved) {
+                return [curBestRange, resolved];
+            } else {
+                return [curBestRange, curType.replace(/([A-Za-z0-9_']+\.)+/g, '')];
+            }
+        }
     }
 }
