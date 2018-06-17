@@ -8,6 +8,7 @@ import { DocumentManager } from "./document";
 import { parseMessages } from "./parse-messages";
 import { StatusBarAlignment } from 'vscode';
 import { registerRangeType } from './range-type';
+import { registerCompletion } from './completion';
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -33,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     registerRangeType(context, docManagers);
 
+    registerCompletion(context, docManagers);
 }
 
 function normalizePath(path_: string): string {
