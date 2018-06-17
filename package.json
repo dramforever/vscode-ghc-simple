@@ -5,7 +5,7 @@
     "version": "0.0.1",
     "publisher": "dramforever",
     "engines": {
-        "vscode": "^1.24.1"
+        "vscode": "^1.14.0"
     },
     "categories": [
         "Other"
@@ -22,7 +22,7 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "dependencies": {
-        "vscode": "^1.1.0"
+        "vscode": "^1.1.18"
     },
     "devDependencies": {
         "typescript": "^2.0.3",
