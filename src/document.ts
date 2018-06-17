@@ -120,7 +120,7 @@ export class DocumentManager implements Disposable {
             if (resolved) {
                 return [curBestRange, resolved];
             } else {
-                return [curBestRange, curType.replace(/([A-Za-z0-9_']+\.)+/g, '')];
+                return [curBestRange, curType.replace(/([A-Z][A-Za-z0-9_']*\.)+([A-Za-z0-9_']+)/g, '$2')];
             }
         }
     }
