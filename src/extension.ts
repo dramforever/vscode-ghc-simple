@@ -9,7 +9,7 @@ import { parseMessages } from "./parse-messages";
 import { StatusBarAlignment } from 'vscode';
 import { registerRangeType } from './range-type';
 import { registerCompletion } from './completion';
-import { ExtensionState } from './extension-state';
+import { ExtensionState, computeWorkspaceType } from './extension-state';
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
@@ -21,7 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
     const ext: ExtensionState = {
         context,
         docManagers: new Map(),
-        outputChannel
+        outputChannel,
+        workspaceType: computeWorkspaceType()
     }
 
     diagnosticCollection = vscode.languages.createDiagnosticCollection('ghc-simple');
@@ -36,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
             mgr.dispose();
         }
         ext.docManagers.clear();
+        ext.workspaceType = computeWorkspaceType();
     }));
 
     registerRangeType(ext);

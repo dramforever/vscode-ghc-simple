@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Disposable, Range, Selection, Position } from 'vscode';
 import { GhciManager } from './ghci';
-import { ExtensionState } from './extension-state';
+import { ExtensionState, HaskellWorkspaceType } from './extension-state';
 
 
 export class DocumentManager implements Disposable {
@@ -24,29 +24,20 @@ export class DocumentManager implements Disposable {
         this.path = path_;
         this.ghci = null;
         this.ext = ext
-        const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -Wall'
-        this.starting = this.start().then(() => { this.ghci.sendCommand(configure) });
+        this.starting = this.start();
     }
 
-    start(): Thenable<void> {
-        return vscode.workspace.findFiles('stack.yaml').then((isStack) => {
-            if (isStack.length > 0) {
-                this.ext.outputChannel.appendLine('Found stack-based');
-                this.makeGhci(['stack', 'repl']);
-            } else {
-                return vscode.workspace.findFiles('**/*.cabal').then((isCabal) => {
-                    let ghciCommand: string[];
-                    if (isCabal.length > 0) {
-                        this.ext.outputChannel.appendLine('Found cabal based');
-                        this.makeGhci(['cabal', 'repl']);
-                    } else {
-                        this.ext.outputChannel.appendLine('Found bare ghci');
-                        this.makeGhci(['stack', 'exec', 'ghci']);
-                    }
-
-                })
-            }
-        });
+    async start(): Promise<void> {
+        const wst = await this.ext.workspaceType;
+        const cmdTable: { [k in HaskellWorkspaceType]: string[] } = {
+            'stack': ['stack', 'repl'],
+            'cabal': ['cabal', 'repl'],
+            'bare-stack': ['stack', 'exec', 'ghci'],
+            'bare': ['ghci'],
+        };
+        this.makeGhci(cmdTable[wst]);
+        const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -Wall';
+        return this.ghci.sendCommand(configure).then(() => {});
     }
 
     clear() {
