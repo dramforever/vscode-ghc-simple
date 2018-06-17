@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { Disposable, Range, Selection, Position } from 'vscode';
 import { GhciManager } from './ghci';
+import { ExtensionState } from './extension-state';
 
 
 export class DocumentManager implements Disposable {
@@ -8,18 +9,21 @@ export class DocumentManager implements Disposable {
     path: string;
     typeCache: null | string[];
     starting: Thenable<void>;
-    loading: Thenable<void>
+    loading: Thenable<void>;
+    ext: ExtensionState;
 
     makeGhci(ghciCommand: string[]) {
         this.ghci = new GhciManager(
             ghciCommand[0],
             ghciCommand.slice(1),
-            { cwd: vscode.workspace.rootPath, stdio: 'pipe' });
+            { cwd: vscode.workspace.rootPath, stdio: 'pipe' },
+            this.ext);
     }
 
-    constructor(path_) {
+    constructor(path_: string, ext: ExtensionState) {
         this.path = path_;
         this.ghci = null;
+        this.ext = ext
         this.starting = this.start();
     }
 

@@ -2,7 +2,8 @@
 
 import * as child_process from 'child_process';
 import * as readline from 'readline';
-import { Disposable } from "vscode";
+import { Disposable, OutputChannel, Extension } from "vscode";
+import { ExtensionState } from './extension-state';
 
 interface PendingCommand {
     commands: string[];
@@ -17,12 +18,14 @@ export class GhciManager implements Disposable {
     options: any;
     stdout: readline.ReadLine;
     stderr: readline.ReadLine;
+    output: OutputChannel
 
-    constructor(command: string, args: string[], options: any) {
+    constructor(command: string, args: string[], options: any, ext: ExtensionState) {
         this.proc = null;
         this.command = command;
         this.args = args;
         this.options = options;
+        this.output = ext.outputChannel;
         console.log('Start!');
     }
 

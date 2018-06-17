@@ -9,32 +9,38 @@ import { parseMessages } from "./parse-messages";
 import { StatusBarAlignment } from 'vscode';
 import { registerRangeType } from './range-type';
 import { registerCompletion } from './completion';
+import { ExtensionState } from './extension-state';
 
 let diagnosticCollection: vscode.DiagnosticCollection;
-
-let docManagers: Map<vscode.TextDocument, DocumentManager> = new Map();
 
 let ghciCommand: string[];
 
 export function activate(context: vscode.ExtensionContext) {
-    
+    const outputChannel = vscode.window.createOutputChannel('GHC');
+
+    const ext: ExtensionState = {
+        context,
+        docManagers: new Map(),
+        outputChannel
+    }
+
     diagnosticCollection = vscode.languages.createDiagnosticCollection('ghc-simple');
     context.subscriptions.push(diagnosticCollection);
 
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(checkHaskell));
-    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(checkHaskell));
-    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument(stopMgr));
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((d) => checkHaskell(d, ext)));
+    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument((d) => checkHaskell(d, ext)));
+    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((d) => stopMgr(d, ext)));
 
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => {
-        for (let [doc, mgr] of docManagers) {
+        for (let [doc, mgr] of ext.docManagers) {
             mgr.dispose();
         }
-        docManagers.clear();
+        ext.docManagers.clear();
     }));
 
-    registerRangeType(context, docManagers);
+    registerRangeType(ext);
 
-    registerCompletion(context, docManagers);
+    registerCompletion(ext);
 }
 
 function normalizePath(path_: string): string {
@@ -46,23 +52,23 @@ function normalizePath(path_: string): string {
     }
 }
 
-function stopMgr(document: vscode.TextDocument) {
-    if (docManagers.has(document)) {
-        docManagers.get(document).dispose();
-        docManagers.delete(document);
+function stopMgr(document: vscode.TextDocument, ext: ExtensionState) {
+    if (ext.docManagers.has(document)) {
+        ext.docManagers.get(document).dispose();
+        ext.docManagers.delete(document);
     }
 }
 
-function checkHaskell(document: vscode.TextDocument) {
+function checkHaskell(document: vscode.TextDocument, ext: ExtensionState) {
     if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs')) {
         console.log('check');
         let docMgr: DocumentManager = null;
 
-        if (docManagers.has(document)) {
-            docMgr = docManagers.get(document);
+        if (ext.docManagers.has(document)) {
+            docMgr = ext.docManagers.get(document);
         } else {
-            docMgr = new DocumentManager(document.uri.fsPath);
-            docManagers.set(document, docMgr);
+            docMgr = new DocumentManager(document.uri.fsPath, ext);
+            ext.docManagers.set(document, docMgr);
         }
 
         const loadP = docMgr.reload();

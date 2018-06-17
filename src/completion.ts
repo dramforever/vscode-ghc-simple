@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DocumentManager } from "./document";
+import { ExtensionState } from './extension-state';
 
 export class HaskellCompletion implements vscode.CompletionItemProvider {
     constructor(public docManagers: Map<vscode.TextDocument, DocumentManager>) {
@@ -45,9 +46,7 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
     }
 }
 
-export function registerCompletion(
-    context: vscode.ExtensionContext,
-    docManagers: Map<vscode.TextDocument, DocumentManager>) {
-    context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        { language: 'haskell', scheme: 'file'} , new HaskellCompletion(docManagers), ' '));
+export function registerCompletion(ext: ExtensionState) {
+    ext.context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
+        { language: 'haskell', scheme: 'file'} , new HaskellCompletion(ext.docManagers), ' '));
 }

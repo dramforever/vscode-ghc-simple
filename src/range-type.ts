@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { DocumentManager } from './document';
 import { StatusBarAlignment } from 'vscode';
+import { ExtensionState } from './extension-state';
 
-export function registerRangeType(
-    context: vscode.ExtensionContext,
-    docManagers: Map<vscode.TextDocument, DocumentManager>) {
+export function registerRangeType(ext: ExtensionState) {
+    const context = ext.context
+    const docManagers = ext.docManagers;
     let selTimeout: NodeJS.Timer | null = null;
 
     const decoCurrent = vscode.window.createTextEditorDecorationType({
