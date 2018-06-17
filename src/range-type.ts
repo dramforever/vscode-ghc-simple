@@ -30,7 +30,7 @@ export function registerRangeType(ext: ExtensionState) {
 
         selTimeout = setTimeout(() => {
             const doc = event.textEditor.document;
-            if (docManagers.has(doc)) {
+            if (! doc.isDirty && docManagers.has(doc)) {
                 const mgr = docManagers.get(doc);
                 mgr.getType(sel).then((res) => {
                     if (res !== null) {
