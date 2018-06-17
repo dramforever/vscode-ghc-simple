@@ -10,18 +10,17 @@ export function registerRangeType(ext: ExtensionState) {
 
     const decoCurrent = vscode.window.createTextEditorDecorationType({
         borderStyle: 'solid',
-        borderColor: 'black',
-        borderWidth: '0px 0px 1px 0px',
-        before: {
-            color: '#999',
-            margin: '2px'
-        }
+        borderColor: '#66f',
+        borderWidth: '0px 0px 1px 0px'
     });
 
-    let sbItem = vscode.window.createStatusBarItem(StatusBarAlignment.Left);
-
-    context.subscriptions.push(sbItem);
-
+    const decoType = vscode.window.createTextEditorDecorationType({
+        after: {
+            color: '#999',
+            margin: '0px 0px 0px 20px'
+        },
+        rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
+    })
 
     context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
         if (selTimeout !== null) {
@@ -30,20 +29,25 @@ export function registerRangeType(ext: ExtensionState) {
         const sel = event.selections[0];
 
         selTimeout = setTimeout(() => {
-            if (docManagers.has(event.textEditor.document)) {
-                const mgr = docManagers.get(event.textEditor.document);
+            const doc = event.textEditor.document;
+            if (docManagers.has(doc)) {
+                const mgr = docManagers.get(doc);
                 mgr.getType(sel).then((res) => {
                     if (res !== null) {
                         const [range, type] = res;
-                        event.textEditor.setDecorations(decoCurrent, [{
-                            hoverMessage: type,
-                            range: range
+                        const lineRange = doc.lineAt(range.start.line).range;
+                        event.textEditor.setDecorations(decoCurrent, [{range}]);
+                        event.textEditor.setDecorations(decoType, [{
+                            range: lineRange,
+                            renderOptions: {
+                                after: {
+                                    contentText: `:: ${type}`
+                                }
+                            }
                         }]);
-                        sbItem.text = type;
-                        sbItem.show();
                     } else {
                         event.textEditor.setDecorations(decoCurrent, []);
-                        sbItem.hide();
+                        event.textEditor.setDecorations(decoType, []);
                     }
                 })
             }
