@@ -48,6 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 function normalizePath(path_: string): string {
     path_ = path.normalize(path_);
     if (path_.length >= 2 && path_.charAt(0).match(/[a-z]/i) && path_.charAt(1) == ':') {
+        // VSCode likes d:\ but GHC likes D:\
         return path_.charAt(0).toUpperCase() + path_.substr(1);
     } else {
         return path_;

@@ -97,17 +97,23 @@ export class DocumentManager implements Disposable {
         if (curType === null) {
             return null;
         } else {
+            // :all-types gives types with implicit forall type variables,
+            // but :kind! doesn't like them, so we try to patch this fact
+
             const re = /[A-Za-z0-9_']*/g
             const typeVariables = curType.match(re).filter((u) =>
                 u.length && u !== 'forall' && /[a-z]/.test(u[0]));
             const forallPart = `forall ${[...new Set(typeVariables)].join(' ')}.`
             const fullType = `${forallPart} ${curType}`;
+            
             const res = await this.ghci.sendCommand([
                 ':set -XExplicitForAll',
                 `:kind! ${fullType}`]);
 
             const resolved: null | string = (() => {
+                // GHCi may output warning messages before the response
                 while (res.length && ! res[0].startsWith(`${fullType} ::`)) res.shift();
+
                 if (res.length && res[1].startsWith('= ')) {
                     res.shift();
                     res[0] = res[0].slice(1); // Skip '=' on second line

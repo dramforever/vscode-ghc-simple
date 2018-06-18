@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 const regex = {
 
-    // Groups:
+    // Groups: (Because there's no named group in JS Regex)
     // 1: file
     // 2-3: variant 1: line:col
     // 4-6: variant 2: line:col-col

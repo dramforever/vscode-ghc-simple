@@ -57,6 +57,9 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
             if (this.ext.docManagers.has(document)) {
                 const mgr = this.ext.docManagers.get(document);
                 const docs = await mgr.ghci.sendCommand(`:info ${item.label}`);
+
+                // Heuristic: If there's an error, then GHCi will output
+                // a blank line before the error message
                 if (docs[0].trim() != '') {
                     const fixedDocs = docs.map((s) => s.replace('\t--', '\n--').trim());
                     item.detail = fixedDocs.join('\n');
