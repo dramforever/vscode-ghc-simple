@@ -23,39 +23,45 @@ export function registerRangeType(ext: ExtensionState) {
     })
 
     context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
-        if (selTimeout !== null) {
-            clearTimeout(selTimeout);
-        }
-        const sel = event.selections[0];
+        const doc = event.textEditor.document;
+        
+        if (doc.isDirty) {
+            event.textEditor.setDecorations(decoCurrent, []);
+            event.textEditor.setDecorations(decoType, []);
+        } else {
+            if (selTimeout !== null) {
+                clearTimeout(selTimeout);
+            }
 
-        selTimeout = setTimeout(() => {
-            const doc = event.textEditor.document;
-            if (! doc.isDirty && docManagers.has(doc)) {
-                const mgr = docManagers.get(doc);
-                mgr.getType(sel).then((res) => {
-                    if (res !== null) {
-                        const [range, type] = res;
-                        const lineRange = doc.lineAt(range.start.line).range;
+            const sel = event.selections[0];
+
+            selTimeout = setTimeout(() => {
+                if (docManagers.has(doc)) {
+                    const mgr = docManagers.get(doc);
+                    mgr.getType(sel).then((res) => {
+                        if (res !== null) {
+                            const [range, type] = res;
+                            const lineRange = doc.lineAt(range.start.line).range;
                             event.textEditor.setDecorations(decoCurrent, [{
                                 range,
                                 hoverMessage: type
                             }]);
-                        event.textEditor.setDecorations(decoType, [{
-                            range: lineRange,
-                            renderOptions: {
-                                after: {
-                                    contentText: `:: ${type}`
+                            event.textEditor.setDecorations(decoType, [{
+                                range: lineRange,
+                                renderOptions: {
+                                    after: {
+                                        contentText: `:: ${type}`
+                                    }
                                 }
-                            }
-                        }]);
-                    } else {
-                        event.textEditor.setDecorations(decoCurrent, []);
-                        event.textEditor.setDecorations(decoType, []);
-                    }
-                })
-            }
-            selTimeout = null;
-        }, 300);
-
+                            }]);
+                        } else {
+                            event.textEditor.setDecorations(decoCurrent, []);
+                            event.textEditor.setDecorations(decoType, []);
+                        }
+                    })
+                }
+                selTimeout = null;
+            }, 300);
+        }
     }));
 }
