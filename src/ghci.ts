@@ -95,6 +95,7 @@ export class GhciManager implements Disposable {
     }
 
     handleLine(line: string) {
+        line = line.replace(/\ufffd/g, ''); // Workaround for invalid characters showing up in output
         this.output.appendLine(`ghci | ${line}`);
         if (this.currentCommand === null) {
             // Ignore stray line
