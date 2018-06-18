@@ -2,6 +2,8 @@
 
 *Simple Haskell support using only GHCi.*
 
+[![vscode-ghc-simple on Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/dramforever.vscode-ghc-simple.svg)](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple)
+
 **Notice:** This project is currently **experimental**. It's intended for testing purposes only for the time being. Things probably won't work for you. Check the issues page for some known problems.
 
 ## What?
