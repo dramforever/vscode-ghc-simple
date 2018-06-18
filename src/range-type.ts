@@ -36,7 +36,10 @@ export function registerRangeType(ext: ExtensionState) {
                     if (res !== null) {
                         const [range, type] = res;
                         const lineRange = doc.lineAt(range.start.line).range;
-                        event.textEditor.setDecorations(decoCurrent, [{range}]);
+                            event.textEditor.setDecorations(decoCurrent, [{
+                                range,
+                                hoverMessage: type
+                            }]);
                         event.textEditor.setDecorations(decoType, [{
                             range: lineRange,
                             renderOptions: {
