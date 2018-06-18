@@ -18,7 +18,7 @@ Currently implemented features:
 
     ![Completion demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/completion-info.PNG)
 
-3. **Type:** View types by selecting in the code. The minimal expression covering the selection will have its type shown
+3. **Type:** View types by selecting in the code. The minimal expression covering the selection will have its type shown. Implemented with `:all-types`.
 
     ![Range type demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/range-type.png)
 
