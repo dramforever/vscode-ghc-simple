@@ -3,8 +3,10 @@ import { DocumentManager } from "./document";
 import { ExtensionState } from './extension-state';
 
 export class HaskellCompletion implements vscode.CompletionItemProvider {
-    constructor(public ext: ExtensionState) {
+    itemDocument: WeakMap<vscode.CompletionItem, vscode.TextDocument>
 
+    constructor(public ext: ExtensionState) {
+        this.itemDocument = new WeakMap();
     }
 
     async provideCompletionItems(
@@ -30,6 +32,7 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
                         const st = JSON.parse(u);
                         const cp = new vscode.CompletionItem(st, vscode.CompletionItemKind.Variable);
                         cp.range = replaceRange;
+                        this.itemDocument.set(cp, document);
                         return cp;
                     });
                     return new vscode.CompletionList(items, true);
@@ -43,6 +46,24 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         } else {
             return null;
         }
+    }
+
+    async resolveCompletionItem(
+        item: vscode.CompletionItem,
+        token: vscode.CancellationToken):
+        Promise<vscode.CompletionItem> {
+        if (this.itemDocument.has(item)) {
+            const document = this.itemDocument.get(item);
+            if (this.ext.docManagers.has(document)) {
+                const mgr = this.ext.docManagers.get(document);
+                const docs = await mgr.ghci.sendCommand(`:info ${item.label}`);
+                if (docs[0].trim() != '') {
+                    const fixedDocs = docs.map((s) => s.replace('\t--', '\n--').trim());
+                    item.detail = fixedDocs.join('\n');
+                }
+            }
+        }
+        return item;
     }
 }
 
