@@ -107,8 +107,8 @@ export class DocumentManager implements Disposable {
             const fullType = `${forallPart} ${curType}`;
             
             const res = await this.ghci.sendCommand([
-                ':set -XExplicitForAll',
-                `:kind! ${fullType}`]);
+                ':seti -XExplicitForAll -XKindSignatures',
+                `:kind! ((${fullType}) :: *)`]);
 
             const resolved: null | string = (() => {
                 // GHCi may output warning messages before the response
