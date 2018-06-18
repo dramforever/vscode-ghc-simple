@@ -14,9 +14,9 @@ Currently implemented features:
 
     ![Squiggle demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/squiggle.png)
 
-2. **Completion:** Crude completion with GHCi's `:complete` command. Works okay with imported and top level identifiers.
+2. **Completion:** Crude completion with GHCi's `:complete` command, with `:info` lookup. Works okay with imported and top level identifiers.
 
-    ![Completion demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/completion.png)
+    ![Completion demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/completion-info.PNG)
 
 3. **Type:** View types by selecting in the code. The minimal expression covering the selection will have its type shown
 
