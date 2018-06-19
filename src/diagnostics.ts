@@ -125,7 +125,7 @@ function stopMgr(document: vscode.TextDocument, ext: ExtensionState) {
     }
 }
 
-function checkHaskell(
+async function checkHaskell(
     diagnosticCollection: vscode.DiagnosticCollection,
     document: vscode.TextDocument,
     ext: ExtensionState) {
@@ -139,18 +139,17 @@ function checkHaskell(
             ext.docManagers.set(document, docMgr);
         }
 
-        const loadP = docMgr.reload();
-        loadP.then((result) => {
-            const normPath = normalizePath(document.uri.fsPath);
+        const result = await docMgr.reload();
 
-            const parsed = parseMessages(result);
+        const normPath = normalizePath(document.uri.fsPath);
 
-            const filtered = parsed.
-                filter((diag) => normalizePath(diag.file) === normPath).
-                map((diag) => diag.diagnostic);
+        const parsed = parseMessages(result);
 
-            diagnosticCollection.set(document.uri, filtered);
-        })
+        const filtered = parsed.
+            filter((diag) => normalizePath(diag.file) === normPath).
+            map((diag) => diag.diagnostic);
+
+        diagnosticCollection.set(document.uri, filtered);
     }
 }
 
@@ -158,8 +157,14 @@ export function registerDiagnostics(ext: ExtensionState) {
     let diagnosticCollection: vscode.DiagnosticCollection;
     diagnosticCollection = vscode.languages.createDiagnosticCollection('ghc-simple');
 
-    ext.context.subscriptions.push(diagnosticCollection);
-    ext.context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((d) => checkHaskell(diagnosticCollection, d, ext)));
-    ext.context.subscriptions.push(vscode.workspace.onDidOpenTextDocument((d) => checkHaskell(diagnosticCollection, d, ext)));
-    ext.context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((d) => stopMgr(d, ext)));
+    const check = (d) => checkHaskell(diagnosticCollection, d, ext);
+    const stop = (d) => stopMgr(d, ext);
+    const vws = vscode.workspace;
+
+    ext.context.subscriptions.push(
+        diagnosticCollection,
+        vws.onDidSaveTextDocument(check),
+        vws.onDidOpenTextDocument(check),
+        vws.onDidCloseTextDocument(stop)
+    );
 }

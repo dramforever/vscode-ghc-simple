@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Disposable, Range, Selection, Position } from 'vscode';
+import { Disposable } from 'vscode';
 import { GhciManager } from './ghci';
 import { ExtensionState, HaskellWorkspaceType } from './extension-state';
 
@@ -37,7 +37,7 @@ export class DocumentManager implements Disposable {
         };
         this.makeGhci(cmdTable[wst]);
         const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -Wall';
-        return this.ghci.sendCommand(configure).then(() => {});
+        await this.ghci.sendCommand(configure);
     }
 
     clear() {

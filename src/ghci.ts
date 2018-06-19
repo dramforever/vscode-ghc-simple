@@ -36,29 +36,29 @@ export class GhciManager implements Disposable {
         return res;
     }
 
-    start(): Promise<child_process.ChildProcess> {
+    async start(): Promise<child_process.ChildProcess> {
         this.proc = child_process.spawn(this.command, this.args, this.options);
         this.stdout = this.makeReadline(this.proc.stdout);
         this.stderr = this.makeReadline(this.proc.stderr);
         this.proc.stdin.on('close', this.handleClose.bind(this));
-        return this.sendCommand(':set prompt ""').then(() => {
-            return this.proc;
-        });
+        await this.sendCommand(':set prompt ""')
+        return this.proc;
     }
 
     stop(): Promise<{}> {
         return this.sendCommand(':q');
     }
 
-    restart(): Promise<child_process.ChildProcess> {
+    async restart(): Promise<child_process.ChildProcess> {
         if (process === null) {
             return this.start();
         } else {
-            this.stop().then(() => {
+            try {
+                await this.stop()
                 console.error('Quitting GHCi should not have succeeded!');
-            }, (reason) => {
+            } catch (_reason) {
                 return this.start();
-            });
+            }
         }
     }
 
@@ -71,16 +71,14 @@ export class GhciManager implements Disposable {
 
     pendingCommands: PendingCommand[] = [];
 
-    sendCommand(cmds: string | string[]): Promise<string[]> {
+    async sendCommand(cmds: string | string[]): Promise<string[]> {
         const commands = (typeof cmds === 'string') ? [cmds] : cmds;
 
         if (this.proc === null) {
-            return this.start().then(() => {
-                return this._sendCommand(commands);
-            })
-        } else {
-            return this._sendCommand(commands);
+            await this.start()
         }
+
+        return this._sendCommand(commands);
     }
 
     _sendCommand(commands: string[]): Promise<string[]> {

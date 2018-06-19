@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { DocumentManager } from './document';
-import { StatusBarAlignment } from 'vscode';
 import { ExtensionState } from './extension-state';
 
 async function getType(
@@ -109,30 +108,29 @@ export function registerRangeType(ext: ExtensionState) {
 
             const sel = event.selections[0];
 
-            selTimeout = setTimeout(() => {
+            selTimeout = setTimeout(async () => {
                 if (docManagers.has(doc)) {
                     const mgr = docManagers.get(doc);
-                    getType(mgr, sel).then((res) => {
-                        if (res !== null) {
-                            const [range, type] = res;
-                            const lineRange = doc.lineAt(range.start.line).range;
-                            event.textEditor.setDecorations(decoCurrent, [{
-                                range,
-                                hoverMessage: type
-                            }]);
-                            event.textEditor.setDecorations(decoType, [{
-                                range: lineRange,
-                                renderOptions: {
-                                    after: {
-                                        contentText: `:: ${type}`
-                                    }
+                    const res = await getType(mgr, sel);
+                    if (res !== null) {
+                        const [range, type] = res;
+                        const lineRange = doc.lineAt(range.start.line).range;
+                        event.textEditor.setDecorations(decoCurrent, [{
+                            range,
+                            hoverMessage: type
+                        }]);
+                        event.textEditor.setDecorations(decoType, [{
+                            range: lineRange,
+                            renderOptions: {
+                                after: {
+                                    contentText: `:: ${type}`
                                 }
-                            }]);
-                        } else {
-                            event.textEditor.setDecorations(decoCurrent, []);
-                            event.textEditor.setDecorations(decoType, []);
-                        }
-                    })
+                            }
+                        }]);
+                    } else {
+                        event.textEditor.setDecorations(decoCurrent, []);
+                        event.textEditor.setDecorations(decoType, []);
+                    }
                 }
                 selTimeout = null;
             }, 300);
