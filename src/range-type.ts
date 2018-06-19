@@ -3,6 +3,80 @@ import { DocumentManager } from './document';
 import { StatusBarAlignment } from 'vscode';
 import { ExtensionState } from './extension-state';
 
+async function getType(
+    mgr: DocumentManager,
+    sel: vscode.Selection | vscode.Position | vscode.Range):
+    Promise<null | [vscode.Range, string]> {
+    let selRangeOrPos: vscode.Range | vscode.Position;
+    if (sel instanceof vscode.Selection) {
+        selRangeOrPos = new vscode.Range(sel.start, sel.end);
+    } else {
+        selRangeOrPos = sel;
+    }
+    // doc.typeCache = [];
+
+    await mgr.loading;
+
+    const typesB: string[] =
+        mgr.typeCache === null
+            ? await mgr.ghci.sendCommand(':all-types')
+            : mgr.typeCache;
+
+    mgr.typeCache = typesB;
+
+    const strTypes = typesB.filter((x) => x.startsWith(mgr.path));
+    const allTypes = strTypes.map((x) =>
+        /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(mgr.path.length)));
+
+    let curBestRange: null | vscode.Range = null, curType: null | string = null;
+
+    for (let [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
+        const curRange = new vscode.Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
+        if (curRange.contains(selRangeOrPos)) {
+            if (curBestRange === null || curBestRange.contains(curRange)) {
+                curBestRange = curRange;
+                curType = type;
+            }
+        }
+    }
+
+    if (curType === null) {
+        return null;
+    } else {
+        // :all-types gives types with implicit forall type variables,
+        // but :kind! doesn't like them, so we try to patch this fact
+
+        const re = /[A-Za-z0-9_']*/g
+        const typeVariables = curType.match(re).filter((u) =>
+            u.length && u !== 'forall' && /[a-z]/.test(u[0]));
+        const forallPart = `forall ${[...new Set(typeVariables)].join(' ')}.`
+        const fullType = `${forallPart} ${curType}`;
+        
+        const res = await mgr.ghci.sendCommand([
+            ':seti -XExplicitForAll -XKindSignatures',
+            `:kind! ((${fullType}) :: *)`]);
+
+        const resolved: null | string = (() => {
+            // GHCi may output warning messages before the response
+            while (res.length && ! res[0].startsWith(`${fullType} ::`)) res.shift();
+
+            if (res.length && res[1].startsWith('= ')) {
+                res.shift();
+                res[0] = res[0].slice(1); // Skip '=' on second line
+                return res.join(' ').replace(/\s{2,}/g, ' ');
+            } else {
+                return null;
+            }
+        })();
+
+        if (resolved) {
+            return [curBestRange, resolved];
+        } else {
+            return [curBestRange, curType.replace(/([A-Z][A-Za-z0-9_']*\.)+([A-Za-z0-9_']+)/g, '$2')];
+        }
+    }
+}
+
 export function registerRangeType(ext: ExtensionState) {
     const context = ext.context
     const docManagers = ext.docManagers;
@@ -38,7 +112,7 @@ export function registerRangeType(ext: ExtensionState) {
             selTimeout = setTimeout(() => {
                 if (docManagers.has(doc)) {
                     const mgr = docManagers.get(doc);
-                    mgr.getType(sel).then((res) => {
+                    getType(mgr, sel).then((res) => {
                         if (res !== null) {
                             const [range, type] = res;
                             const lineRange = doc.lineAt(range.start.line).range;
