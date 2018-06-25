@@ -6,13 +6,13 @@ async function getType(
     mgr: DocumentManager,
     sel: vscode.Selection | vscode.Position | vscode.Range):
     Promise<null | [vscode.Range, string]> {
-    let selRangeOrPos: vscode.Range | vscode.Position;
-    if (sel instanceof vscode.Selection) {
-        selRangeOrPos = new vscode.Range(sel.start, sel.end);
-    } else {
-        selRangeOrPos = sel;
-    }
-    // doc.typeCache = [];
+    const selRangeOrPos: vscode.Range | vscode.Position = (() => {
+        if (sel instanceof vscode.Selection) {
+            return new vscode.Range(sel.start, sel.end);
+        } else {
+            return sel;
+        }
+    })();
 
     await mgr.loading;
 
@@ -29,7 +29,7 @@ async function getType(
 
     let curBestRange: null | vscode.Range = null, curType: null | string = null;
 
-    for (let [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
+    for (const [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
         const curRange = new vscode.Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
         if (curRange.contains(selRangeOrPos)) {
             if (curBestRange === null || curBestRange.contains(curRange)) {

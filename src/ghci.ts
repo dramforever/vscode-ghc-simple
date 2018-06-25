@@ -114,15 +114,13 @@ export class GhciManager implements Disposable {
         const barrier = '===ghci_barrier_' + Math.random().toString() + '===';
         this.currentCommand = { resolve, reject, barrier, lines: [] };
 
-        let isFirst = true;
-        for (let c of commands) {
-            if (isFirst) {
-                this.output.appendLine('    -> ' + c);
-                isFirst = false;
-            } else {
-                this.output.appendLine('    |> ' + c);
-            }
+        if (commands.length > 0) {
+            this.output.appendLine(`    -> ${commands[0]}`);
+            for (const c of commands.slice(1))
+                this.output.appendLine(`    |> ${c}`);
+        }
 
+        for (const c of commands) {
             this.proc.stdin.write(c + '\n');
         }
 
@@ -136,7 +134,7 @@ export class GhciManager implements Disposable {
             this.currentCommand = null;
         }
 
-        for (let cmd of this.pendingCommands) {
+        for (const cmd of this.pendingCommands) {
             cmd.reject('stream closed');
         }
 

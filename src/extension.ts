@@ -5,8 +5,6 @@ import { registerCompletion } from './completion';
 import { ExtensionState, computeWorkspaceType } from './extension-state';
 import { registerDiagnostics } from './diagnostics';
 
-let ghciCommand: string[];
-
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
 
@@ -18,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => {
-        for (let [doc, mgr] of ext.docManagers) {
+        for (const [doc, mgr] of ext.docManagers) {
             mgr.dispose();
         }
         ext.docManagers.clear();
