@@ -1,5 +1,12 @@
 # Change Log
 
+## v0.0.5
+
+- Improvements to `stack` workspaces, including:
+    - Loading all targets with `stack repl` so tests and benchmarks code will work
+    - Using `--no-load` to improve GHCi startup time.
+- Some internal code cleanup.
+
 ## v0.0.4
 
 - Show `:info` for completion items
