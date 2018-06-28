@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as child_process from 'child_process';
 import { Disposable } from 'vscode';
 import { GhciManager } from './ghci';
 import { ExtensionState, HaskellWorkspaceType } from './extension-state';
@@ -29,13 +30,31 @@ export class DocumentManager implements Disposable {
 
     async start(): Promise<void> {
         const wst = await this.ext.workspaceType;
-        const cmdTable: { [k in HaskellWorkspaceType]: string[] } = {
-            'stack': ['stack', 'repl'],
-            'cabal': ['cabal', 'repl'],
-            'bare-stack': ['stack', 'exec', 'ghci'],
-            'bare': ['ghci'],
-        };
-        this.makeGhci(cmdTable[wst]);
+
+        const cmd = await (async () => {
+            if (wst == 'stack') {
+                const result = await new Promise<string>((resolve, reject) => {
+                    const cp = child_process.exec(
+                        'stack ide targets',
+                        { cwd: vscode.workspace.rootPath },
+                        (err, stdout, stderr) => {
+                            if (err) reject();
+                            else resolve(stderr);
+                        }
+                    )
+                });
+                return ['stack', 'repl'].concat(result.split(/\r?\n/)).slice(0, -1);
+            } else if (wst == 'cabal')
+                return ['cabal', 'repl'];
+            else if (wst == 'bare-stack')
+                return ['stack', 'exec', 'ghci'];
+            else if (wst == 'bare')
+                return ['ghci'];
+        })();
+
+        this.ext.outputChannel.appendLine(`Starting ghci using: ${cmd.join(' ')}`);
+
+        this.makeGhci(cmd);
         const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -Wall';
         await this.ghci.sendCommand(configure);
     }
