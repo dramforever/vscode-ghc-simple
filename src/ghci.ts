@@ -124,7 +124,7 @@ export class GhciManager implements Disposable {
             this.proc.stdin.write(c + '\n');
         }
 
-        this.proc.stdin.write(`putStrLn "\\n${barrier}"\n`);
+        this.proc.stdin.write(`Prelude.putStrLn "\\n${barrier}"\n`);
 
     }
 
