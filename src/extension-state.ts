@@ -25,7 +25,7 @@ export async function computeWorkspaceType(): Promise<HaskellWorkspaceType> {
                 'stack --help',
                 {
                     cwd: vscode.workspace.rootPath,
-                    timeout: 1000
+                    timeout: 5000
                 }, (err, stdout, stderr) => {
                     if (err) resolve(false);
                     else resolve(true);
