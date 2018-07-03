@@ -139,6 +139,8 @@ async function checkHaskell(
             diagMap.get(uri).push(diag.diagnostic);
         }
 
+        diagnosticCollection.clear();
+
         for (const [uri, diags] of diagMap.entries()) {
             diagnosticCollection.set(uri, diags);
         }
