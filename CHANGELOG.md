@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.6
+
+- Added 'go to definition' support.
+- Other minor enhancements.
+
 ## v0.0.5
 
 - Improvements to `stack` workspaces, including:
