@@ -108,16 +108,6 @@ function parseMessages(messages: string[]):
     return res;
 }
 
-function normalizePath(path_: string): string {
-    path_ = path.normalize(path_);
-    if (path_.length >= 2 && path_.charAt(0).match(/[a-z]/i) && path_.charAt(1) == ':') {
-        // VSCode likes d:\ but GHC likes D:\
-        return path_.charAt(0).toUpperCase() + path_.substr(1);
-    } else {
-        return path_;
-    }
-}
-
 function stopMgr(document: vscode.TextDocument, ext: ExtensionState) {
     if (ext.docManagers.has(document)) {
         ext.docManagers.get(document).dispose();
@@ -139,15 +129,19 @@ async function checkHaskell(
 
         const result = await docMgr.reload();
 
-        const normPath = normalizePath(document.uri.fsPath);
-
         const parsed = parseMessages(result);
 
-        const filtered = parsed.
-            filter((diag) => normalizePath(diag.file) === normPath).
-            map((diag) => diag.diagnostic);
+        const diagMap: Map<vscode.Uri, vscode.Diagnostic[]> = new Map();
 
-        diagnosticCollection.set(document.uri, filtered);
+        for (const diag of parsed) {
+            const uri = vscode.Uri.file(diag.file);
+            if (! diagMap.has(uri)) diagMap.set(uri, []);
+            diagMap.get(uri).push(diag.diagnostic);
+        }
+
+        for (const [uri, diags] of diagMap.entries()) {
+            diagnosticCollection.set(uri, diags);
+        }
     }
 }
 
