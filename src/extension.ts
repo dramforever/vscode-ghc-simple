@@ -4,6 +4,7 @@ import { registerRangeType } from './range-type';
 import { registerCompletion } from './completion';
 import { ExtensionState, computeWorkspaceType } from './extension-state';
 import { registerDiagnostics } from './diagnostics';
+import { registerDefinition } from './definition';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
@@ -28,6 +29,8 @@ export function activate(context: vscode.ExtensionContext) {
     registerCompletion(ext);
 
     registerDiagnostics(ext);
+
+    registerDefinition(ext);
 }
 
 export function deactivate() {
