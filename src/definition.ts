@@ -17,7 +17,7 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
 
         await mgr.loading;
 
-        const cmd = `:loc-at ${document.uri.fsPath} ${range.start.line} ${range.start.character} ${range.end.line} ${range.end.character} ${document.getText(range)}`;
+        const cmd = `:loc-at ${document.uri.fsPath} ${1 + + range.start.line} ${1 + + range.start.character} ${1 + + range.end.line} ${1 + + range.end.character} ${document.getText(range)}`;
 
         const res = (await mgr.ghci.sendCommand(cmd)).filter(s => s.trim().length > 0);
 
@@ -30,8 +30,8 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
                 return new vscode.Location(
                     vscode.Uri.file(path.resolve(vscode.workspace.rootPath, file)),
                     new vscode.Range(
-                        new vscode.Position(+ startLine, + startCol),
-                        new vscode.Position(+ endLine, + endCol)));
+                        new vscode.Position(+ startLine - 1, + startCol - 1),
+                        new vscode.Position(+ endLine - 1, + endCol - 1)));
             } else {
                 return null;
             }
