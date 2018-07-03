@@ -24,6 +24,11 @@ Currently implemented features:
 
     ![Range type demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/range-type.png)
 
+4. **Definition:** See definitions of identifiers. Supports both module level and local identifiers. Implemented with `:loc-at`. Does not yet support identifiers imported from packages.
+
+    ![Definition demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/definition.png)
+
+
 ## Why?
 
 
