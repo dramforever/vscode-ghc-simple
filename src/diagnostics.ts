@@ -124,18 +124,18 @@ async function checkHaskell(
 
         const parsed = parseMessages(result);
 
-        const diagMap: Map<vscode.Uri, vscode.Diagnostic[]> = new Map();
+        const diagMap: Map<string, vscode.Diagnostic[]> = new Map();
 
         for (const diag of parsed) {
-            const uri = vscode.Uri.file(diag.file);
-            if (! diagMap.has(uri)) diagMap.set(uri, []);
-            diagMap.get(uri).push(diag.diagnostic);
+            const path = vscode.Uri.file(diag.file).fsPath;
+            if (! diagMap.has(path)) diagMap.set(path, []);
+            diagMap.get(path).push(diag.diagnostic);
         }
 
         diagnosticCollection.clear();
 
-        for (const [uri, diags] of diagMap.entries()) {
-            diagnosticCollection.set(uri, diags);
+        for (const [path, diags] of diagMap.entries()) {
+            diagnosticCollection.set(vscode.Uri.file(path), diags);
         }
     }
 }
