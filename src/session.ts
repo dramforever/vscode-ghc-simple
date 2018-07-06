@@ -66,12 +66,24 @@ export class Session implements vscode.Disposable {
 
     async reloadP(): Promise<string[]> {
         await this.start();
-        const pr = this.ghci.sendCommand([
+        const res = await this.ghci.sendCommand([
             ':set +c',
             `:load ${[... this.files.values()].map(x => `*${x}`).join(' ')}`
         ]);
-        this.loading = pr.then(() => undefined);
-        return await pr;
+        const modules = await this.ghci.sendCommand(':show modules');
+        const mmap = new Map<string, string>();
+        for (const line of modules) {
+            const res = /^([^ ]+)\s+\( (.+), interpreted \)$/.exec(line);
+            if (res) {
+                mmap.set(vscode.Uri.file(res[2]).fsPath, res[1]);
+            }
+        }
+        await this.ghci.sendCommand(`:module ${
+            [... this.files]
+                .filter(m => mmap.has(m))
+                .map(m => `*${mmap.get(m)}`).join(' ')
+        }`);
+        return res;
     }
 
     dispose() {
