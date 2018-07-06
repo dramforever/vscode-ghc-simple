@@ -45,20 +45,20 @@ export class GhciManager implements Disposable {
         return this.proc;
     }
 
-    stop(): Promise<{}> {
-        return this.sendCommand(':q');
+    async stop(): Promise<void> {
+        try {
+            await this.sendCommand(':quit');
+            throw 'Quitting ghci should not have succeeded';
+        } catch (_reason) {
+            return;
+        }
     }
 
     async restart(): Promise<child_process.ChildProcess> {
         if (process === null) {
             return this.start();
         } else {
-            try {
-                await this.stop()
-                console.error('Quitting GHCi should not have succeeded!');
-            } catch (_reason) {
-                return this.start();
-            }
+            await this.stop();
         }
     }
 
@@ -133,7 +133,7 @@ export class GhciManager implements Disposable {
             this.currentCommand.reject('stream closed');
             this.currentCommand = null;
         }
-
+        
         for (const cmd of this.pendingCommands) {
             cmd.reject('stream closed');
         }
