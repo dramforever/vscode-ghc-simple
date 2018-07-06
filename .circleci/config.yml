@@ -12,5 +12,5 @@ jobs:
                     node_modules/.bin/vsce package --out vscode-ghc-simple.vsix
             - store_artifacts:
                 path: vscode-ghc-simple.vsix
-                destination: package
+                destination: vscode-ghc-simple.vsix
                 
