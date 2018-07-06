@@ -23,7 +23,15 @@
         "onLanguage:haskell"
     ],
     "main": "./out/src/extension",
-    "contributes": {},
+    "contributes": {
+        "commands": [
+            {
+                "command": "vscode-ghc-simple.restart",
+                "title": "Restart GHCi sessions",
+                "category": "GHC"
+            }
+        ]
+    },
     "scripts": {
         "vscode:prepublish": "tsc -p ./",
         "compile": "tsc -watch -p ./",

@@ -16,30 +16,30 @@ export class Session implements vscode.Disposable {
     }
 
     async start() {
-        const cmd = await (async () => {
-            const wst = await this.ext.workspaceType;
-
-            if (wst == 'stack') {
-                const result = await new Promise<string>((resolve, reject) => {
-                    child_process.exec(
-                        'stack ide targets',
-                        { cwd: vscode.workspace.rootPath },
-                        (err, stdout, stderr) => {
-                            if (err) reject();
-                            else resolve(stderr);
-                        }
-                    )
-                });
-                return ['stack', 'repl', '--no-load'].concat(result.split(/\r?\n/)).slice(0, -1);
-            } else if (wst == 'cabal')
-                return ['cabal', 'repl'];
-            else if (wst == 'bare-stack')
-                return ['stack', 'exec', 'ghci'];
-            else if (wst == 'bare')
-                return ['ghci'];
-        })();
-
         if (this.ghci === null) {
+            const cmd = await (async () => {
+                const wst = await this.ext.workspaceType;
+
+                if (wst == 'stack') {
+                    const result = await new Promise<string>((resolve, reject) => {
+                        child_process.exec(
+                            'stack ide targets',
+                            { cwd: vscode.workspace.rootPath },
+                            (err, stdout, stderr) => {
+                                if (err) reject();
+                                else resolve(stderr);
+                            }
+                        )
+                    });
+                    return ['stack', 'repl', '--no-load'].concat(result.split(/\r?\n/)).slice(0, -1);
+                } else if (wst == 'cabal')
+                    return ['cabal', 'repl'];
+                else if (wst == 'bare-stack')
+                    return ['stack', 'exec', 'ghci'];
+                else if (wst == 'bare')
+                    return ['ghci'];
+            })();
+
             this.ghci = new GhciManager(
                 cmd[0],
                 cmd.slice(1),

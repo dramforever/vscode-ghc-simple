@@ -16,23 +16,35 @@ export function activate(context: vscode.ExtensionContext) {
         sessionManagers: new Map(),
         singleManager: null
     }
+    
+    registerRangeType(ext);
+    
+    registerCompletion(ext);
+    
+    const diagInit = registerDiagnostics(ext);
+    
+    async function restart(): Promise<void> {
+        const stops = [];
 
-    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => {
         for (const [doc, session] of ext.sessionManagers) {
-            session.dispose();
+            if (session.ghci)
+                stops.push(session.ghci.stop());
         }
         ext.sessionManagers.clear();
-        if (ext.singleManager)
-            ext.singleManager.dispose();
+
+        if (ext.singleManager.ghci)
+            stops.push(ext.singleManager.ghci.stop());
+        
+        await Promise.all(stops);
 
         ext.workspaceType = computeWorkspaceType();
-    }));
 
-    registerRangeType(ext);
+        diagInit();
+    }
 
-    registerCompletion(ext);
-
-    registerDiagnostics(ext);
+    context.subscriptions.push(
+        vscode.workspace.onDidChangeConfiguration(restart),
+        vscode.commands.registerCommand('vscode-ghc-simple.restart', restart));
 
     registerDefinition(ext);
 }
