@@ -13,8 +13,12 @@
         "vscode": "^1.14.0"
     },
     "categories": [
-        "Other"
+        "Programming Languages"
     ],
+    "keywords": [
+        "haskell"
+    ],
+    "icon": "https://dram.cf/repo/vscode-ghc-simple/vgs-icon.png",
     "activationEvents": [
         "onLanguage:haskell"
     ],
