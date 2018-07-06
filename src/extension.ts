@@ -11,16 +11,20 @@ export function activate(context: vscode.ExtensionContext) {
 
     const ext: ExtensionState = {
         context,
-        docManagers: new Map(),
         outputChannel,
-        workspaceType: computeWorkspaceType()
+        workspaceType: computeWorkspaceType(),
+        sessionManagers: new Map(),
+        singleManager: null
     }
 
     context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(() => {
-        for (const [doc, mgr] of ext.docManagers) {
-            mgr.dispose();
+        for (const [doc, session] of ext.sessionManagers) {
+            session.dispose();
         }
-        ext.docManagers.clear();
+        ext.sessionManagers.clear();
+        if (ext.singleManager)
+            ext.singleManager.dispose();
+
         ext.workspaceType = computeWorkspaceType();
     }));
 

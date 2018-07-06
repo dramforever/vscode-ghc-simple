@@ -1,0 +1,81 @@
+import * as vscode from 'vscode';
+import * as child_process from 'child_process';
+import { GhciManager } from "./ghci";
+import { ExtensionState } from "./extension-state";
+
+export class Session implements vscode.Disposable {
+    ghci: GhciManager;
+    starting: Promise<void>;
+    loading: Promise<void>;
+    files: Set<string>;
+
+    constructor(public ext: ExtensionState) {
+        this.ghci = null;
+        this.loading = null;
+        this.files = new Set();
+    }
+
+    async start() {
+        const cmd = await (async () => {
+            const wst = await this.ext.workspaceType;
+
+            if (wst == 'stack') {
+                const result = await new Promise<string>((resolve, reject) => {
+                    child_process.exec(
+                        'stack ide targets',
+                        { cwd: vscode.workspace.rootPath },
+                        (err, stdout, stderr) => {
+                            if (err) reject();
+                            else resolve(stderr);
+                        }
+                    )
+                });
+                return ['stack', 'repl', '--no-load'].concat(result.split(/\r?\n/)).slice(0, -1);
+            } else if (wst == 'cabal')
+                return ['cabal', 'repl'];
+            else if (wst == 'bare-stack')
+                return ['stack', 'exec', 'ghci'];
+            else if (wst == 'bare')
+                return ['ghci'];
+        })();
+
+        if (this.ghci === null) {
+            this.ghci = new GhciManager(
+                cmd[0],
+                cmd.slice(1),
+                { cwd: vscode.workspace.rootPath, stdio: 'pipe' },
+                this.ext);
+            const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables -Wall';
+            await this.ghci.sendCommand(configure);        
+        }
+    }
+
+    addFile(s: string) {
+        this.files.add(s);
+    }
+
+    async removeFile(s: string): Promise<void> {
+        this.files.delete(s);
+    }
+
+    async reload(): Promise<string[]> {
+        const pr = this.reloadP();
+        this.loading = pr.then(() => undefined);
+        return await pr;
+    }
+
+    async reloadP(): Promise<string[]> {
+        await this.start();
+        const pr = this.ghci.sendCommand([
+            ':set +c',
+            `:load ${[... this.files.values()].map(x => `*${x}`).join(' ')}`
+        ]);
+        this.loading = pr.then(() => undefined);
+        return await pr;
+    }
+
+    dispose() {
+        if (this.ghci !== null)
+            this.ghci.stop();
+    }
+}

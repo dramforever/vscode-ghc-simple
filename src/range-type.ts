@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
-import { DocumentManager } from './document';
-import { ExtensionState } from './extension-state';
+import { ExtensionState, startSession } from './extension-state';
+import { Session } from './session';
+
+const typeCacheMap = new WeakMap<Session, string[]>();
 
 async function getType(
-    mgr: DocumentManager,
-    sel: vscode.Selection | vscode.Position | vscode.Range):
+    session: Session,
+    sel: vscode.Selection | vscode.Position | vscode.Range,
+    doc: vscode.TextDocument):
     Promise<null | [vscode.Range, string]> {
+
     const selRangeOrPos: vscode.Range | vscode.Position = (() => {
         if (sel instanceof vscode.Selection) {
             return new vscode.Range(sel.start, sel.end);
@@ -14,18 +18,23 @@ async function getType(
         }
     })();
 
-    await mgr.loading;
+    if (session.loading === null) {
+        session.reload();
+    }
+
+    await session.loading;
 
     const typesB: string[] =
-        mgr.typeCache === null
-            ? await mgr.ghci.sendCommand(':all-types')
-            : mgr.typeCache;
+        typeCacheMap.has(session)
+        ? typeCacheMap.get(session)
+        : await session.ghci.sendCommand(':all-types');
 
-    mgr.typeCache = typesB;
+    typeCacheMap.set(session, typesB);
 
-    const strTypes = typesB.filter((x) => x.startsWith(mgr.path));
+    const strTypes = typesB.filter((x) => x.startsWith(doc.uri.fsPath));
+
     const allTypes = strTypes.map((x) =>
-        /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(mgr.path.length)));
+        /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(doc.uri.fsPath.length)));
 
     let curBestRange: null | vscode.Range = null, curType: null | string = null;
 
@@ -51,7 +60,7 @@ async function getType(
         const forallPart = `forall ${[...new Set(typeVariables)].join(' ')}.`
         const fullType = `${forallPart} ${curType}`;
         
-        const res = await mgr.ghci.sendCommand([
+        const res = await session.ghci.sendCommand([
             ':seti -XExplicitForAll -XKindSignatures',
             `:kind! ((${fullType}) :: *)`]);
 
@@ -77,8 +86,7 @@ async function getType(
 }
 
 export function registerRangeType(ext: ExtensionState) {
-    const context = ext.context
-    const docManagers = ext.docManagers;
+    const context = ext.context;
     let selTimeout: NodeJS.Timer | null = null;
 
     const decoCurrent = vscode.window.createTextEditorDecorationType({
@@ -97,6 +105,8 @@ export function registerRangeType(ext: ExtensionState) {
 
     context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
         const doc = event.textEditor.document;
+        if (doc.languageId !== 'haskell' && ! doc.uri.fsPath.endsWith('.hs'))
+            return;
         
         if (doc.isDirty) {
             event.textEditor.setDecorations(decoCurrent, []);
@@ -109,28 +119,26 @@ export function registerRangeType(ext: ExtensionState) {
             const sel = event.selections[0];
 
             selTimeout = setTimeout(async () => {
-                if (docManagers.has(doc)) {
-                    const mgr = docManagers.get(doc);
-                    const res = await getType(mgr, sel);
-                    if (res !== null) {
-                        const [range, type] = res;
-                        const lineRange = doc.lineAt(range.start.line).range;
-                        event.textEditor.setDecorations(decoCurrent, [{
-                            range,
-                            hoverMessage: type
-                        }]);
-                        event.textEditor.setDecorations(decoType, [{
-                            range: lineRange,
-                            renderOptions: {
-                                after: {
-                                    contentText: `:: ${type}`
-                                }
+                const session = await startSession(ext, doc);
+                const res = await getType(session, sel, doc);
+                if (res !== null) {
+                    const [range, type] = res;
+                    const lineRange = doc.lineAt(range.start.line).range;
+                    event.textEditor.setDecorations(decoCurrent, [{
+                        range,
+                        hoverMessage: type
+                    }]);
+                    event.textEditor.setDecorations(decoType, [{
+                        range: lineRange,
+                        renderOptions: {
+                            after: {
+                                contentText: `:: ${type}`
                             }
-                        }]);
-                    } else {
-                        event.textEditor.setDecorations(decoCurrent, []);
-                        event.textEditor.setDecorations(decoType, []);
-                    }
+                        }
+                    }]);
+                } else {
+                    event.textEditor.setDecorations(decoCurrent, []);
+                    event.textEditor.setDecorations(decoType, []);
                 }
                 selTimeout = null;
             }, 300);

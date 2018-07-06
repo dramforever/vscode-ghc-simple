@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionState } from './extension-state';
+import { ExtensionState, startSession } from './extension-state';
 
 export class HaskellDefinition implements vscode.DefinitionProvider {
     constructor(public ext: ExtensionState) {
@@ -11,15 +11,15 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
         position: vscode.Position,
         token: vscode.CancellationToken):
         Promise<vscode.Definition> {
-        if (! this.ext.docManagers.has(document)) return null;
-        const mgr = this.ext.docManagers.get(document);
+        const session = await startSession(this.ext, document);
+
         const range = document.getWordRangeAtPosition(position);
 
-        await mgr.loading;
+        await session.loading;
 
         const cmd = `:loc-at ${document.uri.fsPath} ${1 + + range.start.line} ${1 + + range.start.character} ${1 + + range.end.line} ${1 + + range.end.character} ${document.getText(range)}`;
 
-        const res = (await mgr.ghci.sendCommand(cmd)).filter(s => s.trim().length > 0);
+        const res = (await session.ghci.sendCommand(cmd)).filter(s => s.trim().length > 0);
 
         if (res.length == 1) {
             const locR = /^(.+):\((\d+),(\d+)\)-\((\d+),(\d+)\)$/;
@@ -44,6 +44,6 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
 export function registerDefinition(ext: ExtensionState) {
     ext.context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(
-            { language: 'haskell', scheme: 'file'},
+            { language: 'haskell', scheme: 'file' },
             new HaskellDefinition(ext)));
 }

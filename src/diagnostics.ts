@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { DocumentManager } from './document';
-import { ExtensionState } from './extension-state';
+import { ExtensionState, startSession, stopSession } from './extension-state';
+import { Session } from './session';
 
 const regex = {
 
@@ -108,26 +108,19 @@ function parseMessages(messages: string[]):
     return res;
 }
 
-function stopMgr(document: vscode.TextDocument, ext: ExtensionState) {
-    if (ext.docManagers.has(document)) {
-        ext.docManagers.get(document).dispose();
-        ext.docManagers.delete(document);
+function stopHaskell(document: vscode.TextDocument, ext: ExtensionState) {
+    if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs'))
+        stopSession(ext, document);
     }
-}
 
 async function checkHaskell(
     diagnosticCollection: vscode.DiagnosticCollection,
     document: vscode.TextDocument,
     ext: ExtensionState) {
     if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs')) {
-        if (! ext.docManagers.has(document)) {
-            const dm = new DocumentManager(document.uri.fsPath, ext);
-            ext.docManagers.set(document, dm);
-        }
+        const session: Session = await startSession(ext, document);
 
-        const docMgr: DocumentManager = ext.docManagers.get(document);
-
-        const result = await docMgr.reload();
+        const result = await session.reload();
 
         const parsed = parseMessages(result);
 
@@ -151,7 +144,7 @@ export function registerDiagnostics(ext: ExtensionState) {
     const diagnosticCollection = vscode.languages.createDiagnosticCollection('ghc-simple');
 
     const check = (d) => checkHaskell(diagnosticCollection, d, ext);
-    const stop = (d) => stopMgr(d, ext);
+    const stop = (d) => stopHaskell(d, ext);
     const vws = vscode.workspace;
 
     ext.context.subscriptions.push(

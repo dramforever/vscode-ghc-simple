@@ -1,14 +1,53 @@
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
-import { DocumentManager } from './document';
+import { Session } from './session';
 
 export type HaskellWorkspaceType = 'cabal' | 'stack' | 'bare-stack' | 'bare';
 
 export interface ExtensionState {
     context: vscode.ExtensionContext;
-    docManagers: Map<vscode.TextDocument, DocumentManager>;
     outputChannel: vscode.OutputChannel;
     workspaceType: Promise<HaskellWorkspaceType>;
+    sessionManagers: Map<vscode.TextDocument, Session>;
+    singleManager: Session;
+}
+
+export async function startSession(ext: ExtensionState, doc: vscode.TextDocument): Promise<Session> {
+    const wst = await ext.workspaceType;
+    const session = (() => {
+        if (-1 !== ['stack', 'cabal'].indexOf(wst)) {
+            // stack or cabal
+
+            if (ext.singleManager === null)
+                ext.singleManager = new Session(ext);
+
+            return ext.singleManager;
+        } else {
+            // bare or bare-stack
+
+            if (! ext.sessionManagers.has(doc))
+                ext.sessionManagers.set(doc, new Session(ext));
+
+            return ext.sessionManagers.get(doc);
+        }
+    })();
+    session.addFile(doc.uri.fsPath);
+    return session;
+}
+
+export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
+    const wst = await ext.workspaceType;
+    if (-1 !== ['cabal', 'stack'].indexOf(wst)) {
+        // stack or cabal
+        if (ext.singleManager !== null)
+            ext.singleManager.removeFile(doc.uri.fsPath);
+    } else {
+        // bare or bare-stack
+        if (ext.sessionManagers.has(doc)) {
+            ext.sessionManagers.get(doc).dispose();
+            ext.sessionManagers.delete(doc);
+        }
+    }
 }
 
 export async function computeWorkspaceType(): Promise<HaskellWorkspaceType> {

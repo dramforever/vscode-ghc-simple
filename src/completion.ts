@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-import { DocumentManager } from "./document";
-import { ExtensionState } from './extension-state';
+import { ExtensionState, startSession } from './extension-state';
 
 export class HaskellCompletion implements vscode.CompletionItemProvider {
     itemDocument: WeakMap<vscode.CompletionItem, vscode.TextDocument>
@@ -14,16 +13,14 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         position: vscode.Position,
         token: vscode.CancellationToken):
         Promise<null | vscode.CompletionList> {
-        if (! this.ext.docManagers.has(document)) return null;
-
-        const mgr = this.ext.docManagers.get(document) as DocumentManager;
+        const session = await startSession(this.ext, document);
 
         const firstInLine = position.with({ character: 0 });
         const line = document.getText(new vscode.Range(firstInLine, position));
         if (line.trim() === '') return null;
 
-        await mgr.loading;
-        const complStrs = await mgr.ghci.sendCommand(`:complete repl 10 ${JSON.stringify(line)}`);
+        await session.loading;
+        const complStrs = await session.ghci.sendCommand(`:complete repl 10 ${JSON.stringify(line)}`);
         const firstLine = /^\d+ \d+ (".*")$/.exec(complStrs[0]);
 
         if (firstLine === null) {
@@ -54,16 +51,14 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         Promise<vscode.CompletionItem> {
         if (this.itemDocument.has(item)) {
             const document = this.itemDocument.get(item);
-            if (this.ext.docManagers.has(document)) {
-                const mgr = this.ext.docManagers.get(document);
-                const docs = await mgr.ghci.sendCommand(`:info ${item.label}`);
+            const session = await startSession(this.ext, document);
+            const docs = await session.ghci.sendCommand(`:info ${item.label}`);
 
-                // Heuristic: If there's an error, then GHCi will output
-                // a blank line before the error message
-                if (docs[0].trim() != '') {
-                    const fixedDocs = docs.map((s) => s.replace('\t--', '\n--').trim());
-                    item.detail = fixedDocs.join('\n');
-                }
+            // Heuristic: If there's an error, then GHCi will output
+            // a blank line before the error message
+            if (docs[0].trim() != '') {
+                const fixedDocs = docs.map((s) => s.replace('\t--', '\n--').trim());
+                item.detail = fixedDocs.join('\n');
             }
         }
         return item;
@@ -72,5 +67,5 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
 
 export function registerCompletion(ext: ExtensionState) {
     ext.context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        { language: 'haskell', scheme: 'file'} , new HaskellCompletion(ext), ' '));
+        { language: 'haskell', scheme: 'file' } , new HaskellCompletion(ext), ' '));
 }
