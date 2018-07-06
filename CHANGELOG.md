@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.7
+
+- Use only one GHCi instance per workspace for `stack` and `cabal` workspaces.
+- Check all Haskell files on extension startup.
+
 ## v0.0.6
 
 - Added 'go to definition' support.
