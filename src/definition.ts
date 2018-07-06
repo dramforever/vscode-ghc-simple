@@ -13,7 +13,12 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
         Promise<vscode.Definition> {
         const session = await startSession(this.ext, document);
 
-        const range = document.getWordRangeAtPosition(position);
+        //             ------------------------ maybe qualified
+        //                                      ------------------------ operator
+        //                                                               ----------------------- name
+        const hssym = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
+
+        const range = document.getWordRangeAtPosition(position, hssym);
 
         await session.loading;
 
