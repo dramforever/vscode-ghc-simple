@@ -153,4 +153,8 @@ export function registerDiagnostics(ext: ExtensionState) {
         vws.onDidOpenTextDocument(check),
         vws.onDidCloseTextDocument(stop)
     );
+
+    for (const doc of vscode.workspace.textDocuments) {
+        checkHaskell(diagnosticCollection, doc, ext);
+    }
 }
