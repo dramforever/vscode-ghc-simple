@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
 import { Session } from './session';
 
-const typeCacheMap = new WeakMap<Session, string[]>();
-
 async function getType(
     session: Session,
     sel: vscode.Selection | vscode.Position | vscode.Range,
@@ -25,11 +23,11 @@ async function getType(
     await session.loading;
 
     const typesB: string[] =
-        typeCacheMap.has(session)
-        ? typeCacheMap.get(session)
+        session.typeCache !== null
+        ? session.typeCache
         : await session.ghci.sendCommand(':all-types');
 
-    typeCacheMap.set(session, typesB);
+    session.typeCache = typesB;
 
     const strTypes = typesB.filter((x) => x.startsWith(doc.uri.fsPath));
 

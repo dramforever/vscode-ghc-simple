@@ -8,11 +8,13 @@ export class Session implements vscode.Disposable {
     starting: Promise<void>;
     loading: Promise<void>;
     files: Set<string>;
+    typeCache: string[] | null;
 
     constructor(public ext: ExtensionState) {
         this.ghci = null;
         this.loading = null;
         this.files = new Set();
+        this.typeCache = null;
     }
 
     async start() {
@@ -59,6 +61,7 @@ export class Session implements vscode.Disposable {
     }
 
     async reload(): Promise<string[]> {
+        this.typeCache = null;
         const pr = this.reloadP();
         this.loading = pr.then(() => undefined);
         return await pr;
