@@ -46,7 +46,7 @@ export class Session implements vscode.Disposable {
                 { cwd: vscode.workspace.rootPath, stdio: 'pipe' },
                 this.ext);
             const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables -Wall';
-            await this.ghci.sendCommand(configure);        
+            await this.ghci.sendCommand(configure);
         }
     }
 

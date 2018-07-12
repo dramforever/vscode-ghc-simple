@@ -20,7 +20,10 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         if (line.trim() === '') return null;
 
         await session.loading;
-        const complStrs = await session.ghci.sendCommand(`:complete repl 10 ${JSON.stringify(line)}`);
+        const complStrs = await session.ghci.sendCommand(
+            `:complete repl 10 ${JSON.stringify(line)}`,
+            token);
+
         const firstLine = /^\d+ \d+ (".*")$/.exec(complStrs[0]);
 
         if (firstLine === null) {
@@ -52,7 +55,7 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         if (this.itemDocument.has(item)) {
             const document = this.itemDocument.get(item);
             const session = await startSession(this.ext, document);
-            const docs = await session.ghci.sendCommand(`:info ${item.label}`);
+            const docs = await session.ghci.sendCommand(`:info ${item.label}`, token);
 
             // Heuristic: If there's an error, then GHCi will output
             // a blank line before the error message

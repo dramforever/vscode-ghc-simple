@@ -2,10 +2,11 @@
 
 import * as child_process from 'child_process';
 import * as readline from 'readline';
-import { Disposable, OutputChannel, Extension } from "vscode";
+import { Disposable, OutputChannel, CancellationToken } from "vscode";
 import { ExtensionState } from './extension-state';
 
 interface PendingCommand {
+    token: CancellationToken | null
     commands: string[];
     resolve: (result: string[]) => void;
     reject: (reason: any) => void;
@@ -71,19 +72,25 @@ export class GhciManager implements Disposable {
 
     pendingCommands: PendingCommand[] = [];
 
-    async sendCommand(cmds: string | string[]): Promise<string[]> {
+    async sendCommand(
+        cmds: string | string[],
+        token: CancellationToken | null = null):
+        Promise<string[]> {
         const commands = (typeof cmds === 'string') ? [cmds] : cmds;
 
         if (this.proc === null) {
             await this.start()
         }
 
-        return this._sendCommand(commands);
+        return this._sendCommand(commands, token);
     }
 
-    _sendCommand(commands: string[]): Promise<string[]> {
+    _sendCommand(
+        commands: string[],
+        token: CancellationToken | null):
+        Promise<string[]> {
         return new Promise((resolve, reject) => {
-            const pending: PendingCommand = { commands, resolve, reject };
+            const pending: PendingCommand = { token, commands, resolve, reject };
             if (this.currentCommand === null) {
                 this.launchCommand(pending);
             } else {
@@ -101,6 +108,15 @@ export class GhciManager implements Disposable {
             if (this.currentCommand.barrier === line) {
                 this.currentCommand.resolve(this.currentCommand.lines);
                 this.currentCommand = null;
+                while (
+                    this.pendingCommands.length > 0
+                    && this.pendingCommands[0].token !== null
+                    && this.pendingCommands[0].token.isCancellationRequested) {
+                    console.log(`Cancel ${this.pendingCommands[0].commands}`);
+                    this.pendingCommands[0].reject('cancelled');
+                    this.pendingCommands.shift();
+                }
+
                 if (this.pendingCommands.length > 0) {
                     this.launchCommand(this.pendingCommands.shift());
                 }
