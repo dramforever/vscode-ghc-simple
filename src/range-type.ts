@@ -64,12 +64,12 @@ async function getType(
 
         const resolved: null | string = (() => {
             // GHCi may output warning messages before the response
-            while (res.length && ! res[0].startsWith(`${fullType} ::`)) res.shift();
+            while (res.length && res[0] !== `((${fullType}) :: *) :: *`) res.shift();
 
             if (res.length && res[1].startsWith('= ')) {
                 res.shift();
                 res[0] = res[0].slice(1); // Skip '=' on second line
-                return res.join(' ').replace(/\s{2,}/g, ' ');
+                return res.join(' ').replace(/\s{2,}/g, ' ').trim();
             } else {
                 return null;
             }
