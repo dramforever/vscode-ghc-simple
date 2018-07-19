@@ -1,10 +1,20 @@
 # Simple GHC (Haskell) Integration for VSCode
 
+![Icon](images/vgs-icon.png)
+
 *Simple Haskell support using only GHCi.*
 
-[![vscode-ghc-simple on Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/dramforever.vscode-ghc-simple.svg)](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple)
+[![vscode-ghc-simple on Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/dramforever.vscode-ghc-simple.svg)](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple) [![CircleCI](https://circleci.com/gh/dramforever/vscode-ghc-simple.png?style=shield)](https://circleci.com/gh/dramforever/vscode-ghc-simple)
 
-**Notice:** This project is currently **experimental**. It's intended for testing purposes only for the time being. Things probably won't work for you. Check the issues page for some known problems.
+## Installation
+
+Get vscode-ghc-simple from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple) or run the following in Quick Open:
+
+```plain
+ext install dramforever.vscode-ghc-simple
+```
+
+Alternatively, if you want the latest and greatest, you can download `vsix` files from [Circle CI](https://circleci.com/gh/dramforever/vscode-ghc-simple). Pick the latest build, and check out the 'Artifacts' tab.
 
 ## What?
 
@@ -30,6 +40,5 @@ Currently implemented features:
 
 
 ## Why?
-
 
 Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained various tooling-related features. These allow for more tooling that communicate with the compiler using text IO and files, instead of a Haskell API. This project aims to explore the possibilities provided by said features, by implementing Haskell tooling within the editor VSCode.
