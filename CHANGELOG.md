@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.0.8
+
+- Support cancellation of not yet started commands.
+- Fix type query after reload
+- Other minor fixes enhancements.
+
 ## v0.0.7
 
 - Use only one GHCi instance per workspace for `stack` and `cabal` workspaces.
