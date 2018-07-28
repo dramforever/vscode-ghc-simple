@@ -19,9 +19,9 @@ export class Session implements vscode.Disposable {
 
     async start() {
         if (this.ghci === null) {
-            const cmd = await (async () => {
-                const wst = await this.ext.workspaceType;
+            const wst = await this.ext.workspaceType;
 
+            const cmd = await (async () => {
                 if (wst == 'stack') {
                     const result = await new Promise<string>((resolve, reject) => {
                         child_process.exec(
@@ -47,8 +47,12 @@ export class Session implements vscode.Disposable {
                 cmd.slice(1),
                 { cwd: vscode.workspace.rootPath, stdio: 'pipe' },
                 this.ext);
-            const configure = ':set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables -Wall';
-            await this.ghci.sendCommand(configure);
+            const config = vscode.workspace.getConfiguration('ghcSimple');
+            const configureCommands = config.startupCommands.concat(
+                wst === 'bare-stack' || wst === 'bare'
+                ? config.bareStartupCommands
+                : []);
+            await this.ghci.sendCommand(configureCommands);
         }
     }
 

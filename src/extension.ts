@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         ext.sessionManagers.clear();
 
-        if (ext.singleManager.ghci)
+        if (ext.singleManager && ext.singleManager.ghci)
             stops.push(ext.singleManager.ghci.stop());
         
         await Promise.all(stops);

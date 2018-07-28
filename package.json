@@ -30,7 +30,38 @@
                 "title": "Restart GHCi sessions",
                 "category": "GHC"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "GHC Simple configuration",
+            "properties": {
+                "ghcSimple.workspaceType": {
+                    "type": "string",
+                    "default": "detect",
+                    "description": "Workspace type, 'bare' means use GHCi directly",
+                    "enum": [ "detect", "stack", "cabal", "bare-stack", "bare" ]
+                },
+                "ghcSimple.startupCommands": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
+                        ":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables"
+                    ],
+                    "description": "GHCi commands on startup to use for all workspace types"
+                },
+                "ghcSimple.bareStartupCommands": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [ ":set -Wall" ],
+                    "description": "Extra GHCi commands on startup to use for 'bare' workspace types"
+                }
+            }
+        }
     },
     "scripts": {
         "vscode:prepublish": "tsc -p ./",

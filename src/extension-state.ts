@@ -51,6 +51,12 @@ export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument)
 }
 
 export async function computeWorkspaceType(): Promise<HaskellWorkspaceType> {
+    const configType =
+        vscode.workspace.getConfiguration('ghcSimple').workspaceType as
+            HaskellWorkspaceType | 'detect';
+
+    if (configType !== 'detect') return configType;
+
     const isStack = await vscode.workspace.findFiles('stack.yaml');
     if (isStack.length > 0)
         return 'stack';
