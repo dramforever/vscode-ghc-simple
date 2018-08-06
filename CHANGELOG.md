@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.9
+
+- Add configuration options.
+- Other minor fixes.
+
 ## v0.0.8
 
 - Support cancellation of not yet started commands.
