@@ -49,7 +49,7 @@ export class GhciManager implements Disposable {
     async stop(): Promise<void> {
         try {
             await this.sendCommand(':quit');
-            throw 'Quitting ghci should not have succeeded';
+            throw 'Quitting ghci should have succeeded';
         } catch (_reason) {
             return;
         }
