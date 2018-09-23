@@ -18,6 +18,9 @@
     "keywords": [
         "haskell"
     ],
+    "extensionDependencies": [
+        "justusadam.language-haskell"
+    ],
     "icon": "images/vgs-icon.png",
     "activationEvents": [
         "onLanguage:haskell"
