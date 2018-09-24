@@ -42,3 +42,23 @@ Currently implemented features:
 ## Why?
 
 Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained various tooling-related features. These allow for more tooling that communicate with the compiler using text IO and files, instead of a Haskell API. This project aims to explore the possibilities provided by said features, by implementing Haskell tooling within the editor VSCode.
+
+## Notes
+
+### Commands
+
+- `vscode-ghc-simple.restart`: Restart GHCi sessions
+
+    vscode-ghc-simple currently lacks a way of detecting changes of critical configuration files such as `stack.yaml` or `*.cabal`. Run this command whenever, had you been running GHCi manually, you would restart it.
+
+### Configuration options
+
+- `ghcSimple.workspaceType`: Workspace type
+
+    Override workspace type detection and force a certain workspace type (e.g. `stack` or `cabal`).
+
+    Normally, vscode-ghc-simple will try to detect whether to use Stack or Cabal, or use a plain GHCi. Change this option *in your workspace settings* to specify such a type manually.
+
+- `ghcSimple.startupCommands` and `ghcSimple.bareStartupCommands`
+
+    Commands to run at GHCi startup. Configures some common options.
