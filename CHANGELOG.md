@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.0.10
+
+- (#8) Added dependency on [Haskell Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=justusadam.language-haskell)
+- Added some rudimentary documentation.
+
 ## v0.0.9
 
 - Add configuration options.
