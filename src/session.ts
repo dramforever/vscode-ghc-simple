@@ -33,7 +33,7 @@ export class Session implements vscode.Disposable {
                             }
                         )
                     });
-                    return ['stack', 'repl', '--no-load'].concat(result.split(/\r?\n/)).slice(0, -1);
+                    return ['stack', 'repl', '--no-load'].concat(result.match(/^[^\s]+$/gm));
                 } else if (wst == 'cabal')
                     return ['cabal', 'repl'];
                 else if (wst == 'bare-stack')
