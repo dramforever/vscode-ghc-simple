@@ -59,6 +59,8 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
 
     Normally, vscode-ghc-simple will try to detect whether to use Stack or Cabal, or use a plain GHCi. Change this option *in your workspace settings* to specify such a type manually.
 
+    vscode-ghc-simple will default to Cabal new-style for workspaces with Cabal files.
+
 - `ghcSimple.startupCommands` and `ghcSimple.bareStartupCommands`
 
     Commands to run at GHCi startup. Configures some common options.

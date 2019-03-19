@@ -7,7 +7,7 @@
         "url": "https://github.com/dramforever/vscode-ghc-simple"
     },
     "license": "ISC",
-    "version": "0.0.10",
+    "version": "0.0.8",
     "publisher": "dramforever",
     "engines": {
         "vscode": "^1.14.0"
@@ -42,7 +42,15 @@
                     "type": "string",
                     "default": "detect",
                     "description": "Workspace type, 'bare' means use GHCi directly",
-                    "enum": [ "detect", "stack", "cabal", "bare-stack", "bare" ]
+                    "enum": [
+                        "detect",
+                        "stack",
+                        "cabal",
+                        "cabal new",
+                        "cabal v2",
+                        "bare-stack",
+                        "bare"
+                    ]
                 },
                 "ghcSimple.startupCommands": {
                     "type": "array",
@@ -60,7 +68,9 @@
                     "items": {
                         "type": "string"
                     },
-                    "default": [ ":set -Wall" ],
+                    "default": [
+                        ":set -Wall"
+                    ],
                     "description": "Extra GHCi commands on startup to use for 'bare' workspace types"
                 }
             }
