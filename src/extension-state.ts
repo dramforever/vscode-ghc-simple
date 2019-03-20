@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { Session } from './session';
 
-export type HaskellWorkspaceType = 'cabal' | 'stack' | 'bare-stack' | 'bare';
+export type HaskellWorkspaceType = 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
 
 export interface ExtensionState {
     context: vscode.ExtensionContext;
@@ -22,7 +22,7 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
     const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
     const type = await getWorkspaceType(ext, folder);
     const session = (() => {
-        if (-1 !== ['stack', 'cabal'].indexOf(type)) {
+        if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
             // stack or cabal
 
             if (! ext.workspaceManagers.has(folder))
@@ -71,10 +71,10 @@ export async function computeWorkspaceType(resource: vscode.Uri): Promise<Haskel
     const isStack = await vscode.workspace.findFiles('stack.yaml');
     if (isStack.length > 0)
         return 'stack';
-    
+
     const isCabal = await vscode.workspace.findFiles('**/*.cabal');
     if (isCabal.length > 0)
-        return 'cabal';
+        return 'cabal new';
 
     const hasStack = await new Promise<boolean>((resolve, reject) => {
             const cp = child_process.exec(

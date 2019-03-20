@@ -7,7 +7,7 @@
         "url": "https://github.com/dramforever/vscode-ghc-simple"
     },
     "license": "ISC",
-    "version": "0.0.10",
+    "version": "0.0.8",
     "publisher": "dramforever",
     "engines": {
         "vscode": "^1.28.0"
@@ -46,6 +46,8 @@
                         "detect",
                         "stack",
                         "cabal",
+                        "cabal new",
+                        "cabal v2",
                         "bare-stack",
                         "bare"
                     ]
