@@ -31,6 +31,7 @@ async function getType(
 
     const strTypes = typesB.filter((x) => x.startsWith(doc.uri.fsPath));
 
+    // file:(l,c)-(l,c): type
     const allTypes = strTypes.map((x) =>
         /^:\((\d+),(\d+)\)-\((\d+),(\d+)\): (.*)$/.exec(x.substr(doc.uri.fsPath.length)));
 
@@ -49,37 +50,15 @@ async function getType(
     if (curType === null) {
         return null;
     } else {
-        // :all-types gives types with implicit forall type variables,
-        // but :kind! doesn't like them, so we try to patch this fact
+        const res = await session.ghci.sendCommand(
+            `:type-at ${JSON.stringify(doc.uri.fsPath)}`
+            + ` ${curBestRange.start.line + 1} ${curBestRange.start.character + 1}`
+            + ` ${curBestRange.end.line + 1} ${curBestRange.end.character + 1}`);
 
-        const re = /[A-Za-z0-9_']*/g
-        const typeVariables = curType.match(re).filter((u) =>
-            u.length && u !== 'forall' && /[a-z]/.test(u[0]));
-        const forallPart = `forall ${[...new Set(typeVariables)].join(' ')}.`
-        const fullType = `${forallPart} ${curType}`;
-        
-        const res = await session.ghci.sendCommand([
-            ':seti -XExplicitForAll -XKindSignatures',
-            `:kind! ((${fullType}) :: *)`]);
-
-        const resolved: null | string = (() => {
-            // GHCi may output warning messages before the response
-            while (res.length && res[0] !== `((${fullType}) :: *) :: *`) res.shift();
-
-            if (res.length && res[1].startsWith('= ')) {
-                res.shift();
-                res[0] = res[0].slice(1); // Skip '=' on second line
-                return res.join(' ').replace(/\s{2,}/g, ' ').trim();
-            } else {
-                return null;
-            }
-        })();
-
-        if (resolved) {
-            return [curBestRange, resolved];
-        } else {
+        if (res.length == 2 && res[1].startsWith(' :: '))
+            return [curBestRange, res[1].slice(' :: '.length)];
+        else
             return [curBestRange, curType.replace(/([A-Z][A-Za-z0-9_']*\.)+([A-Za-z0-9_']+)/g, '$2')];
-        }
     }
 }
 
