@@ -7,28 +7,35 @@ export type HaskellWorkspaceType = 'cabal' | 'cabal new' | 'cabal v2' | 'stack' 
 export interface ExtensionState {
     context: vscode.ExtensionContext;
     outputChannel: vscode.OutputChannel;
-    workspaceType: Promise<HaskellWorkspaceType>;
-    sessionManagers: Map<vscode.TextDocument, Session>;
-    singleManager: Session;
+    workspaceTypeMap: Map<vscode.WorkspaceFolder, Promise<HaskellWorkspaceType>>;
+    documentManagers: Map<vscode.TextDocument, Session>;
+    workspaceManagers: Map<vscode.WorkspaceFolder, Session>;
+}
+
+function getWorkspaceType(ext: ExtensionState, folder: vscode.WorkspaceFolder): Promise<HaskellWorkspaceType> {
+    if (! ext.workspaceTypeMap.has(folder))
+        ext.workspaceTypeMap.set(folder, computeWorkspaceType(folder.uri));
+    return ext.workspaceTypeMap.get(folder);
 }
 
 export async function startSession(ext: ExtensionState, doc: vscode.TextDocument): Promise<Session> {
-    const wst = await ext.workspaceType;
+    const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
+    const type = await getWorkspaceType(ext, folder);
     const session = (() => {
-        if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(wst)) {
+        if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
             // stack or cabal
 
-            if (ext.singleManager === null)
-                ext.singleManager = new Session(ext);
+            if (! ext.workspaceManagers.has(folder))
+                ext.workspaceManagers.set(folder, new Session(ext, folder));
 
-            return ext.singleManager;
+            return ext.workspaceManagers.get(folder);
         } else {
             // bare or bare-stack
 
-            if (! ext.sessionManagers.has(doc))
-                ext.sessionManagers.set(doc, new Session(ext));
+            if (! ext.documentManagers.has(doc))
+                ext.documentManagers.set(doc, new Session(ext, folder));
 
-            return ext.sessionManagers.get(doc);
+            return ext.documentManagers.get(doc);
         }
     })();
     session.addFile(doc.uri.fsPath);
@@ -36,23 +43,27 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 }
 
 export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
-    const wst = await ext.workspaceType;
-    if (-1 !== ['cabal', 'stack'].indexOf(wst)) {
+    const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
+    const type = await getWorkspaceType(ext, folder);
+
+    if (-1 !== ['cabal', 'stack'].indexOf(type)) {
         // stack or cabal
-        if (ext.singleManager !== null)
-            ext.singleManager.removeFile(doc.uri.fsPath);
+        if (ext.workspaceManagers.has(folder)) {
+            const mgr = ext.workspaceManagers.get(folder);
+            mgr.removeFile(doc.uri.fsPath);
+        }
     } else {
         // bare or bare-stack
-        if (ext.sessionManagers.has(doc)) {
-            ext.sessionManagers.get(doc).dispose();
-            ext.sessionManagers.delete(doc);
+        if (ext.documentManagers.has(doc)) {
+            ext.documentManagers.get(doc).dispose();
+            ext.documentManagers.delete(doc);
         }
     }
 }
 
-export async function computeWorkspaceType(): Promise<HaskellWorkspaceType> {
+export async function computeWorkspaceType(resource: vscode.Uri): Promise<HaskellWorkspaceType> {
     const configType =
-        vscode.workspace.getConfiguration('ghcSimple').workspaceType as
+        vscode.workspace.getConfiguration('ghcSimple', resource).workspaceType as
             HaskellWorkspaceType | 'detect';
 
     if (configType !== 'detect') return configType;
@@ -69,7 +80,7 @@ export async function computeWorkspaceType(): Promise<HaskellWorkspaceType> {
             const cp = child_process.exec(
                 'stack --help',
                 {
-                    cwd: vscode.workspace.rootPath,
+                    cwd: vscode.workspace.getWorkspaceFolder(resource).uri.fsPath,
                     timeout: 5000
                 }, (err, stdout, stderr) => {
                     if (err) resolve(false);

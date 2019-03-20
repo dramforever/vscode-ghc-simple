@@ -16,8 +16,15 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         const session = await startSession(this.ext, document);
 
         const firstInLine = position.with({ character: 0 });
-        const line = document.getText(new vscode.Range(firstInLine, position));
+        let line = document.getText(new vscode.Range(firstInLine, position));
         if (line.trim() === '') return null;
+
+        let dummy : number = 0;
+
+        if (line.trim().startsWith(':')) {
+            line = 'x' + line;
+            dummy += 1;
+        }
 
         await session.loading;
         const complStrs = await session.ghci.sendCommand(
@@ -36,7 +43,7 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
 
         const result = firstLine[1];
         const prefix = JSON.parse(result);
-        const replaceRange = new vscode.Range(position.with({ character: prefix.length }), position);
+        const replaceRange = new vscode.Range(position.with({ character: prefix.length - dummy }), position);
         const items: vscode.CompletionItem[] = complStrs.map(u => {
             const st = JSON.parse(u);
             const cp = new vscode.CompletionItem(st, vscode.CompletionItemKind.Variable);

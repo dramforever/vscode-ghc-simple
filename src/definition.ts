@@ -31,9 +31,10 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
             const loc = res[0];
             const ma = loc.match(locR);
             if (ma) {
-                const [_all, file, startLine, startCol, endLine, endCol] = ma
+                const [_all, file, startLine, startCol, endLine, endCol] = ma;
+                const workspaceRoot = vscode.workspace.getWorkspaceFolder(document.uri).uri.fsPath;
                 return new vscode.Location(
-                    vscode.Uri.file(path.resolve(vscode.workspace.rootPath, file)),
+                    vscode.Uri.file(path.resolve(workspaceRoot, file)),
                     new vscode.Range(
                         new vscode.Position(+ startLine - 1, + startCol - 1),
                         new vscode.Position(+ endLine - 1, + endCol - 1)));
