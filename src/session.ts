@@ -79,7 +79,7 @@ export class Session implements vscode.Disposable {
         await this.start();
         const res = await this.ghci.sendCommand([
             ':set +c',
-            `:load ${[... this.files.values()].map(x => `*${x}`).join(' ')}`
+            `:load ${[... this.files.values()].map(x => JSON.stringify(`*${x}`)).join(' ')}`
         ]);
         const modules = await this.ghci.sendCommand(':show modules');
         const mmap = new Map<string, string>();
