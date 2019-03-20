@@ -78,7 +78,7 @@
                         "type": "string"
                     },
                     "default": [
-                        ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
+                        ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -dppr-cols=9999999",
                         ":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables"
                     ],
                     "description": "GHCi commands on startup to use for all workspace types"
