@@ -10,7 +10,7 @@
     "version": "0.0.10",
     "publisher": "dramforever",
     "engines": {
-        "vscode": "^1.14.0"
+        "vscode": "^1.28.0"
     },
     "categories": [
         "Programming Languages"
@@ -42,7 +42,13 @@
                     "type": "string",
                     "default": "detect",
                     "description": "Workspace type, 'bare' means use GHCi directly",
-                    "enum": [ "detect", "stack", "cabal", "bare-stack", "bare" ]
+                    "enum": [
+                        "detect",
+                        "stack",
+                        "cabal",
+                        "bare-stack",
+                        "bare"
+                    ]
                 },
                 "ghcSimple.startupCommands": {
                     "type": "array",
@@ -60,7 +66,9 @@
                     "items": {
                         "type": "string"
                     },
-                    "default": [ ":set -Wall" ],
+                    "default": [
+                        ":set -Wall"
+                    ],
                     "description": "Extra GHCi commands on startup to use for 'bare' workspace types"
                 }
             }
@@ -73,11 +81,11 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "dependencies": {
-        "vscode": "^1.1.18"
+        "vscode": "^1.1.30"
     },
     "devDependencies": {
+        "@types/node": "^6.14.4",
         "typescript": "^2.0.3",
-        "@types/node": "^6.0.40",
-        "vsce": "^1.43.0"
+        "vsce": "^1.58.0"
     }
 }
