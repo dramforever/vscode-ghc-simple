@@ -34,7 +34,7 @@ Currently implemented features:
 
     ![Range type demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/range-type.png)
 
-4. **Definition:** See definitions of identifiers. Supports both module level and local identifiers. Implemented with `:loc-at`. Does not yet support identifiers imported from packages.
+4. **Definition and usages:** See definitions amd references of identifiers. Supports both module level and local identifiers. Implemented with `:loc-at` and `uses`. Does not yet support identifiers imported from packages.
 
     ![Definition demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/definition.png)
 
@@ -52,6 +52,10 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
     vscode-ghc-simple currently lacks a way of detecting changes of critical configuration files such as `stack.yaml` or `*.cabal`. Run this command whenever, had you been running GHCi manually, you would restart it.
 
 ### Configuration options
+
+- `ghcSimple.feature.*`: Feature switches
+
+    Some users might want only a subset of the features provided in vscode-ghc-simple. These options can be used to disabled unneeded features.
 
 - `ghcSimple.workspaceType`: Workspace type
 

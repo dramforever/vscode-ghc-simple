@@ -1,8 +1,19 @@
 # Change Log
 
+## v0.1.0
+
+- ([#24](https://github.com/dramforever/vscode-ghc-simple/pull/24), [#6](https://github.com/dramforever/vscode-ghc-simple/issue/6)) Cabal new-build and v2 support. Thanks to [edmundnoble](https://github.com/edmundnoble) for this pull request.
+- Multi-root workspaces support.
+- Show references support.
+- Other minor enhancements and fixes, including:
+    - ([#18](https://github.com/dramforever/vscode-ghc-simple/pull/18), [#13](https://github.com/dramforever/vscode-ghc-simple/issue/13)) Extension is more robust when `stack ide targets` emits warnings. Thanks to [EduardSergeev ](https://github.com/EduardSergeev) for this pull request.
+    - Type query now uses `:all-types` to find the range only, and uses `:type-at` to find the actual type. This replaces the unneededly complex 'type resolver'.
+    - ([#14](https://github.com/dramforever/vscode-ghc-simple/pull/14)) Quote file names more carefully to handle paths with spaces.
+    - ([#19](https://github.com/dramforever/vscode-ghc-simple/pull/19)) Various features of this extension can be switched off using options.
+
 ## v0.0.10
 
-- (#8) Added dependency on [Haskell Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=justusadam.language-haskell)
+- ([#8](https://github.com/dramforever/vscode-ghc-simple/pull/8)) Added dependency on [Haskell Syntax Highlighting](https://marketplace.visualstudio.com/items?itemName=justusadam.language-haskell). Thanks to [2mol](https://github.com/2mol) for this pull request.
 - Added some rudimentary documentation.
 
 ## v0.0.9
