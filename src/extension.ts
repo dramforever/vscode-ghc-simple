@@ -12,10 +12,12 @@ export function activate(context: vscode.ExtensionContext) {
     const ext: ExtensionState = {
         context,
         outputChannel,
-        workspaceType: computeWorkspaceType(),
-        sessionManagers: new Map(),
-        singleManager: null
-    }
+        documentManagers: new Map(),
+        workspaceManagers: new Map(),
+        workspaceTypeMap: new Map()
+    };
+
+    (global as any)._ext = ext;
     
     registerRangeType(ext);
     
@@ -26,18 +28,21 @@ export function activate(context: vscode.ExtensionContext) {
     async function restart(): Promise<void> {
         const stops = [];
 
-        for (const [doc, session] of ext.sessionManagers) {
+        for (const [doc, session] of ext.documentManagers) {
             if (session.ghci)
                 stops.push(session.ghci.stop());
         }
-        ext.sessionManagers.clear();
 
-        if (ext.singleManager && ext.singleManager.ghci)
-            stops.push(ext.singleManager.ghci.stop());
-        
+        ext.documentManagers.clear();
+
+        for (const [ws, session] of ext.workspaceManagers) {
+            if (session.ghci)
+                stops.push(session.ghci.stop());
+        }
+
+        ext.workspaceManagers.clear();
+
         await Promise.all(stops);
-
-        ext.workspaceType = computeWorkspaceType();
 
         diagInit();
     }
@@ -45,6 +50,12 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(restart),
         vscode.commands.registerCommand('vscode-ghc-simple.restart', restart));
+
+    vscode.workspace.onDidChangeWorkspaceFolders((changeEvent) => {
+        for (const folder of changeEvent.removed)
+            if (ext.workspaceManagers.has(folder))
+                ext.workspaceManagers.get(folder).dispose();
+    })
 
     registerDefinition(ext);
 }
