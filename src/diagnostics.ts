@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionState, startSession, stopSession } from './extension-state';
 import { Session } from './session';
+import { getFeatures } from './utils';
 
 const regex = {
 
@@ -117,7 +118,7 @@ async function checkHaskell(
     diagnosticCollection: vscode.DiagnosticCollection,
     document: vscode.TextDocument,
     ext: ExtensionState) {
-    if (! vscode.workspace.getConfiguration('ghcSimple', document.uri).feature.diagnostics)
+    if (! getFeatures(document.uri).diagnostics)
         // Diagnostics disabled by user
         return false;
 

@@ -1,59 +1,45 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
+import { strToLocation, haskellSymbolRegex, getFeatures } from './utils';
 
-export class HaskellDefinition implements vscode.DefinitionProvider {
-    constructor(public ext: ExtensionState) {
-    }
-
-    async provideDefinition(
+export function registerDefinition(ext: ExtensionState) {
+    async function provideDefinition(
         document: vscode.TextDocument,
         position: vscode.Position,
         token: vscode.CancellationToken):
         Promise<null | vscode.Definition> {
-        if (! vscode.workspace.getConfiguration('ghcSimple', document.uri).feature.definition)
+        if (! getFeatures(document.uri).definition)
             // Definition disabled by user
             return null;
 
-        const session = await startSession(this.ext, document);
+        const session = await startSession(ext, document);
 
         //             ------------------------ maybe qualified
         //                                      ------------------------ operator
         //                                                               ----------------------- name
-        const hssym = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
 
-        const range = document.getWordRangeAtPosition(position, hssym);
+        const range = document.getWordRangeAtPosition(position, haskellSymbolRegex);
 
         await session.loading;
 
-        const cmd = `:loc-at ${document.uri.fsPath} ${1 + + range.start.line} ${1 + + range.start.character} ${1 + + range.end.line} ${1 + + range.end.character} ${document.getText(range)}`;
+        const cmd = `:loc-at ${JSON.stringify(document.uri.fsPath)}`
+            + ` ${1 + + range.start.line} ${1 + + range.start.character}`
+            + ` ${1 + + range.end.line} ${1 + + range.end.character}`
+            + ` ${document.getText(range)}`;
 
-        const res = (await session.ghci.sendCommand(cmd)).filter(s => s.trim().length > 0);
+        const res = (await session.ghci.sendCommand(cmd, token)).filter(s => s.trim().length > 0);
 
         if (res.length == 1) {
-            const locR = /^(.+):\((\d+),(\d+)\)-\((\d+),(\d+)\)$/;
             const loc = res[0];
-            const ma = loc.match(locR);
-            if (ma) {
-                const [_all, file, startLine, startCol, endLine, endCol] = ma;
-                const workspaceRoot = vscode.workspace.getWorkspaceFolder(document.uri).uri.fsPath;
-                return new vscode.Location(
-                    vscode.Uri.file(path.resolve(workspaceRoot, file)),
-                    new vscode.Range(
-                        new vscode.Position(+ startLine - 1, + startCol - 1),
-                        new vscode.Position(+ endLine - 1, + endCol - 1)));
-            } else {
-                return null;
-            }
+            return strToLocation(loc, vscode.workspace.getWorkspaceFolder(document.uri).uri.fsPath)
         } else {
             return null;
         }
     }
-}
 
-export function registerDefinition(ext: ExtensionState) {
     ext.context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(
             { language: 'haskell', scheme: 'file' },
-            new HaskellDefinition(ext)));
+            { provideDefinition }));
 }

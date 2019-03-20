@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
 import { Session } from './session';
+import { getFeatures } from './utils';
 
 async function getType(
     session: Session,
@@ -82,7 +83,7 @@ export function registerRangeType(ext: ExtensionState) {
 
     context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
         const doc = event.textEditor.document;
-        if (! vscode.workspace.getConfiguration('ghcSimple', doc.uri).feature.rangeType)
+        if (! getFeatures(doc.uri).rangeType)
             // Range type disabled by user
             return;
 

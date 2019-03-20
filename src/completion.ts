@@ -1,23 +1,20 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
+import { getFeatures } from './utils';
 
-export class HaskellCompletion implements vscode.CompletionItemProvider {
-    itemDocument: WeakMap<vscode.CompletionItem, vscode.TextDocument>
+export function registerCompletion(ext: ExtensionState) {
+    const itemDocument: Map<vscode.CompletionItem, vscode.TextDocument> = new Map();
 
-    constructor(public ext: ExtensionState) {
-        this.itemDocument = new WeakMap();
-    }
-
-    async provideCompletionItems(
+    async function provideCompletionItems(
         document: vscode.TextDocument,
         position: vscode.Position,
         token: vscode.CancellationToken):
         Promise<null | vscode.CompletionList> {
-        if (! vscode.workspace.getConfiguration('ghcSimple', document.uri).feature.completion)
+        if (! getFeatures(document.uri).completion)
             // Completion disabled by user
             return null;
 
-        const session = await startSession(this.ext, document);
+        const session = await startSession(ext, document);
 
         const firstInLine = position.with({ character: 0 });
         let line = document.getText(new vscode.Range(firstInLine, position));
@@ -38,7 +35,7 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         const firstLine = /^\d+ \d+ (".*")$/.exec(complStrs[0]);
 
         if (firstLine === null) {
-            this.ext.outputChannel.appendLine('Bad completion response');
+            ext.outputChannel.appendLine('Bad completion response');
             return null;
         }
 
@@ -52,20 +49,20 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
             const st = JSON.parse(u);
             const cp = new vscode.CompletionItem(st, vscode.CompletionItemKind.Variable);
             cp.range = replaceRange;
-            this.itemDocument.set(cp, document);
+            itemDocument.set(cp, document);
             return cp;
         });
 
         return new vscode.CompletionList(items, true);
     }
 
-    async resolveCompletionItem(
+    async function resolveCompletionItem(
         item: vscode.CompletionItem,
         token: vscode.CancellationToken):
         Promise<vscode.CompletionItem> {
-        if (this.itemDocument.has(item)) {
-            const document = this.itemDocument.get(item);
-            const session = await startSession(this.ext, document);
+        if (itemDocument.has(item)) {
+            const document = itemDocument.get(item);
+            const session = await startSession(ext, document);
             const docs = await session.ghci.sendCommand(`:info ${item.label}`, token);
 
             // Heuristic: If there's an error, then GHCi will output
@@ -77,9 +74,8 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         }
         return item;
     }
-}
-
-export function registerCompletion(ext: ExtensionState) {
     ext.context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        { language: 'haskell', scheme: 'file' } , new HaskellCompletion(ext), ' '));
+        { language: 'haskell', scheme: 'file' },
+        { provideCompletionItems, resolveCompletionItem },
+        ' '));
 }
