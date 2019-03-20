@@ -5,6 +5,7 @@ import { registerCompletion } from './completion';
 import { ExtensionState, computeWorkspaceType } from './extension-state';
 import { registerDiagnostics } from './diagnostics';
 import { registerDefinition } from './definition';
+import { registerReference } from './reference';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
@@ -20,9 +21,10 @@ export function activate(context: vscode.ExtensionContext) {
     (global as any)._ext = ext;
     
     registerRangeType(ext);
-    
     registerCompletion(ext);
-    
+    registerDefinition(ext);
+    registerReference(ext);
+
     const diagInit = registerDiagnostics(ext);
     
     async function restart(): Promise<void> {
@@ -56,8 +58,6 @@ export function activate(context: vscode.ExtensionContext) {
             if (ext.workspaceManagers.has(folder))
                 ext.workspaceManagers.get(folder).dispose();
     })
-
-    registerDefinition(ext);
 }
 
 export function deactivate() {

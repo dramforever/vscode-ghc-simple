@@ -58,6 +58,11 @@
                     "default": true,
                     "description": "Enable go to definition"
                 },
+                "ghcSimple.feature.reference": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable show references"
+                },
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
