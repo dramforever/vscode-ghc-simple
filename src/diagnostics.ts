@@ -117,6 +117,10 @@ async function checkHaskell(
     diagnosticCollection: vscode.DiagnosticCollection,
     document: vscode.TextDocument,
     ext: ExtensionState) {
+    if (! vscode.workspace.getConfiguration('ghcSimple', document.uri).feature.diagnostics)
+        // Diagnostics disabled by user
+        return false;
+
     if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs')) {
         const session: Session = await startSession(ext, document);
 

@@ -13,6 +13,10 @@ export class HaskellCompletion implements vscode.CompletionItemProvider {
         position: vscode.Position,
         token: vscode.CancellationToken):
         Promise<null | vscode.CompletionList> {
+        if (! vscode.workspace.getConfiguration('ghcSimple', document.uri).feature.completion)
+            // Completion disabled by user
+            return null;
+
         const session = await startSession(this.ext, document);
 
         const firstInLine = position.with({ character: 0 });

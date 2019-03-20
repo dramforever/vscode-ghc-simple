@@ -103,6 +103,10 @@ export function registerRangeType(ext: ExtensionState) {
 
     context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
         const doc = event.textEditor.document;
+        if (! vscode.workspace.getConfiguration('ghcSimple', doc.uri).feature.rangeType)
+            // Range type disabled by user
+            return;
+
         if (doc.languageId !== 'haskell' && ! doc.uri.fsPath.endsWith('.hs'))
             return;
         

@@ -10,7 +10,11 @@ export class HaskellDefinition implements vscode.DefinitionProvider {
         document: vscode.TextDocument,
         position: vscode.Position,
         token: vscode.CancellationToken):
-        Promise<vscode.Definition> {
+        Promise<null | vscode.Definition> {
+        if (! vscode.workspace.getConfiguration('ghcSimple', document.uri).feature.definition)
+            // Definition disabled by user
+            return null;
+
         const session = await startSession(this.ext, document);
 
         //             ------------------------ maybe qualified

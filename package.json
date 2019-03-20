@@ -38,6 +38,26 @@
             "type": "object",
             "title": "GHC Simple configuration",
             "properties": {
+                "ghcSimple.feature.diagnostics": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable diagnostics"
+                },
+                "ghcSimple.feature.rangeType": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable selection type tooltip"
+                },
+                "ghcSimple.feature.completion": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable completion"
+                },
+                "ghcSimple.feature.definition": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable go to definition"
+                },
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
