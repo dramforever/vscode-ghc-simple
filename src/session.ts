@@ -51,7 +51,7 @@ export class Session implements vscode.Disposable {
                 cmd.slice(1),
                 { cwd: this.workspaceFolder.uri.fsPath, stdio: 'pipe' },
                 this.ext);
-            const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands');
+            const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.workspaceFolder.uri);
             const configureCommands = [].concat(
                 cmds.all,
                 wst === 'bare-stack' || wst === 'bare' ? cmds.bare : [],
