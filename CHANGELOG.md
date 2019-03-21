@@ -1,12 +1,18 @@
 # Change Log
 
+## v0.1.1
+
+- ([#7](https://github.com/dramforever/vscode-ghc-simple/issue/7)) Some flags like `-Werror=no-home-modules` or `-fhide-source-paths` break vscode-ghc-simple. This has been worked around.
+- Now vscode-ghc-simple will use `-fobject-code` to speed up reloads of modules. You can disable this by changing the option `ghcSimple.useObjectCode`. 
+- Other minor enhancements and fixes.
+
 ## v0.1.0
 
 - ([#24](https://github.com/dramforever/vscode-ghc-simple/pull/24), [#6](https://github.com/dramforever/vscode-ghc-simple/issue/6)) Cabal new-build and v2 support. Thanks to [edmundnoble](https://github.com/edmundnoble) for this pull request.
 - Multi-root workspaces support.
 - Show references support.
 - Other minor enhancements and fixes, including:
-    - ([#18](https://github.com/dramforever/vscode-ghc-simple/pull/18), [#13](https://github.com/dramforever/vscode-ghc-simple/issue/13)) Extension is more robust when `stack ide targets` emits warnings. Thanks to [EduardSergeev ](https://github.com/EduardSergeev) for this pull request.
+    - ([#18](https://github.com/dramforever/vscode-ghc-simple/pull/18), [#13](https://github.com/dramforever/vscode-ghc-simple/issue/13)) Extension is more robust when `stack ide targets` emits warnings. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for this pull request.
     - Type query now uses `:all-types` to find the range only, and uses `:type-at` to find the actual type. This replaces the unneededly complex 'type resolver'.
     - ([#14](https://github.com/dramforever/vscode-ghc-simple/pull/14)) Quote file names more carefully to handle paths with spaces.
     - ([#19](https://github.com/dramforever/vscode-ghc-simple/pull/19)) Various features of this extension can be switched off using options.
