@@ -116,6 +116,12 @@
                     "default": [],
                     "scope": "resource",
                     "markdownDescription": "Custom GHCi commands on startup"
+                },
+                "ghcSimple.useObjectCode": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "markdownDescription": "Compile to object code first when loading. Optimizes GHCi reloads."
                 }
             }
         }

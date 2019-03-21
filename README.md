@@ -79,3 +79,7 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
     - `custom`: Custom commands for all workspaces
 
     Change the options in workspace settings instead of user settings if you want to apply the settings to a workspace locally.
+
+- `ghcSimple.useObjectCode`: Speed up GHCi reloads using `-fobject-code`
+
+    Enabled by default. Load everything with `-fobject-code` first before loading needed files with `-fbyte-code`. This way only changed files need to be recompiled, which greatly speeds up GHCi on large projects.

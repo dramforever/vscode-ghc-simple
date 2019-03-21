@@ -78,9 +78,17 @@ export class Session implements vscode.Disposable {
 
     async reloadP(): Promise<string[]> {
         await this.start();
+        const loadCommand = `:load ${[... this.files.values()].map(x => JSON.stringify(`*${x}`)).join(' ')}`;
+        if (vscode.workspace.getConfiguration('ghcSimple.useObjectCode', this.workspaceFolder.uri))
+            await this.ghci.sendCommand([
+                ':set -fobject-code',
+                loadCommand
+            ]);
+
         const res = await this.ghci.sendCommand([
+            ':set -fbyte-code',
             ':set +c',
-            `:load ${[... this.files.values()].map(x => JSON.stringify(`*${x}`)).join(' ')}`
+            loadCommand
         ]);
         const modules = await this.ghci.sendCommand(':show modules');
         const mmap = new Map<string, string>();
