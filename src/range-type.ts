@@ -23,12 +23,10 @@ async function getType(
 
     await session.loading;
 
-    const typesB: string[] =
-        session.typeCache !== null
-        ? session.typeCache
-        : await session.ghci.sendCommand(':all-types');
+    if (session.typeCache === null)
+        session.typeCache = session.ghci.sendCommand(':all-types');
 
-    session.typeCache = typesB;
+    const typesB = await session.typeCache;
 
     const strTypes = typesB.filter((x) => x.startsWith(doc.uri.fsPath));
 

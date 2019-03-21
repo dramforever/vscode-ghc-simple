@@ -8,7 +8,7 @@ export class Session implements vscode.Disposable {
     starting: Promise<void>;
     loading: Promise<void>;
     files: Set<string>;
-    typeCache: string[] | null;
+    typeCache: Promise<string[]> | null;
 
     constructor(public ext: ExtensionState, public workspaceFolder: vscode.WorkspaceFolder) {
         this.ghci = null;
