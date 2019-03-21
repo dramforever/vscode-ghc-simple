@@ -13,6 +13,7 @@ const regex = {
     // 7-10: variant 3: (line, col)
     message_base: /^(.+):(?:(\d+):(\d+)|(\d+):(\d+)-(\d+)|\((\d+),(\d+)\)-\((\d+),(\d+)\)): (.+)$/,
     single_line_error: /^error: (.+)$/,
+    single_line_warning: /^warning: \[(.+)\] (.+)$/,
     error: /^error:$/,
     warning: /^warning: \[(.+)\]$/
 };
@@ -25,6 +26,9 @@ interface DiagnosticWithFile {
 function parseMessages(messages: string[]):
     DiagnosticWithFile[] {
     const res: DiagnosticWithFile[] = [];
+
+    (global as any).parseMessages = parseMessages;
+    (global as any).lastmsg = messages.join('\n');
 
     while (messages.length > 0) {
         const heading = messages.shift();
@@ -65,15 +69,28 @@ function parseMessages(messages: string[]):
             })();
 
             const res_sl_error = regex.single_line_error.exec(res_heading[11]);
+            const res_sl_warning = regex.single_line_warning.exec(res_heading[11]);
             const res_error = regex.error.exec(res_heading[11]);
             const res_warning = regex.warning.exec(res_heading[11]);
 
             const sev = vscode.DiagnosticSeverity;
 
+            const error_warnings = [
+                '-Wdeferred-type-errors',
+                '-Wdeferred-out-of-scope-variables',
+                '-Wtyped-holes'
+            ];
+
             if (res_sl_error !== null) {
                 res.push({
                     file: res_heading[1],
                     diagnostic: new vscode.Diagnostic(range, res_sl_error[1], sev.Error)
+                });
+            } else if (res_sl_warning !== null) {
+                const severity = error_warnings.indexOf(res_sl_warning[1]) >= 0 ? sev.Error : sev.Warning;
+                res.push({
+                    file: res_heading[1],
+                    diagnostic: new vscode.Diagnostic(range, res_sl_warning[2], severity)
                 });
             } else {
                 const msgs: string[] = [];
@@ -86,10 +103,7 @@ function parseMessages(messages: string[]):
                     if (res_error !== null) {
                         return sev.Error;
                     } else if (res_warning !== null
-                        && ['-Wdeferred-type-errors',
-                            '-Wdeferred-out-of-scope-variables',
-                            '-Wtyped-holes'
-                        ].indexOf(res_warning[1]) >= 0) {
+                        && error_warnings.indexOf(res_warning[1]) >= 0) {
                         return sev.Error;
                     } else if (res_warning !== null) {
                         return sev.Warning;
