@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.2
+
+- Fix parsing of single-line warnings
+
 ## v0.1.1
 
 - ([#7](https://github.com/dramforever/vscode-ghc-simple/issues/7)) Some flags like `-Werror=no-home-modules` or `-fhide-source-paths` break vscode-ghc-simple. This has been worked around.
