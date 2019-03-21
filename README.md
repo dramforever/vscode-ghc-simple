@@ -65,6 +65,17 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
 
     vscode-ghc-simple will default to Cabal new-style for workspaces with Cabal files.
 
-- `ghcSimple.startupCommands` and `ghcSimple.bareStartupCommands`
+- `ghcSimple.startupCommands.*`: GHCi Startup commands
 
     Commands to run at GHCi startup. Configures some common options.
+
+    Two of the command lists are semantically meant to configure GHCi for use by vscode-ghc-simple:
+
+    - `all`: Commands for all workspaces
+    - `bare`: Commands for standalone files (bare workspaces)
+
+    If you need to add more commands, it's suggested that you do so using the following command list, so that the previous to can be updated as needed in newer versions of vscode-ghc-simple:
+
+    - `custom`: Custom commands for all workspaces
+
+    Change the options in workspace settings instead of user settings if you want to apply the settings to a workspace locally.

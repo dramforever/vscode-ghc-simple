@@ -77,7 +77,7 @@
                         "bare"
                     ]
                 },
-                "ghcSimple.startupCommands": {
+                "ghcSimple.startupCommands.all": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -88,9 +88,9 @@
                         ":set -fno-hide-source-paths",
                         ":set -Wno-error=missing-home-modules"
                     ],
-                    "description": "GHCi commands on startup to use for all workspace types"
+                    "markdownDescription": "GHCi commands on startup to use for all workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
                 },
-                "ghcSimple.bareStartupCommands": {
+                "ghcSimple.startupCommands.bare": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -98,7 +98,15 @@
                     "default": [
                         ":set -Wall"
                     ],
-                    "description": "Extra GHCi commands on startup to use for 'bare' workspace types"
+                    "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"                    
+                },
+                "ghcSimple.startupCommands.custom": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "markdownDescription": "Custom GHCi commands on startup"
                 }
             }
         }
