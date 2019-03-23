@@ -18,15 +18,13 @@ export function activate(context: vscode.ExtensionContext) {
         workspaceTypeMap: new Map()
     };
 
-    (global as any)._ext = ext;
-    
     registerRangeType(ext);
     registerCompletion(ext);
     registerDefinition(ext);
     registerReference(ext);
 
     const diagInit = registerDiagnostics(ext);
-    
+
     async function restart(): Promise<void> {
         const stops = [];
 

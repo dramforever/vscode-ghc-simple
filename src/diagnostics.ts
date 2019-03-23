@@ -27,9 +27,6 @@ function parseMessages(messages: string[]):
     DiagnosticWithFile[] {
     const res: DiagnosticWithFile[] = [];
 
-    (global as any).parseMessages = parseMessages;
-    (global as any).lastmsg = messages.join('\n');
-
     while (messages.length > 0) {
         const heading = messages.shift();
 
