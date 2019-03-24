@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.3
+
+- Minor fixes, including [#25](https://github.com/dramforever/vscode-ghc-simple/pull/25) from [edmundnoble](https://github.com/edmundnoble) and [#26](https://github.com/dramforever/vscode-ghc-simple/pull/26) from [EduardSergeev](https://github.com/EduardSergeev).
+
 ## v0.1.2
 
 - Fix parsing of single-line warnings
