@@ -43,6 +43,7 @@ export class GhciManager implements Disposable {
         this.stderr = this.makeReadline(this.proc.stderr);
         this.proc.stdin.on('close', this.handleClose.bind(this));
         await this.sendCommand(':set prompt ""')
+        await this.sendCommand(':set prompt-cont ""')
         return this.proc;
     }
 
@@ -149,7 +150,7 @@ export class GhciManager implements Disposable {
             this.currentCommand.reject('stream closed');
             this.currentCommand = null;
         }
-        
+
         for (const cmd of this.pendingCommands) {
             cmd.reject('stream closed');
         }
@@ -157,7 +158,7 @@ export class GhciManager implements Disposable {
         this.pendingCommands.length = 0; // Clear pendingCommands
         this.dispose();
     }
-    
+
     dispose() {
         if (this.proc !== null) {
             this.proc.kill();
