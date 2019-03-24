@@ -28,6 +28,11 @@ export function registerCompletion(ext: ExtensionState) {
         }
 
         await session.loading;
+
+        await session.ghci.sendCommand(
+            `:module *${session.getModuleName(document.uri.fsPath)}`,
+            token);
+
         const complStrs = await session.ghci.sendCommand(
             `:complete repl 10 ${JSON.stringify(line)}`,
             token);

@@ -23,6 +23,9 @@ async function getType(
 
     await session.loading;
 
+    await session.ghci.sendCommand(
+        `:module *${session.getModuleName(doc.uri.fsPath)}`);
+
     if (session.typeCache === null)
         session.typeCache = session.ghci.sendCommand(':all-types');
 
@@ -87,7 +90,7 @@ export function registerRangeType(ext: ExtensionState) {
 
         if (doc.languageId !== 'haskell' && ! doc.uri.fsPath.endsWith('.hs'))
             return;
-        
+
         if (doc.isDirty) {
             event.textEditor.setDecorations(decoCurrent, []);
             event.textEditor.setDecorations(decoType, []);

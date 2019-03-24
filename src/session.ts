@@ -9,12 +9,14 @@ export class Session implements vscode.Disposable {
     loading: Promise<void>;
     files: Set<string>;
     typeCache: Promise<string[]> | null;
+    moduleMap: Map<string, string>;
 
     constructor(public ext: ExtensionState, public workspaceFolder: vscode.WorkspaceFolder) {
         this.ghci = null;
         this.loading = null;
         this.files = new Set();
         this.typeCache = null;
+        this.moduleMap = new Map();
     }
 
     async start() {
@@ -91,19 +93,20 @@ export class Session implements vscode.Disposable {
             loadCommand
         ]);
         const modules = await this.ghci.sendCommand(':show modules');
-        const mmap = new Map<string, string>();
+
+        this.moduleMap.clear();
         for (const line of modules) {
             const res = /^([^ ]+)\s+\( (.+), interpreted \)$/.exec(line);
             if (res) {
-                mmap.set(vscode.Uri.file(res[2]).fsPath, res[1]);
+                this.moduleMap.set(vscode.Uri.file(res[2]).fsPath, res[1]);
             }
         }
-        await this.ghci.sendCommand(`:module ${
-            [... this.files]
-                .filter(m => mmap.has(m))
-                .map(m => `*${mmap.get(m)}`).join(' ')
-        }`);
+        await this.ghci.sendCommand(':module');
         return res;
+    }
+
+    getModuleName(filename: string): string {
+        return this.moduleMap.get(filename);
     }
 
     dispose() {
