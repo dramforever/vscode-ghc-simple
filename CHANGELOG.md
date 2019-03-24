@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.5
+
+- Minor fixes.
+
 ## v0.1.4
 
 - New feature: inline REPL. Run Haddock REPL comments in your file in a single click.
