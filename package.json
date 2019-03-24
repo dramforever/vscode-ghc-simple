@@ -131,7 +131,8 @@
                         "type": "string"
                     },
                     "default": [
-                        ":set -Wall"
+                        ":set -Wall",
+                        ":seti -Wno-type-defaults"
                     ],
                     "scope": "resource",
                     "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
