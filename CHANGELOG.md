@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.1.4
+
+- New feature: inline REPL. Run Haddock REPL comments in your file in a single click.
+- Other minor enhancements and fixes.
+
 ## v0.1.3
 
 - Minor fixes, including [#25](https://github.com/dramforever/vscode-ghc-simple/pull/25) from [edmundnoble](https://github.com/edmundnoble) and [#26](https://github.com/dramforever/vscode-ghc-simple/pull/26) from [EduardSergeev](https://github.com/EduardSergeev).
@@ -11,7 +16,7 @@
 ## v0.1.1
 
 - ([#7](https://github.com/dramforever/vscode-ghc-simple/issues/7)) Some flags like `-Werror=no-home-modules` or `-fhide-source-paths` break vscode-ghc-simple. This has been worked around.
-- Now vscode-ghc-simple will use `-fobject-code` to speed up reloads of modules. You can disable this by changing the option `ghcSimple.useObjectCode`. 
+- Now vscode-ghc-simple will use `-fobject-code` to speed up reloads of modules. You can disable this by changing the option `ghcSimple.useObjectCode`.
 - Other minor enhancements and fixes.
 
 ## v0.1.0
