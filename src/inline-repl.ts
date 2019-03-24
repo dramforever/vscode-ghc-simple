@@ -4,7 +4,7 @@ import { haskellReplLine, getFeatures } from './utils';
 
 
 export function registerInlineRepl(ext: ExtensionState) {
-    const availableRepl: WeakMap<vscode.TextDocument, [vscode.Range, vscode.Command][]> = new Map();
+    const availableRepl: WeakMap<vscode.TextDocument, [vscode.Range, vscode.Command][]> = new WeakMap();
 
     async function inlineReplRun (
         textEditor: vscode.TextEditor,
