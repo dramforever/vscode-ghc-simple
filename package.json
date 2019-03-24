@@ -106,7 +106,7 @@
                         ":set -Wall"
                     ],
                     "scope": "resource",
-                    "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"                    
+                    "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
                 },
                 "ghcSimple.startupCommands.custom": {
                     "type": "array",
@@ -122,6 +122,12 @@
                     "default": true,
                     "scope": "resource",
                     "markdownDescription": "Compile to object code first when loading. Optimizes GHCi reloads."
+                },
+                "ghcSimple.maxCompletions": {
+                    "type": "number",
+                    "default": 50,
+                    "scope": "resource",
+                    "markdownDescription": "Maximum number of completion items to show."
                 }
             }
         }

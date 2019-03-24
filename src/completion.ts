@@ -33,8 +33,10 @@ export function registerCompletion(ext: ExtensionState) {
             `:module *${session.getModuleName(document.uri.fsPath)}`,
             token);
 
+        const { maxCompletions } = vscode.workspace.getConfiguration('ghcSimple', document.uri);
+
         const complStrs = await session.ghci.sendCommand(
-            `:complete repl 10 ${JSON.stringify(line)}`,
+            `:complete repl ${maxCompletions} ${JSON.stringify(line)}`,
             token);
 
         const firstLine = /^\d+ \d+ (".*")$/.exec(complStrs[0]);

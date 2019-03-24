@@ -83,3 +83,5 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
 - `ghcSimple.useObjectCode`: Speed up GHCi reloads using `-fobject-code`
 
     Enabled by default. Load everything with `-fobject-code` first before loading needed files with `-fbyte-code`. This way only changed files need to be recompiled, which greatly speeds up GHCi on large projects.
+
+- `ghcSimple.maxCompletions`: Maximum number of completion items to show.
