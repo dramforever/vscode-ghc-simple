@@ -20,11 +20,18 @@ export function registerCompletion(ext: ExtensionState) {
         let line = document.getText(new vscode.Range(firstInLine, position));
         if (line.trim() === '') return null;
 
-        let dummy : number = 0;
+        let delta : number = 0;
 
         if (line.trim().startsWith(':')) {
             line = 'x' + line;
-            dummy += 1;
+            delta -= 1;
+        }
+
+        const replRegex = /^(\s*-{2,}\s+)?>>>/;
+        const replResult = replRegex.exec(line);
+        if (replResult !== null) {
+            line = line.slice(replResult[0].length);
+            delta += replResult[0].length;
         }
 
         await session.loading;
@@ -51,7 +58,7 @@ export function registerCompletion(ext: ExtensionState) {
 
         const result = firstLine[1];
         const prefix = JSON.parse(result);
-        const replaceRange = new vscode.Range(position.with({ character: prefix.length - dummy }), position);
+        const replaceRange = new vscode.Range(position.with({ character: prefix.length + delta }), position);
         const items: vscode.CompletionItem[] = complStrs.map(u => {
             const st = JSON.parse(u);
             const cp = new vscode.CompletionItem(st, vscode.CompletionItemKind.Variable);
@@ -84,5 +91,5 @@ export function registerCompletion(ext: ExtensionState) {
     ext.context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
         { language: 'haskell', scheme: 'file' },
         { provideCompletionItems, resolveCompletionItem },
-        ' '));
+        ' ', ':'));
 }
