@@ -32,6 +32,28 @@
                 "command": "vscode-ghc-simple.restart",
                 "title": "Restart GHCi sessions",
                 "category": "GHC"
+            },
+            {
+                "command": "vscode-ghc-simple.inline-repl-run",
+                "title": "Run this block in GHCi",
+                "category": "GHC"
+            },
+            {
+                "command": "vscode-ghc-simple.inline-repl-run-all",
+                "title": "Run all block from this file in GHCi",
+                "category": "GHC"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "vscode-ghc-simple.inline-repl-run",
+                "key": "shift+enter",
+                "when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
+            },
+            {
+                "command": "vscode-ghc-simple.inline-repl-run-all",
+                "key": "shift+alt+enter",
+                "when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
             }
         ],
         "configuration": {
@@ -67,6 +89,12 @@
                     "default": true,
                     "scope": "resource",
                     "description": "Enable show references"
+                },
+                "ghcSimple.feature.inlineRepl": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable inline GHCi REPL"
                 },
                 "ghcSimple.workspaceType": {
                     "type": "string",
@@ -128,6 +156,12 @@
                     "default": 50,
                     "scope": "resource",
                     "markdownDescription": "Maximum number of completion items to show."
+                },
+                "ghcSimple.inlineRepl.codeLens": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "markdownDescription": "Show code lens for GHCi REPL blocks"
                 }
             }
         }

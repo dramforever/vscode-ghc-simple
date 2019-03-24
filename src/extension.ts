@@ -6,6 +6,7 @@ import { ExtensionState, computeWorkspaceType } from './extension-state';
 import { registerDiagnostics } from './diagnostics';
 import { registerDefinition } from './definition';
 import { registerReference } from './reference';
+import { registerInlineRepl } from './inline-repl';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
@@ -22,6 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
     registerCompletion(ext);
     registerDefinition(ext);
     registerReference(ext);
+    registerInlineRepl(ext);
 
     const diagInit = registerDiagnostics(ext);
 

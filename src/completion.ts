@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
-import { getFeatures } from './utils';
+import { getFeatures, haskellReplLine } from './utils';
 
 export function registerCompletion(ext: ExtensionState) {
     const itemDocument: Map<vscode.CompletionItem, vscode.TextDocument> = new Map();
@@ -27,11 +27,10 @@ export function registerCompletion(ext: ExtensionState) {
             delta -= 1;
         }
 
-        const replRegex = /^(\s*-{2,}\s+)?>>>/;
-        const replResult = replRegex.exec(line);
+        const replResult = haskellReplLine.exec(line);
         if (replResult !== null) {
-            line = line.slice(replResult[0].length);
-            delta += replResult[0].length;
+            line = line.slice(replResult[1].length + '>>>'.length);
+            delta += replResult[1].length + '>>>'.length;
         }
 
         await session.loading;

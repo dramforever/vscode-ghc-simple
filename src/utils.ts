@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 export const haskellSymbolRegex = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
+export const haskellReplLine = /^(\s*-{2,}\s+)?>>>(.*)$/;
 
 export function strToLocation(s: string, workspaceRoot: string): null | vscode.Location {
     const locR = /^(.+):\((\d+),(\d+)\)-\((\d+),(\d+)\)$/;
