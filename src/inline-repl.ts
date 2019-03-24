@@ -37,7 +37,7 @@ export function registerInlineRepl(ext: ExtensionState) {
             if (response[response.length - 1] == '') response.pop();
             const filtRsponse = response.map(s => prefix + (s == '' ? '<BLANKLINE>' : s));
             const end = range.isEmpty ? '\n' : '';
-            const replacement = filtRsponse.join('\n') + '\n' + prefix.replace(/\s+$/, '') + end;
+            const replacement = filtRsponse.map(s => s + '\n').join('') + prefix.replace(/\s+$/, '') + end;
             await textEditor.edit(e => e.replace(range, replacement),
                 { undoStopBefore: ! arg.batch, undoStopAfter: ! arg.batch });
         }
