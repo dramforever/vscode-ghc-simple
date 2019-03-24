@@ -117,7 +117,7 @@
                         "type": "string"
                     },
                     "default": [
-                        ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans -dppr-cols=9999999",
+                        ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
                         ":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables",
                         ":set -fno-hide-source-paths",
                         ":set -Wno-error=missing-home-modules"
