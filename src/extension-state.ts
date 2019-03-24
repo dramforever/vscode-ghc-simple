@@ -46,7 +46,7 @@ export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument)
     const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
     const type = await getWorkspaceType(ext, folder);
 
-    if (-1 !== ['cabal', 'stack'].indexOf(type)) {
+    if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
         // stack or cabal
         if (ext.workspaceManagers.has(folder)) {
             const mgr = ext.workspaceManagers.get(folder);
