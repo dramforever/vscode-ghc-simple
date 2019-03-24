@@ -46,7 +46,7 @@ function parseMessages(messages: string[]):
                     const line = num(2);
                     const col = num(3);
 
-                    return new vscode.Range(line - 1, col - 1, line - 1, col - 1);
+                    return new vscode.Range(line - 1, col - 1, line - 1, col);
                 } else if (res_heading[4]) {
                     // line:col-col
                     const line = num(4);
