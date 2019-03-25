@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.6
+
+- Fix inline REPL when the user types too fast and code lenses haven't updated yet.
+
 ## v0.1.5
 
 - Minor fixes.
