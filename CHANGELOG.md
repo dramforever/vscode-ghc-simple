@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.1.7
+
+- ([#27](https://github.com/dramforever/vscode-ghc-simple/issues/27)) Fix configuration handling
+- ([#28](https://github.com/dramforever/vscode-ghc-simple/issues/28)) Fix handling files without workspace folder
+- Fix multi-root workspace type detection
+
 ## v0.1.6
 
 - Fix inline REPL when the user types too fast and code lenses haven't updated yet.
