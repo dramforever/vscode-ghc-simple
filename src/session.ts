@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { GhciManager } from "./ghci";
-import { ExtensionState } from "./extension-state";
+import { ExtensionState, HaskellWorkspaceType } from "./extension-state";
 
 export class Session implements vscode.Disposable {
     ghci: GhciManager;
@@ -10,25 +10,31 @@ export class Session implements vscode.Disposable {
     files: Set<string>;
     typeCache: Promise<string[]> | null;
     moduleMap: Map<string, string>;
+    cwdOption: { cwd?: string };
 
-    constructor(public ext: ExtensionState, public workspaceFolder: vscode.WorkspaceFolder) {
+    constructor(
+        public ext: ExtensionState,
+        public workspaceType: HaskellWorkspaceType,
+        public resourceType: 'workspace' | 'file',
+        public resource: vscode.Uri) {
         this.ghci = null;
         this.loading = null;
         this.files = new Set();
         this.typeCache = null;
         this.moduleMap = new Map();
+        this.cwdOption = resourceType == 'workspace' ? { cwd: this.resource.fsPath } : {};
     }
 
     async start() {
         if (this.ghci === null) {
-            const wst = await this.ext.workspaceTypeMap.get(this.workspaceFolder);
+            const wst = this.workspaceType;
 
             const cmd = await (async () => {
                 if (wst == 'stack') {
                     const result = await new Promise<string>((resolve, reject) => {
                         child_process.exec(
                             'stack ide targets',
-                            { cwd: this.workspaceFolder.uri.fsPath },
+                            this.cwdOption,
                             (err, stdout, stderr) => {
                                 if (err) reject('Command stack ide targets failed:\n' + stderr);
                                 else resolve(stderr);
@@ -51,9 +57,9 @@ export class Session implements vscode.Disposable {
             this.ghci = new GhciManager(
                 cmd[0],
                 cmd.slice(1),
-                { cwd: this.workspaceFolder.uri.fsPath, stdio: 'pipe' },
+                Object.assign({ stdio: 'pipe' }, this.cwdOption),
                 this.ext);
-            const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.workspaceFolder.uri);
+            const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);
             const configureCommands = [].concat(
                 cmds.all,
                 wst === 'bare-stack' || wst === 'bare' ? cmds.bare : [],
@@ -81,7 +87,7 @@ export class Session implements vscode.Disposable {
     async reloadP(): Promise<string[]> {
         await this.start();
         const loadCommand = `:load ${[... this.files.values()].map(x => JSON.stringify(`*${x}`)).join(' ')}`;
-        if (vscode.workspace.getConfiguration('ghcSimple', this.workspaceFolder.uri).useObjectCode)
+        if (vscode.workspace.getConfiguration('ghcSimple', this.resource).useObjectCode)
             await this.ghci.sendCommand([
                 ':set -fobject-code',
                 loadCommand

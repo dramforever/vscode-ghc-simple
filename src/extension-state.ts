@@ -14,26 +14,29 @@ export interface ExtensionState {
 
 function getWorkspaceType(ext: ExtensionState, folder: vscode.WorkspaceFolder): Promise<HaskellWorkspaceType> {
     if (! ext.workspaceTypeMap.has(folder))
-        ext.workspaceTypeMap.set(folder, computeWorkspaceType(folder.uri));
+        ext.workspaceTypeMap.set(folder, computeWorkspaceType(folder));
     return ext.workspaceTypeMap.get(folder);
 }
 
 export async function startSession(ext: ExtensionState, doc: vscode.TextDocument): Promise<Session> {
     const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
-    const type = await getWorkspaceType(ext, folder);
+    const type = folder === undefined
+        ? await computeFileType()
+        : await getWorkspaceType(ext, folder);
+
     const session = (() => {
         if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
             // stack or cabal
 
             if (! ext.workspaceManagers.has(folder))
-                ext.workspaceManagers.set(folder, new Session(ext, folder));
+                ext.workspaceManagers.set(folder, new Session(ext, type, 'workspace', folder.uri));
 
             return ext.workspaceManagers.get(folder);
         } else {
             // bare or bare-stack
 
             if (! ext.documentManagers.has(doc))
-                ext.documentManagers.set(doc, new Session(ext, folder));
+                ext.documentManagers.set(doc, new Session(ext, type, 'file', doc.uri));
 
             return ext.documentManagers.get(doc);
         }
@@ -44,7 +47,9 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 
 export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
     const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
-    const type = await getWorkspaceType(ext, folder);
+    const type = folder === undefined
+        ? await computeFileType()
+        : await getWorkspaceType(ext, folder);
 
     if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
         // stack or cabal
@@ -61,9 +66,31 @@ export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument)
     }
 }
 
-export async function computeWorkspaceType(resource: vscode.Uri): Promise<HaskellWorkspaceType> {
+function hasStack(cwd?: string): Promise<boolean> {
+    const cwdOpt = cwd === undefined ? {} : { cwd };
+    return new Promise<boolean>((resolve, reject) => {
+        const cp = child_process.exec(
+            'stack --help',
+            Object.assign({ timeout: 5000 }, cwdOpt),
+            (err, stdout, stderr) => {
+                if (err) resolve(false);
+                else resolve(true);
+            }
+        )
+    });
+
+}
+
+export async function computeFileType(): Promise<HaskellWorkspaceType> {
+    if (await hasStack())
+        return 'bare-stack'
+    else
+        return 'bare';
+}
+
+export async function computeWorkspaceType(folder: vscode.WorkspaceFolder): Promise<HaskellWorkspaceType> {
     const configType =
-        vscode.workspace.getConfiguration('ghcSimple', resource).workspaceType as
+        vscode.workspace.getConfiguration('ghcSimple', folder.uri).workspaceType as
             HaskellWorkspaceType | 'detect';
 
     if (configType !== 'detect') return configType;
@@ -76,20 +103,7 @@ export async function computeWorkspaceType(resource: vscode.Uri): Promise<Haskel
     if (isCabal.length > 0)
         return 'cabal new';
 
-    const hasStack = await new Promise<boolean>((resolve, reject) => {
-            const cp = child_process.exec(
-                'stack --help',
-                {
-                    cwd: vscode.workspace.getWorkspaceFolder(resource).uri.fsPath,
-                    timeout: 5000
-                }, (err, stdout, stderr) => {
-                    if (err) resolve(false);
-                    else resolve(true);
-                }
-            )
-        });
-
-    if (hasStack)
+    if (await hasStack(folder.uri.fsPath))
         return 'bare-stack'
     else
         return 'bare';
