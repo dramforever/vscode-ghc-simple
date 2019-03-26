@@ -95,11 +95,15 @@ export async function computeWorkspaceType(folder: vscode.WorkspaceFolder): Prom
 
     if (configType !== 'detect') return configType;
 
-    const isStack = await vscode.workspace.findFiles('stack.yaml');
+    const find: (file: string) => Thenable<vscode.Uri[]> =
+        (file) => vscode.workspace.findFiles(
+            new vscode.RelativePattern(folder, file));
+
+    const isStack = await find('stack.yaml');
     if (isStack.length > 0)
         return 'stack';
 
-    const isCabal = await vscode.workspace.findFiles('**/*.cabal');
+    const isCabal = await find('**/*.cabal');
     if (isCabal.length > 0)
         return 'cabal new';
 
