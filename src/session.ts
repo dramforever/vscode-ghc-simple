@@ -54,6 +54,13 @@ export class Session implements vscode.Disposable {
                     return ['ghci'];
             })();
 
+            this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
+            this.ext.outputChannel.appendLine(
+                `(Under ${
+                    this.cwdOption.cwd === undefined
+                        ? 'default cwd'
+                        : `cwd ${this.cwdOption.cwd}` })`);
+
             this.ghci = new GhciManager(
                 cmd[0],
                 cmd.slice(1),
@@ -65,7 +72,13 @@ export class Session implements vscode.Disposable {
                 wst === 'bare-stack' || wst === 'bare' ? cmds.bare : [],
                 cmds.custom
             );
-            await this.ghci.sendCommand(configureCommands);
+            try {
+                await this.ghci.sendCommand(configureCommands);
+            } catch(e) {
+                this.ext.outputChannel.appendLine(`Error starting GHCi: ${e}`);
+                vscode.window.showWarningMessage(
+                    'Error while start GHCi. Further information might be found in output tab.');
+            }
         }
     }
 
