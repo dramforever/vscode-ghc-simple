@@ -56,9 +56,10 @@ async function getType(
             `:type-at ${JSON.stringify(doc.uri.fsPath)}`
             + ` ${curBestRange.start.line + 1} ${curBestRange.start.character + 1}`
             + ` ${curBestRange.end.line + 1} ${curBestRange.end.character + 1}`);
+        const resStr = res.map(l => l.trim()).join(' ');
 
-        if (res.length == 2 && res[1].startsWith(' :: '))
-            return [curBestRange, res[1].slice(' :: '.length)];
+        if (resStr.startsWith(':: '))
+            return [curBestRange, resStr.slice(':: '.length)];
         else
             return [curBestRange, curType.replace(/([A-Z][A-Za-z0-9_']*\.)+([A-Za-z0-9_']+)/g, '$2')];
     }
