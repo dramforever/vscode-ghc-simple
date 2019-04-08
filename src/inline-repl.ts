@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
-import { haskellReplLine, getFeatures } from './utils';
+import { haskellReplLine, getFeatures, haskellSelector } from './utils';
 
 
 export function registerInlineRepl(ext: ExtensionState) {
@@ -166,7 +166,7 @@ export function registerInlineRepl(ext: ExtensionState) {
 
     ext.context.subscriptions.push(
         vscode.languages.registerCodeLensProvider(
-            { language: 'haskell', scheme: 'file' },
+            haskellSelector,
             { provideCodeLenses }
         )
     );

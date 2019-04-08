@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
-import { strToLocation, haskellSymbolRegex, getFeatures } from './utils';
+import { strToLocation, haskellSymbolRegex, getFeatures, haskellSelector } from './utils';
 
 export function registerDefinition(ext: ExtensionState) {
     async function provideDefinition(
@@ -44,6 +44,6 @@ export function registerDefinition(ext: ExtensionState) {
 
     ext.context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(
-            { language: 'haskell', scheme: 'file' },
+            haskellSelector,
             { provideDefinition }));
 }

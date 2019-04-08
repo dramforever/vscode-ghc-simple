@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
-import { getFeatures, haskellReplLine } from './utils';
+import { getFeatures, haskellReplLine, haskellSelector } from './utils';
 
 export function registerCompletion(ext: ExtensionState) {
     const itemDocument: Map<vscode.CompletionItem, vscode.TextDocument> = new Map();
@@ -88,7 +88,7 @@ export function registerCompletion(ext: ExtensionState) {
         return item;
     }
     ext.context.subscriptions.push(vscode.languages.registerCompletionItemProvider(
-        { language: 'haskell', scheme: 'file' },
+        haskellSelector,
         { provideCompletionItems, resolveCompletionItem },
         ' ', ':'));
 }

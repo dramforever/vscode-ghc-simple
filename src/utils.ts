@@ -4,6 +4,17 @@ import * as vscode from 'vscode';
 export const haskellSymbolRegex = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
 export const haskellReplLine = /^(\s*-{2,}\s+)?>>>(.*)$/;
 
+export const haskellSelector: vscode.DocumentSelector = [
+    { language: 'haskell', scheme: 'file' },
+    { language: 'literate haskell', scheme: 'file' }
+];
+
+export function documentIsHaskell(doc: vscode.TextDocument) {
+    return (
+        [ 'haskell', 'literate haskell' ].indexOf(doc.languageId) !== -1
+        || [ '.hs', '.lhs' ].some(suf => doc.uri.fsPath.endsWith(suf)));
+}
+
 export function strToLocation(s: string, workspaceRoot: string): null | vscode.Location {
     const locR = /^(.+):\((\d+),(\d+)\)-\((\d+),(\d+)\)$/;
     const ma = s.match(locR);

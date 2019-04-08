@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionState, startSession, stopSession } from './extension-state';
 import { Session } from './session';
-import { getFeatures } from './utils';
+import { getFeatures, documentIsHaskell } from './utils';
 
 const regex = {
 
@@ -121,7 +121,7 @@ function parseMessages(messages: string[]):
 }
 
 function stopHaskell(document: vscode.TextDocument, ext: ExtensionState) {
-    if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs'))
+    if (documentIsHaskell(document))
         stopSession(ext, document);
     }
 
@@ -133,7 +133,7 @@ async function checkHaskell(
         // Diagnostics disabled by user
         return false;
 
-    if (document.languageId == 'haskell' || document.uri.fsPath.endsWith('.hs')) {
+    if (documentIsHaskell(document)) {
         const session: Session = await startSession(ext, document);
 
         const result = await session.reload();

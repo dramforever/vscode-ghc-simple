@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
 import { Session } from './session';
-import { getFeatures } from './utils';
+import { getFeatures, documentIsHaskell } from './utils';
 
 async function getType(
     session: Session,
@@ -89,7 +89,7 @@ export function registerRangeType(ext: ExtensionState) {
             // Range type disabled by user
             return;
 
-        if (doc.languageId !== 'haskell' && ! doc.uri.fsPath.endsWith('.hs'))
+        if (! documentIsHaskell(doc))
             return;
 
         if (doc.isDirty) {

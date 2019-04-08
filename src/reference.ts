@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from "./extension-state";
-import { getFeatures, haskellSymbolRegex, strToLocation } from './utils';
+import { getFeatures, haskellSymbolRegex, strToLocation, haskellSelector } from './utils';
 
 export function registerReference(ext: ExtensionState) {
     async function provideReferences(
@@ -46,7 +46,7 @@ export function registerReference(ext: ExtensionState) {
 
     ext.context.subscriptions.push(
         vscode.languages.registerReferenceProvider(
-            { language: 'haskell', scheme: 'file' },
+            haskellSelector,
             { provideReferences })
     )
 }
