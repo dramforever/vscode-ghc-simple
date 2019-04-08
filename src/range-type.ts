@@ -69,17 +69,25 @@ export function registerRangeType(ext: ExtensionState) {
     const context = ext.context;
     let selTimeout: NodeJS.Timer | null = null;
 
-    const decoCurrent = vscode.window.createTextEditorDecorationType({
+    const deco = {
         borderStyle: 'solid',
-        borderColor: '#66f',
-        borderWidth: '0px 0px 1px 0px'
-    });
+        borderColor: '#66f'
+    }
+
+    // ______
+    const decoCurrent = vscode.window.createTextEditorDecorationType(
+        Object.assign({}, deco, { borderWidth: '0px 0px 1px 0px' }));
+
+    // |
+    const decoMultiLine = vscode.window.createTextEditorDecorationType(
+        Object.assign({}, deco, { borderWidth: '0px 0px 0px 1px' }));
+
+    // |_____
+    const decoLastLine = vscode.window.createTextEditorDecorationType(
+        Object.assign({}, deco, { borderWidth: '0px 0px 1px 1px' }));
 
     const decoType = vscode.window.createTextEditorDecorationType({
-        after: {
-            color: '#999',
-            margin: '0px 0px 0px 20px'
-        },
+        after: { color: '#999' },
         rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
     })
 
@@ -92,9 +100,15 @@ export function registerRangeType(ext: ExtensionState) {
         if (! documentIsHaskell(doc))
             return;
 
-        if (doc.isDirty) {
+        function clear() {
             event.textEditor.setDecorations(decoCurrent, []);
             event.textEditor.setDecorations(decoType, []);
+            event.textEditor.setDecorations(decoMultiLine, []);
+            event.textEditor.setDecorations(decoLastLine, []);
+        }
+
+        if (doc.isDirty) {
+            clear();
         } else {
             if (selTimeout !== null) {
                 clearTimeout(selTimeout);
@@ -108,21 +122,41 @@ export function registerRangeType(ext: ExtensionState) {
                 if (res !== null) {
                     const [range, type] = res;
                     const lineRange = doc.lineAt(range.start.line).range;
-                    event.textEditor.setDecorations(decoCurrent, [{
-                        range,
-                        hoverMessage: type
-                    }]);
+                    const singleLine = range.start.line == range.end.line;
+                    if (singleLine) {
+                        event.textEditor.setDecorations(decoCurrent, [{
+                            range,
+                            hoverMessage: type
+                        }]);
+                        event.textEditor.setDecorations(decoMultiLine, []);
+                        event.textEditor.setDecorations(decoLastLine, []);
+                    } else {
+                        const lastLineRange = doc.lineAt(range.end.line).range;
+                        event.textEditor.setDecorations(decoCurrent, [{
+                            range: lineRange.with({ start: range.start }),
+                            hoverMessage: type
+                        }]);
+                        if (range.end.line == range.start.line + 1)
+                            event.textEditor.setDecorations(decoMultiLine, []);
+                        else
+                            event.textEditor.setDecorations(decoMultiLine, [{
+                                range: new vscode.Range(
+                                    doc.lineAt(range.start.line + 1).range.start,
+                                    doc.lineAt(range.end.line - 1).range.end)
+                            }]);
+                        event.textEditor.setDecorations(decoLastLine, [{
+                            range: lastLineRange.with({ end: range.end })
+                        }]);
+                    }
+                    const typeText = singleLine ? ` :: ${type}` : `... :: ${type}`;
                     event.textEditor.setDecorations(decoType, [{
                         range: lineRange,
                         renderOptions: {
-                            after: {
-                                contentText: `:: ${type}`
-                            }
+                            after: { contentText: typeText }
                         }
                     }]);
                 } else {
-                    event.textEditor.setDecorations(decoCurrent, []);
-                    event.textEditor.setDecorations(decoType, []);
+                    clear();
                 }
                 selTimeout = null;
             }, 300);
