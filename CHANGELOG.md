@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.1.8
+
+- Rudimentary support for Literate Haskell files. Basically, the extension now 'works' in `.lhs` files.
+- Cleaner marking of multi-line expressions in type query.
+- Other minor fixes.
+
 ## v0.1.7
 
 - ([#27](https://github.com/dramforever/vscode-ghc-simple/issues/27)) Fix configuration handling
