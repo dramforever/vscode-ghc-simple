@@ -103,7 +103,7 @@ export async function computeWorkspaceType(folder: vscode.WorkspaceFolder): Prom
     if (isStack.length > 0)
         return 'stack';
 
-    const isCabal = await find('**/*.cabal');
+    const isCabal = await find('*.cabal');
     if (isCabal.length > 0)
         return 'cabal new';
 
