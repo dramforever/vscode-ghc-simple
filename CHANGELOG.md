@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.9
+
+- Minor fixes
+
 ## v0.1.8
 
 - Rudimentary support for Literate Haskell files. Basically, the extension now 'works' in `.lhs` files.
