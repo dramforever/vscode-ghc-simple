@@ -100,8 +100,8 @@
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
-                    "description": "Workspace type, 'bare' means use GHCi directly",
                     "scope": "resource",
+                    "description": "Workspace type, 'bare' means use GHCi directly",
                     "enum": [
                         "detect",
                         "stack",
@@ -111,6 +111,12 @@
                         "bare-stack",
                         "bare"
                     ]
+                },
+                "ghcSimple.commandSuffix": {
+                    "type": "string",
+                    "default": "",
+                    "scope": "resource",
+                    "description": "Arbitrary string appended to REPL command"
                 },
                 "ghcSimple.startupCommands.all": {
                     "type": "array",
