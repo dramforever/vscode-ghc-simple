@@ -3,6 +3,8 @@ import { ExtensionState, startSession } from './extension-state';
 import { Session } from './session';
 import { getFeatures, documentIsHaskell } from './utils';
 
+let hasNotified = false;
+
 async function getType(
     session: Session,
     sel: vscode.Selection | vscode.Position | vscode.Range,
@@ -26,10 +28,48 @@ async function getType(
     await session.ghci.sendCommand(
         `:module *${session.getModuleName(doc.uri.fsPath)}`);
 
-    if (session.typeCache === null)
+    let completed = false;
+
+    if (session.typeCache === null) {
         session.typeCache = session.ghci.sendCommand(':all-types');
 
+        const shouldNotify = () =>
+            ! hasNotified
+            && ! vscode.workspace
+                .getConfiguration('ghcSimple.flag', doc.uri)
+                .get('noNotifySlowRangeType');
+
+        if (shouldNotify()) {
+            const time = 10;
+
+            setTimeout(async () => {
+                if (! completed && shouldNotify()) {
+                    hasNotified = true;
+
+                    const res = await vscode.window.showWarningMessage(
+                        `GHCi spent more than ${time} seconds providing type. `
+                        + `Maybe project is too large? Try disabling range types.`,
+                        'Disable and restart',
+                        'Do not ask again',
+                        'Dismiss'
+                    );
+                    if (res == 'Disable and restart') {
+                        vscode.workspace
+                            .getConfiguration('ghcSimple.feature', doc.uri)
+                            .update('rangeType', false);
+                        vscode.commands.executeCommand('vscode-ghc-simple.restart');
+                    } else if (res == 'Do not ask again') {
+                        vscode.workspace
+                            .getConfiguration('ghcSimple.flag', doc.uri)
+                            .update('noNotifySlowRangeType', true);
+                    }
+                }
+            }, time * 1000);
+        }
+    }
+
     const typesB = await session.typeCache;
+    completed = true;
 
     const strTypes = typesB.filter((x) => x.startsWith(doc.uri.fsPath));
 

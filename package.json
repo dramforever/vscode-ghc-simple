@@ -164,6 +164,12 @@
                     "default": true,
                     "scope": "resource",
                     "markdownDescription": "Show code lens for GHCi REPL blocks"
+                },
+                "ghcSimple.flag.noNotifySlowRangeType": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "resource",
+                    "description": "Do not show message for slow range type"
                 }
             }
         }
