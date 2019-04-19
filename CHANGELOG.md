@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.1.10
+
+- Large projects where `:all-types` take too long to finish are given a notice. The user is prompted to disable this feature.
+- Other minor fixes.
+
 ## v0.1.9
 
 - Minor fixes
