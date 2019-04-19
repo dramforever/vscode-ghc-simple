@@ -93,12 +93,6 @@ export function registerRangeType(ext: ExtensionState) {
 
     context.subscriptions.push(vscode.window.onDidChangeTextEditorSelection((event) => {
         const doc = event.textEditor.document;
-        if (! getFeatures(doc.uri).rangeType)
-            // Range type disabled by user
-            return;
-
-        if (! documentIsHaskell(doc))
-            return;
 
         function clear() {
             event.textEditor.setDecorations(decoCurrent, []);
@@ -106,6 +100,15 @@ export function registerRangeType(ext: ExtensionState) {
             event.textEditor.setDecorations(decoMultiLine, []);
             event.textEditor.setDecorations(decoLastLine, []);
         }
+
+        if (! getFeatures(doc.uri).rangeType) {
+            // Range type disabled by user
+            clear();
+            return;
+        }
+
+        if (! documentIsHaskell(doc))
+            return;
 
         if (doc.isDirty) {
             clear();
