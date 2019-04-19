@@ -56,6 +56,10 @@ export class GhciManager implements Disposable {
         }
     }
 
+    kill() {
+        this.proc.kill();
+    }
+
     async restart(): Promise<child_process.ChildProcess> {
         if (process === null) {
             return this.start();

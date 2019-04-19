@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         for (const [doc, session] of ext.documentManagers) {
             if (session.ghci)
-                stops.push(session.ghci.stop());
+                stops.push(session.ghci.kill());
         }
 
         ext.documentManagers.clear();
