@@ -15,6 +15,7 @@ export class Session implements vscode.Disposable {
     constructor(
         public ext: ExtensionState,
         public workspaceType: HaskellWorkspaceType,
+        public cmdSuffix: string[],
         public resourceType: 'workspace' | 'file',
         public resource: vscode.Uri) {
         this.ghci = null;
@@ -53,6 +54,10 @@ export class Session implements vscode.Disposable {
                 else if (wst == 'bare')
                     return ['ghci'];
             })();
+
+            for (const arg of this.cmdSuffix) {
+                cmd.push(arg);
+            }
 
             this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
             this.ext.outputChannel.appendLine(

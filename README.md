@@ -85,6 +85,10 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
 
     Change the options in workspace settings instead of user settings if you want to apply the settings to a workspace locally.
 
+- `ghcSimple.commandSuffix`: REPL command suffix
+
+    Arbitrary string appended to the REPL command line (e.g. `ghci`, `cabal new-repl`, `stack ghci`).
+
 - `ghcSimple.useObjectCode`: Speed up GHCi reloads using `-fobject-code`
 
     Enabled by default. Load everything with `-fobject-code` first before loading needed files with `-fbyte-code`. This way only changed files need to be recompiled, which greatly speeds up GHCi on large projects.
