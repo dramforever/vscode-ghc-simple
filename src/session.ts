@@ -53,8 +53,10 @@ export class Session implements vscode.Disposable {
                 else if (wst == 'bare')
                     return ['ghci'];
             })();
+            const replOptions = vscode.workspace.getConfiguration('ghcSimple.replOptions', this.resource);
+            const startCmd = [].concat(cmd, replOptions.custom);
 
-            this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
+            this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(startCmd)}`);
             this.ext.outputChannel.appendLine(
                 `(Under ${
                     this.cwdOption.cwd === undefined
@@ -62,8 +64,8 @@ export class Session implements vscode.Disposable {
                         : `cwd ${this.cwdOption.cwd}` })`);
 
             this.ghci = new GhciManager(
-                cmd[0],
-                cmd.slice(1),
+                startCmd[0],
+                startCmd.slice(1),
                 Object.assign({ stdio: 'pipe' }, this.cwdOption),
                 this.ext);
             const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);
