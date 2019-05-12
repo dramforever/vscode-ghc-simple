@@ -1,203 +1,198 @@
 {
-	"name": "vscode-ghc-simple",
-	"displayName": "Simple GHC (Haskell) Integration",
-	"description": "Simple Haskell support using only GHCi",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/dramforever/vscode-ghc-simple"
-	},
-	"license": "ISC",
-	"version": "0.1.10",
-	"publisher": "dramforever",
-	"engines": {
-		"vscode": "^1.28.0"
-	},
-	"categories": [
-		"Programming Languages"
-	],
-	"keywords": [
-		"haskell"
-	],
-	"extensionDependencies": [
-		"justusadam.language-haskell"
-	],
-	"icon": "images/vgs-icon.png",
-	"activationEvents": [
-		"onLanguage:haskell",
-		"onLanguage:literate haskell"
-	],
-	"main": "./out/src/extension",
-	"contributes": {
-		"commands": [
-			{
-				"command": "vscode-ghc-simple.restart",
-				"title": "Restart GHCi sessions",
-				"category": "GHC"
-			},
-			{
-				"command": "vscode-ghc-simple.inline-repl-run",
-				"title": "Run this block in GHCi",
-				"category": "GHC"
-			},
-			{
-				"command": "vscode-ghc-simple.inline-repl-run-all",
-				"title": "Run all block from this file in GHCi",
-				"category": "GHC"
-			}
-		],
-		"keybindings": [
-			{
-				"command": "vscode-ghc-simple.inline-repl-run",
-				"key": "shift+enter",
-				"when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
-			},
-			{
-				"command": "vscode-ghc-simple.inline-repl-run-all",
-				"key": "shift+alt+enter",
-				"when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "GHC Simple configuration",
-			"properties": {
-				"ghcSimple.feature.diagnostics": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"description": "Enable diagnostics"
-				},
-				"ghcSimple.feature.rangeType": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"description": "Enable selection type tooltip"
-				},
-				"ghcSimple.feature.completion": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"description": "Enable completion"
-				},
-				"ghcSimple.feature.definition": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"description": "Enable go to definition"
-				},
-				"ghcSimple.feature.reference": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"description": "Enable show references"
-				},
-				"ghcSimple.feature.inlineRepl": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"description": "Enable inline GHCi REPL"
-				},
-				"ghcSimple.workspaceType": {
-					"type": "string",
-					"default": "detect",
-					"description": "Workspace type, 'bare' means use GHCi directly",
-					"scope": "resource",
-					"enum": [
-						"detect",
-						"stack",
-						"cabal",
-						"cabal new",
-						"cabal v2",
-						"bare-stack",
-						"bare"
-					]
-				},
-				"ghcSimple.replOptions.custom": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"default": [],
-					"scope": "resource",
-					"markdownDescription": "Custom options appended to the cabal/stack repl startup. Custom repl options should go in `ghcSimple.replOptions.custom`"
-				},
-				"ghcSimple.startupCommands.all": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"default": [
-						":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
-						":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables",
-						":set -fno-hide-source-paths",
-						":set -Wno-error=missing-home-modules"
-					],
-					"scope": "resource",
-					"markdownDescription": "GHCi commands on startup to use for all workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
-				},
-				"ghcSimple.startupCommands.bare": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"default": [
-						":set -Wall",
-						":seti -Wno-type-defaults"
-					],
-					"scope": "resource",
-					"markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
-				},
-				"ghcSimple.startupCommands.custom": {
-					"type": "array",
-					"items": {
-						"type": "string"
-					},
-					"default": [],
-					"scope": "resource",
-					"markdownDescription": "Custom GHCi commands on startup"
-				},
-				"ghcSimple.useObjectCode": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"markdownDescription": "Compile to object code first when loading. Optimizes GHCi reloads."
-				},
-				"ghcSimple.maxCompletions": {
-					"type": "number",
-					"default": 50,
-					"scope": "resource",
-					"markdownDescription": "Maximum number of completion items to show."
-				},
-				"ghcSimple.inlineRepl.codeLens": {
-					"type": "boolean",
-					"default": true,
-					"scope": "resource",
-					"markdownDescription": "Show code lens for GHCi REPL blocks"
-				},
-				"ghcSimple.flag.noNotifySlowRangeType": {
-					"type": "boolean",
-					"default": false,
-					"scope": "resource",
-					"description": "Do not show message for slow range type"
-				}
-			}
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "tsc -p ./",
-		"compile": "tsc -watch -p ./",
-		"postinstall": "node ./node_modules/vscode/bin/install",
-		"test": "node ./node_modules/vscode/bin/test"
-	},
-	"devDependencies": {
-		"@types/node": "^6.14.4",
-		"typescript": "^2.9.2",
-		"vsce": "^1.59.0",
-		"vscode": "^1.1.33"
-	},
-	"__metadata": {
-		"id": "40aa9ab6-fcee-47fb-91a0-9a17fa6d8415",
-		"publisherDisplayName": "dramforever",
-		"publisherId": "fe39a6e8-1c08-483a-b6b6-a4d7c68b3e4f"
-	}
+    "name": "vscode-ghc-simple",
+    "displayName": "Simple GHC (Haskell) Integration",
+    "description": "Simple Haskell support using only GHCi",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dramforever/vscode-ghc-simple"
+    },
+    "license": "ISC",
+    "version": "0.1.10",
+    "publisher": "dramforever",
+    "engines": {
+        "vscode": "^1.28.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "keywords": [
+        "haskell"
+    ],
+    "extensionDependencies": [
+        "justusadam.language-haskell"
+    ],
+    "icon": "images/vgs-icon.png",
+    "activationEvents": [
+        "onLanguage:haskell",
+        "onLanguage:literate haskell"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "vscode-ghc-simple.restart",
+                "title": "Restart GHCi sessions",
+                "category": "GHC"
+            },
+            {
+                "command": "vscode-ghc-simple.inline-repl-run",
+                "title": "Run this block in GHCi",
+                "category": "GHC"
+            },
+            {
+                "command": "vscode-ghc-simple.inline-repl-run-all",
+                "title": "Run all block from this file in GHCi",
+                "category": "GHC"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "vscode-ghc-simple.inline-repl-run",
+                "key": "shift+enter",
+                "when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
+            },
+            {
+                "command": "vscode-ghc-simple.inline-repl-run-all",
+                "key": "shift+alt+enter",
+                "when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "GHC Simple configuration",
+            "properties": {
+                "ghcSimple.feature.diagnostics": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable diagnostics"
+                },
+                "ghcSimple.feature.rangeType": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable selection type tooltip"
+                },
+                "ghcSimple.feature.completion": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable completion"
+                },
+                "ghcSimple.feature.definition": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable go to definition"
+                },
+                "ghcSimple.feature.reference": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable show references"
+                },
+                "ghcSimple.feature.inlineRepl": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable inline GHCi REPL"
+                },
+                "ghcSimple.workspaceType": {
+                    "type": "string",
+                    "default": "detect",
+                    "description": "Workspace type, 'bare' means use GHCi directly",
+                    "scope": "resource",
+                    "enum": [
+                        "detect",
+                        "stack",
+                        "cabal",
+                        "cabal new",
+                        "cabal v2",
+                        "bare-stack",
+                        "bare"
+                    ]
+                },
+                "ghcSimple.replOptions.custom": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "scope": "resource",
+                    "markdownDescription": "Custom options appended to the cabal/stack repl startup. Custom repl options should go in `ghcSimple.replOptions.custom`"
+                },
+                "ghcSimple.startupCommands.all": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
+                        ":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables",
+                        ":set -fno-hide-source-paths",
+                        ":set -Wno-error=missing-home-modules"
+                    ],
+                    "scope": "resource",
+                    "markdownDescription": "GHCi commands on startup to use for all workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
+                },
+                "ghcSimple.startupCommands.bare": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [
+                        ":set -Wall",
+                        ":seti -Wno-type-defaults"
+                    ],
+                    "scope": "resource",
+                    "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
+                },
+                "ghcSimple.startupCommands.custom": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": [],
+                    "scope": "resource",
+                    "markdownDescription": "Custom GHCi commands on startup"
+                },
+                "ghcSimple.useObjectCode": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "markdownDescription": "Compile to object code first when loading. Optimizes GHCi reloads."
+                },
+                "ghcSimple.maxCompletions": {
+                    "type": "number",
+                    "default": 50,
+                    "scope": "resource",
+                    "markdownDescription": "Maximum number of completion items to show."
+                },
+                "ghcSimple.inlineRepl.codeLens": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "markdownDescription": "Show code lens for GHCi REPL blocks"
+                },
+                "ghcSimple.flag.noNotifySlowRangeType": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "resource",
+                    "description": "Do not show message for slow range type"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "@types/node": "^6.14.4",
+        "typescript": "^2.9.2",
+        "vsce": "^1.59.0",
+        "vscode": "^1.1.33"
+    }
 }
