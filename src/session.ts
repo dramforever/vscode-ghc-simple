@@ -33,7 +33,7 @@ export class Session implements vscode.Disposable {
                 if (wst == 'stack') {
                     const result = await new Promise<string>((resolve, reject) => {
                         child_process.exec(
-                            'stack ide targets',
+                            'stack --color never ide targets',
                             this.cwdOption,
                             (err, stdout, stderr) => {
                                 if (err) reject('Command stack ide targets failed:\n' + stderr);
@@ -41,7 +41,7 @@ export class Session implements vscode.Disposable {
                             }
                         )
                     });
-                    return ['stack', 'repl', '--no-load'].concat(result.match(/^[^\s]+$/gm));
+                    return ['stack', '--color', 'never', 'repl', '--no-load'].concat(result.match(/^[^\s]+$/gm));
                 } else if (wst == 'cabal')
                     return ['cabal', 'repl'];
                 else if (wst == 'cabal new')
@@ -49,7 +49,7 @@ export class Session implements vscode.Disposable {
                 else if (wst == 'cabal v2')
                     return ['cabal', 'v2-repl'];
                 else if (wst == 'bare-stack')
-                    return ['stack', 'exec', 'ghci'];
+                    return ['stack', '--color', 'never', 'exec', 'ghci'];
                 else if (wst == 'bare')
                     return ['ghci'];
             })();
