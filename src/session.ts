@@ -29,29 +29,43 @@ export class Session implements vscode.Disposable {
         if (this.ghci === null) {
             const wst = this.workspaceType;
 
+            const getStackIdeTargets = async () => {
+                const result = await new Promise<string>((resolve, reject) => {
+                    child_process.exec(
+                        'stack ide targets',
+                        this.cwdOption,
+                        (err, stdout, stderr) => {
+                            if (err) reject('Command stack ide targets failed:\n' + stderr);
+                            else resolve(stderr);
+                        }
+                    )
+                });
+
+                console.log('stack ide targets', result);
+
+                return result.match(/^[^\s]+$/gm);
+            }
+
             const cmd = await (async () => {
-                if (wst == 'stack') {
-                    const result = await new Promise<string>((resolve, reject) => {
-                        child_process.exec(
-                            'stack ide targets',
-                            this.cwdOption,
-                            (err, stdout, stderr) => {
-                                if (err) reject('Command stack ide targets failed:\n' + stderr);
-                                else resolve(stderr);
-                            }
-                        )
-                    });
-                    return ['stack', 'repl', '--no-load'].concat(result.match(/^[^\s]+$/gm));
+                if (wst == 'custom-workspace' || wst == 'custom-file') {
+                    let cmd = vscode.workspace.getConfiguration('ghcSimple', this.resource).replCommand;
+                    if (cmd.indexOf('$stack_ide_targets') !== -1) {
+                        const sit = await getStackIdeTargets();
+                        cmd.replace(/\$stack_ide_targets/g, sit.join(' '));
+                    }
+                    return cmd;
+                } else if (wst == 'stack') {
+                    return `stack repl --no-load ${(await getStackIdeTargets()).join(' ')}`;
                 } else if (wst == 'cabal')
-                    return ['cabal', 'repl'];
+                    return 'cabal repl';
                 else if (wst == 'cabal new')
-                    return ['cabal', 'new-repl'];
+                    return 'cabal new-repl';
                 else if (wst == 'cabal v2')
-                    return ['cabal', 'v2-repl'];
+                    return 'cabal v2-repl';
                 else if (wst == 'bare-stack')
-                    return ['stack', 'exec', 'ghci'];
+                    return 'stack exec ghci';
                 else if (wst == 'bare')
-                    return ['ghci'];
+                    return 'ghci';
             })();
 
             this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
@@ -62,8 +76,7 @@ export class Session implements vscode.Disposable {
                         : `cwd ${this.cwdOption.cwd}` })`);
 
             this.ghci = new GhciManager(
-                cmd[0],
-                cmd.slice(1),
+                cmd,
                 Object.assign({ stdio: 'pipe' }, this.cwdOption),
                 this.ext);
             const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);

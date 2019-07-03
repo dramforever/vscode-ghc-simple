@@ -2,7 +2,7 @@ import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { Session } from './session';
 
-export type HaskellWorkspaceType = 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
+export type HaskellWorkspaceType = 'custom-workspace' | 'custom-file' | 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
 
 export interface ExtensionState {
     context: vscode.ExtensionContext;
@@ -25,7 +25,7 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
         : await getWorkspaceType(ext, folder);
 
     const session = (() => {
-        if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
+        if (-1 !== ['custom-workspace', 'stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
             // stack or cabal
 
             if (! ext.workspaceManagers.has(folder))
@@ -51,14 +51,14 @@ export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument)
         ? await computeFileType()
         : await getWorkspaceType(ext, folder);
 
-    if (-1 !== ['stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
-        // stack or cabal
+    if (-1 !== ['custom-workspace', 'stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
+
         if (ext.workspaceManagers.has(folder)) {
             const mgr = ext.workspaceManagers.get(folder);
             mgr.removeFile(doc.uri.fsPath);
         }
     } else {
-        // bare or bare-stack
+        // bare or bare-stack or custom-file
         if (ext.documentManagers.has(doc)) {
             ext.documentManagers.get(doc).dispose();
             ext.documentManagers.delete(doc);
@@ -89,11 +89,24 @@ export async function computeFileType(): Promise<HaskellWorkspaceType> {
 }
 
 export async function computeWorkspaceType(folder: vscode.WorkspaceFolder): Promise<HaskellWorkspaceType> {
-    const configType =
+    const customCommand =
+        vscode.workspace.getConfiguration('ghcSimple', folder.uri).replCommand;
+
+    if (customCommand !== "") {
+        const customScope =
+            vscode.workspace.getConfiguration('ghcSimple', folder.uri).replScope;
+
+        if (customScope == "workspace")
+            return 'custom-workspace';
+        else
+            return 'custom-file';
+    }
+
+    const oldConfigType =
         vscode.workspace.getConfiguration('ghcSimple', folder.uri).workspaceType as
             HaskellWorkspaceType | 'detect';
 
-    if (configType !== 'detect') return configType;
+    if (oldConfigType !== 'detect') return oldConfigType;
 
     const find: (file: string) => Thenable<vscode.Uri[]> =
         (file) => vscode.workspace.findFiles(

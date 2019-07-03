@@ -15,16 +15,14 @@ interface PendingCommand {
 export class GhciManager implements Disposable {
     proc: child_process.ChildProcess | null;
     command: string;
-    args: string[];
     options: any;
     stdout: readline.ReadLine;
     stderr: readline.ReadLine;
     output: OutputChannel
 
-    constructor(command: string, args: string[], options: any, ext: ExtensionState) {
+    constructor(command: string, options: any, ext: ExtensionState) {
         this.proc = null;
         this.command = command;
-        this.args = args;
         this.options = options;
         this.output = ext.outputChannel;
     }
@@ -38,7 +36,7 @@ export class GhciManager implements Disposable {
     }
 
     async start(): Promise<child_process.ChildProcess> {
-        this.proc = child_process.spawn(this.command, this.args, this.options);
+        this.proc = child_process.exec(this.command, this.options);
         this.stdout = this.makeReadline(this.proc.stdout);
         this.stderr = this.makeReadline(this.proc.stderr);
         this.proc.stdin.on('close', this.handleClose.bind(this));
@@ -57,7 +55,8 @@ export class GhciManager implements Disposable {
     }
 
     kill() {
-        this.proc.kill();
+        if (this.proc !== null)
+            this.proc.kill();
     }
 
     async restart(): Promise<child_process.ChildProcess> {

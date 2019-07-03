@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { registerRangeType } from './range-type';
 import { registerCompletion } from './completion';
-import { ExtensionState, computeWorkspaceType } from './extension-state';
+import { ExtensionState } from './extension-state';
 import { registerDiagnostics } from './diagnostics';
 import { registerDefinition } from './definition';
 import { registerReference } from './reference';
@@ -43,6 +43,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         ext.workspaceManagers.clear();
+
+        ext.workspaceTypeMap.clear();
 
         await Promise.all(stops);
 

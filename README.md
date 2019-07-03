@@ -62,13 +62,15 @@ Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained va
 
     Some users might want only a subset of the features provided in vscode-ghc-simple. These options can be used to disabled unneeded features.
 
-- `ghcSimple.workspaceType`: Workspace type
+- `ghcSimple.workspaceType`: *This option is deprecated.* See `ghcSimple.replCommand` and `ghcSimple.replScope`.
 
-    Override workspace type detection and force a certain workspace type (e.g. `stack` or `cabal`).
+- `ghcSimple.replCommand`: The command used to start GHCi.
 
-    Normally, vscode-ghc-simple will try to detect whether to use Stack or Cabal, or use a plain GHCi. Change this option *in your workspace settings* to specify such a type manually.
+    Configure this to change the command used to start GHCi. `$stack_ide_targets` will be replaced by the output of `stack ide targets`. Leave blank for auto detection. When set, overrides the deprecated `ghcSimple.workspaceType`. If you set this, please also set `ghcSimple.replScope` to an appropriate value.
 
-    vscode-ghc-simple will default to Cabal new-style for workspaces with Cabal files.
+- `ghcSimple.replScope`: The scope of each GHCi session
+
+    Whether GHCi should be started for a project or individual files. **Note**: This option has no effect when `ghcSimple.replCommand` is set to empty string for auto detection.
 
 - `ghcSimple.startupCommands.*`: GHCi Startup commands
 

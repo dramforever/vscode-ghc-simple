@@ -100,7 +100,7 @@
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
-                    "description": "Workspace type, 'bare' means use GHCi directly",
+                    "markdownDescription": "*This option is deprecated.* See `ghcSimple.replCommand` and `ghcSimple.replScope`.",
                     "scope": "resource",
                     "enum": [
                         "detect",
@@ -111,6 +111,21 @@
                         "bare-stack",
                         "bare"
                     ]
+                },
+                "ghcSimple.replCommand": {
+                    "type": "string",
+                    "default": "",
+                    "scope": "resource",
+                    "markdownDescription": "The command used to start GHCi. `$stack_ide_targets` will be replaced by the output of `stack ide targets`. Leave blank for auto detection. When set, overrides the deprecated `ghcSimple.workspaceType`. If you set this, please also set `ghcSimple.replScope` to an appropriate value."
+                },
+                "ghcSimple.replScope": {
+                    "type": "string",
+                    "enum": [
+                        "workspace",
+                        "file"
+                    ],
+                    "default": "workspace",
+                    "markdownDescription": "Whether GHCi should be started for a project or individual files. **Note**: This option has no effect when `ghcSimple.replCommand` is set to empty string for auto detection."
                 },
                 "ghcSimple.startupCommands.all": {
                     "type": "array",
