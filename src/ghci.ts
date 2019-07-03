@@ -116,7 +116,7 @@ export class GhciManager implements Disposable {
                     this.pendingCommands.length > 0
                     && this.pendingCommands[0].token !== null
                     && this.pendingCommands[0].token.isCancellationRequested) {
-                    console.log(`Cancel ${this.pendingCommands[0].commands}`);
+                    this.output.appendLine(`Cancel ${this.pendingCommands[0].commands}`);
                     this.pendingCommands[0].reject('cancelled');
                     this.pendingCommands.shift();
                 }

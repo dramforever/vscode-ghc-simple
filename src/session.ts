@@ -41,8 +41,6 @@ export class Session implements vscode.Disposable {
                     )
                 });
 
-                console.log('stack ide targets', result);
-
                 return result.match(/^[^\s]+$/gm);
             }
 
