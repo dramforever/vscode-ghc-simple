@@ -57,9 +57,9 @@ export class Session implements vscode.Disposable {
                 } else if (wst == 'cabal')
                     return 'cabal repl';
                 else if (wst == 'cabal new')
-                    return 'cabal new-repl';
+                    return 'cabal new-repl all';
                 else if (wst == 'cabal v2')
-                    return 'cabal v2-repl';
+                    return 'cabal v2-repl all';
                 else if (wst == 'bare-stack')
                     return 'stack --color never exec ghci';
                 else if (wst == 'bare')
