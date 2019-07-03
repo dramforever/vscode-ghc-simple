@@ -1,5 +1,12 @@
 # Change Log
 
+## v0.1.11
+
+- New configuration option `ghcSimple.replCommand` and `ghcSimple.replScope` override the now deprecated `ghcSimple.workspaceType` and provide more control over how GHCi is started.
+- Minor fixes including:
+    - Avoid truncation of -Werror error messages by [rimmington](https://github.com/rimmington) ([#38](https://github.com/dramforever/vscode-ghc-simple/pull/38))
+    - Workaround for stack color output on Windows by [1Computer1](https://github.com/1Computer1) ([#37](https://github.com/dramforever/vscode-ghc-simple/pull/37), [32683c2](https://github.com/dramforever/vscode-ghc-simple/commit/32683c2fe8048cc8c1c360b31a8ebe42da2c6185))
+
 ## v0.1.10
 
 - Large projects where `:all-types` take too long to finish are given a notice. The user is prompted to disable this feature.
