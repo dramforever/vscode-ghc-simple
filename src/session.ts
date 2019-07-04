@@ -32,7 +32,7 @@ export class Session implements vscode.Disposable {
             const getStackIdeTargets = async () => {
                 const result = await new Promise<string>((resolve, reject) => {
                     child_process.exec(
-                        'stack --colors never ide targets',
+                        'stack --color never ide targets',
                         this.cwdOption,
                         (err, stdout, stderr) => {
                             if (err) reject('Command stack ide targets failed:\n' + stderr);
