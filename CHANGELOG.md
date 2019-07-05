@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.12
+
+- ([#40](https://github.com/dramforever/vscode-ghc-simple/issues/40)) Quick fix for a typo for working around stack color output
+
 ## v0.1.11
 
 - New configuration option `ghcSimple.replCommand` and `ghcSimple.replScope` override the now deprecated `ghcSimple.workspaceType` and provide more control over how GHCi is started.
