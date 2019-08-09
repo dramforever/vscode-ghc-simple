@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { GhciManager } from "./ghci";
@@ -11,6 +12,7 @@ export class Session implements vscode.Disposable {
     typeCache: Promise<string[]> | null;
     moduleMap: Map<string, string>;
     cwdOption: { cwd?: string };
+    basePath?: string
 
     constructor(
         public ext: ExtensionState,
@@ -89,6 +91,26 @@ export class Session implements vscode.Disposable {
                 this.ext.outputChannel.appendLine(`Error starting GHCi: ${e}`);
                 vscode.window.showWarningMessage(
                     'Error while start GHCi. Further information might be found in output tab.');
+            }
+            try {
+                const res = await this.ghci.sendCommand(':show paths');
+                if (res.length < 1) {
+                    throw new Error('":show path" has too few lines');
+                }
+                // expect second line of the output to be current ghci path
+                const basePath = res[1].trim();
+                if (basePath.length <= 0 || basePath[0] != '/') {
+                    throw new Error('invalid path value: ${basePath}');
+                }
+                const doesExist = await new Promise(resolve => fs.exists(basePath, resolve));
+                if (!doesExist) {
+                    throw new Error('detected path doesn\'t exist: ${basePath}');
+                }
+                this.ext.outputChannel.appendLine(`Detected base path: ${basePath}`);
+                this.basePath = basePath;
+            } catch(e) {
+                this.ext.outputChannel.appendLine(`Error detecting base path: ${e}`);
+                this.ext.outputChannel.appendLine('Will fallback to document\'s workspace folder');
             }
         }
     }
