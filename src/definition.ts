@@ -36,7 +36,8 @@ export function registerDefinition(ext: ExtensionState) {
 
         if (res.length == 1) {
             const loc = res[0];
-            return strToLocation(loc, vscode.workspace.getWorkspaceFolder(document.uri).uri.fsPath)
+            const basePath = session.basePath || vscode.workspace.getWorkspaceFolder(document.uri).uri.fsPath
+            return strToLocation(loc, basePath)
         } else {
             return null;
         }
