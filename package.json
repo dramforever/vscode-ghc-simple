@@ -7,7 +7,7 @@
         "url": "https://github.com/dramforever/vscode-ghc-simple"
     },
     "license": "ISC",
-    "version": "0.1.12",
+    "version": "0.1.13",
     "publisher": "dramforever",
     "engines": {
         "vscode": "^1.28.0"

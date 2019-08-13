@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.1.13
+
+- Detect current ghci search for go to definition for multi-package setups. By [dimsmol](https://github.com/dimsmol) ([#42](https://github.com/dramforever/vscode-ghc-simple/pull/42))
+- Filter out 'it' and 'Ghci*.it' in completion results
+- Internal: Updated dependencies
+
 ## v0.1.12
 
 - ([#40](https://github.com/dramforever/vscode-ghc-simple/issues/40)) Quick fix for a typo for working around stack color output
