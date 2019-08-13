@@ -95,16 +95,16 @@ export class Session implements vscode.Disposable {
             try {
                 const res = await this.ghci.sendCommand(':show paths');
                 if (res.length < 1) {
-                    throw new Error('":show path" has too few lines');
+                    throw new Error('":show paths" has too few lines');
                 }
                 // expect second line of the output to be current ghci path
                 const basePath = res[1].trim();
                 if (basePath.length <= 0 || basePath[0] != '/') {
-                    throw new Error('invalid path value: ${basePath}');
+                    throw new Error('Invalid path value: ${basePath}');
                 }
                 const doesExist = await new Promise(resolve => fs.exists(basePath, resolve));
                 if (!doesExist) {
-                    throw new Error('detected path doesn\'t exist: ${basePath}');
+                    throw new Error('Detected path doesn\'t exist: ${basePath}');
                 }
                 this.ext.outputChannel.appendLine(`Detected base path: ${basePath}`);
                 this.basePath = basePath;
