@@ -58,13 +58,21 @@ export function registerCompletion(ext: ExtensionState) {
         const result = firstLine[1];
         const prefix = JSON.parse(result);
         const replaceRange = new vscode.Range(position.with({ character: prefix.length + delta }), position);
-        const items: vscode.CompletionItem[] = complStrs.map(u => {
+        const items: vscode.CompletionItem[] = [];
+
+        for (const u of complStrs) {
             const st = JSON.parse(u);
+
+            // Filter out 'it' and 'Ghci*.it' if not in '>>>' block
+            if (replResult === null
+                && (st == "it" || /Ghci\d+\.it/.test(st)))
+                continue;
+
             const cp = new vscode.CompletionItem(st, vscode.CompletionItemKind.Variable);
             cp.range = replaceRange;
             itemDocument.set(cp, document);
-            return cp;
-        });
+            items.push(cp);
+        }
 
         return new vscode.CompletionList(items, true);
     }
