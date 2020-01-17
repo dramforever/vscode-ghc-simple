@@ -48,6 +48,12 @@ Currently implemented features:
 
 Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained various tooling-related features. These allow for more tooling that communicate with the compiler using text IO and files, instead of a Haskell API. This project aims to explore the possibilities provided by said features, by implementing Haskell tooling within the editor VSCode.
 
+## Debugging/issues
+
+When reporting an issue, please include the log from the *Output* tab for *GHC*: 
+
+![VS Code GHC Output-tab](images/vs-code-output-tab-ghc.png)
+
 ## Notes
 
 ### Commands
