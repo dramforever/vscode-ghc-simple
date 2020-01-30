@@ -48,13 +48,23 @@ Currently implemented features:
 
 Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained various tooling-related features. These allow for more tooling that communicate with the compiler using text IO and files, instead of a Haskell API. This project aims to explore the possibilities provided by said features, by implementing Haskell tooling within the editor VSCode.
 
-## Debugging/issues
+## Usage
 
-When reporting an issue, please include the log from the *Output* tab for *GHC*: 
+### Basic usage
 
-![VS Code GHC Output-tab](images/vs-code-output-tab-ghc.png)
+Install the extension from the marketplace or using the Quick Open command `ext install dramforever.vscode-ghc-simple`. Open individual Haskell source files or projects, and vscode-ghc-simple will auto-detect the appropriate way to start a GHCi and communicate with it to provide editor tooling. Configuration options can be used to tweak the (see below).
 
-## Notes
+Please note that projects should be opened so that the top-level configuration file (`stack.yaml` or `*.cabal`) is at the workspace root. This way the extension can detect the project.
+
+Also note that when the project configuration is changed, the `Restart GHCi sessions` command needs to be issued manually for changes to take place. Again, see below.
+
+### Debugging/issues
+
+The full log of interaction between GHCi and this extension can be found in *Output* tab for *GHC* as shown below:
+
+![VSCode GHC Output-tab](images/vs-code-output-tab-ghc.png)
+
+When reporting an issue please also attach relevant log output, ideally (but not necessarily) from a fresh start (`Developer: Reload Window` command) to reproduction of the bug. You can also check there when things go unexpectedly to see.
 
 ### Commands
 
