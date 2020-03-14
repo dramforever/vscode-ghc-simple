@@ -14,7 +14,7 @@ assignees: ''
 - [ ] A workaround is available
 - [ ] A fix is written
 - [ ] A fix is released
-- [ ] The fixed verison is on the marketplace.
+- [ ] The fixed version is on the marketplace.
 
 ---
 
