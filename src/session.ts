@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { GhciManager } from "./ghci";
 import { ExtensionState, HaskellWorkspaceType } from "./extension-state";
+import { stackCommand } from './utils';
 
 export class Session implements vscode.Disposable {
     ghci: GhciManager;
@@ -34,11 +35,11 @@ export class Session implements vscode.Disposable {
             const getStackIdeTargets = async () => {
                 const result = await new Promise<string>((resolve, reject) => {
                     child_process.exec(
-                        'stack --color never ide targets',
+                        `${stackCommand} ide targets --stdout`,
                         this.cwdOption,
                         (err, stdout, stderr) => {
                             if (err) reject('Command stack ide targets failed:\n' + stderr);
-                            else resolve(stderr);
+                            else resolve(stdout);
                         }
                     )
                 });
@@ -55,7 +56,7 @@ export class Session implements vscode.Disposable {
                     }
                     return cmd;
                 } else if (wst == 'stack') {
-                    return `stack --color never repl --no-load ${(await getStackIdeTargets()).join(' ')}`;
+                    return `${stackCommand} repl --no-load ${(await getStackIdeTargets()).join(' ')}`;
                 } else if (wst == 'cabal')
                     return 'cabal repl';
                 else if (wst == 'cabal new')
@@ -63,7 +64,7 @@ export class Session implements vscode.Disposable {
                 else if (wst == 'cabal v2')
                     return 'cabal v2-repl all';
                 else if (wst == 'bare-stack')
-                    return 'stack --color never exec ghci';
+                    return `${stackCommand} exec ghci`;
                 else if (wst == 'bare')
                     return 'ghci';
             })();
