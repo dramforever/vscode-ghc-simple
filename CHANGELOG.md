@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.14
+
+- ([#50](https://github.com/dramforever/vscode-ghc-simple/issues/50),[#47](https://github.com/dramforever/vscode-ghc-simple/issues/47)) Clean stack output on Windows. Workaround for some issues while reading `stack`'s output.
+
 ## v0.1.13
 
 - Detect current ghci search for go to definition for multi-package setups. By [dimsmol](https://github.com/dimsmol) ([#42](https://github.com/dramforever/vscode-ghc-simple/pull/42))
