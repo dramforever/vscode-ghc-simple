@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { ExtensionState } from './extension-state';
 
 export const haskellSymbolRegex = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
 export const haskellReplLine = /^(\s*-{2,}\s+)?>>>(.*)$/;
@@ -33,4 +34,11 @@ export function strToLocation(s: string, workspaceRoot: string): null | vscode.L
 
 export function getFeatures(resource: vscode.Uri): { [k: string]: any } {
     return vscode.workspace.getConfiguration('ghcSimple', resource).feature;
+}
+
+export function reportError(ext: ExtensionState, msg: string) {
+    return (err) => {
+        console.error(`${msg}: ${err}`);
+        ext.outputChannel.appendLine(`${msg}: ${err}`);
+    }
 }

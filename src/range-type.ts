@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
 import { Session } from './session';
-import { getFeatures, documentIsHaskell } from './utils';
+import { getFeatures, documentIsHaskell, reportError } from './utils';
 
 let hasNotified = false;
 
@@ -43,26 +43,30 @@ async function getType(
             const time = 10;
 
             setTimeout(async () => {
-                if (! completed && shouldNotify()) {
-                    hasNotified = true;
+                try {
+                    if (! completed && shouldNotify()) {
+                        hasNotified = true;
 
-                    const res = await vscode.window.showWarningMessage(
-                        `GHCi spent more than ${time} seconds providing type. `
-                        + `Maybe project is too large? Try disabling range types.`,
-                        'Disable and restart',
-                        'Do not ask again',
-                        'Dismiss'
-                    );
-                    if (res == 'Disable and restart') {
-                        vscode.workspace
-                            .getConfiguration('ghcSimple.feature', doc.uri)
-                            .update('rangeType', false);
-                        vscode.commands.executeCommand('vscode-ghc-simple.restart');
-                    } else if (res == 'Do not ask again') {
-                        vscode.workspace
-                            .getConfiguration('ghcSimple.flag', doc.uri)
-                            .update('noNotifySlowRangeType', true);
+                        const res = await vscode.window.showWarningMessage(
+                            `GHCi spent more than ${time} seconds providing type. `
+                            + `Maybe project is too large? Try disabling range types.`,
+                            'Disable and restart',
+                            'Do not ask again',
+                            'Dismiss'
+                        );
+                        if (res == 'Disable and restart') {
+                            vscode.workspace
+                                .getConfiguration('ghcSimple.feature', doc.uri)
+                                .update('rangeType', false);
+                            vscode.commands.executeCommand('vscode-ghc-simple.restart');
+                        } else if (res == 'Do not ask again') {
+                            vscode.workspace
+                                .getConfiguration('ghcSimple.flag', doc.uri)
+                                .update('noNotifySlowRangeType', true);
+                        }
                     }
+                } catch (err) {
+                    console.log('This should not be happening');
                 }
             }, time * 1000);
         }
@@ -160,46 +164,50 @@ export function registerRangeType(ext: ExtensionState) {
             const sel = event.selections[0];
 
             selTimeout = setTimeout(async () => {
-                const session = await startSession(ext, doc);
-                const res = await getType(session, sel, doc);
-                if (res !== null) {
-                    const [range, type] = res;
-                    const lineRange = doc.lineAt(range.start.line).range;
-                    const singleLine = range.start.line == range.end.line;
-                    if (singleLine) {
-                        event.textEditor.setDecorations(decoCurrent, [{
-                            range,
-                            hoverMessage: type
-                        }]);
-                        event.textEditor.setDecorations(decoMultiLine, []);
-                        event.textEditor.setDecorations(decoLastLine, []);
-                    } else {
-                        const lastLineRange = doc.lineAt(range.end.line).range;
-                        event.textEditor.setDecorations(decoCurrent, [{
-                            range: lineRange.with({ start: range.start }),
-                            hoverMessage: type
-                        }]);
-                        if (range.end.line == range.start.line + 1)
-                            event.textEditor.setDecorations(decoMultiLine, []);
-                        else
-                            event.textEditor.setDecorations(decoMultiLine, [{
-                                range: new vscode.Range(
-                                    doc.lineAt(range.start.line + 1).range.start,
-                                    doc.lineAt(range.end.line - 1).range.end)
+                try {
+                    const session = await startSession(ext, doc);
+                    const res = await getType(session, sel, doc);
+                    if (res !== null) {
+                        const [range, type] = res;
+                        const lineRange = doc.lineAt(range.start.line).range;
+                        const singleLine = range.start.line == range.end.line;
+                        if (singleLine) {
+                            event.textEditor.setDecorations(decoCurrent, [{
+                                range,
+                                hoverMessage: type
                             }]);
-                        event.textEditor.setDecorations(decoLastLine, [{
-                            range: lastLineRange.with({ end: range.end })
-                        }]);
-                    }
-                    const typeText = singleLine ? ` :: ${type}` : `... :: ${type}`;
-                    event.textEditor.setDecorations(decoType, [{
-                        range: lineRange,
-                        renderOptions: {
-                            after: { contentText: typeText }
+                            event.textEditor.setDecorations(decoMultiLine, []);
+                            event.textEditor.setDecorations(decoLastLine, []);
+                        } else {
+                            const lastLineRange = doc.lineAt(range.end.line).range;
+                            event.textEditor.setDecorations(decoCurrent, [{
+                                range: lineRange.with({ start: range.start }),
+                                hoverMessage: type
+                            }]);
+                            if (range.end.line == range.start.line + 1)
+                                event.textEditor.setDecorations(decoMultiLine, []);
+                            else
+                                event.textEditor.setDecorations(decoMultiLine, [{
+                                    range: new vscode.Range(
+                                        doc.lineAt(range.start.line + 1).range.start,
+                                        doc.lineAt(range.end.line - 1).range.end)
+                                }]);
+                            event.textEditor.setDecorations(decoLastLine, [{
+                                range: lastLineRange.with({ end: range.end })
+                            }]);
                         }
-                    }]);
-                } else {
-                    clear();
+                        const typeText = singleLine ? ` :: ${type}` : `... :: ${type}`;
+                        event.textEditor.setDecorations(decoType, [{
+                            range: lineRange,
+                            renderOptions: {
+                                after: { contentText: typeText }
+                            }
+                        }]);
+                    } else {
+                        clear();
+                    }
+                } catch (err) {
+                    reportError(ext, 'Error providing range type')(err);
                 }
                 selTimeout = null;
             }, 300);

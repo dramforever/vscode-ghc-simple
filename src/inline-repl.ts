@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
-import { haskellReplLine, getFeatures, haskellSelector } from './utils';
+import { haskellReplLine, getFeatures, haskellSelector, reportError } from './utils';
 
 
 export function registerInlineRepl(ext: ExtensionState) {
@@ -118,8 +118,20 @@ export function registerInlineRepl(ext: ExtensionState) {
     }
 
     ext.context.subscriptions.push(
-        vscode.commands.registerTextEditorCommand('vscode-ghc-simple.inline-repl-run', inlineReplRun),
-        vscode.commands.registerTextEditorCommand('vscode-ghc-simple.inline-repl-run-all', inlineReplRunAll)
+        vscode.commands.registerTextEditorCommand(
+            'vscode-ghc-simple.inline-repl-run',
+            (textEditor, edit, arg) => {
+                inlineReplRun(textEditor, edit, arg)
+                    .catch(reportError(ext, 'Error running inline repl'));
+            }
+        ),
+        vscode.commands.registerTextEditorCommand(
+            'vscode-ghc-simple.inline-repl-run-all',
+            (textEditor, edit) => {
+                inlineReplRunAll(textEditor, edit)
+                    .catch(reportError(ext, 'Error running inline repl'));
+            }
+        ),
     );
 
     async function provideCodeLenses(

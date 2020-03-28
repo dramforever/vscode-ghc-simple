@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { GhciManager } from "./ghci";
 import { ExtensionState, HaskellWorkspaceType } from "./extension-state";
-import { stackCommand } from './utils';
+import { stackCommand, reportError } from './utils';
 
 export class Session implements vscode.Disposable {
     ghci: GhciManager;
@@ -108,7 +108,7 @@ export class Session implements vscode.Disposable {
             try {
                 await this.ghci.sendCommand(configureCommands);
             } catch(e) {
-                this.ext.outputChannel.appendLine(`Error starting GHCi: ${e}`);
+                reportError(this.ext, 'Error starting GHCi')(e);
                 vscode.window.showWarningMessage(
                     'Error while start GHCi. Further information might be found in output tab.');
             }
@@ -139,7 +139,7 @@ export class Session implements vscode.Disposable {
         this.files.add(s);
     }
 
-    async removeFile(s: string): Promise<void> {
+    removeFile(s: string) {
         this.files.delete(s);
     }
 
@@ -147,7 +147,7 @@ export class Session implements vscode.Disposable {
         this.typeCache = null;
         const pr = this.reloadP();
         this.loading = pr.then(() => undefined);
-        return await pr;
+        return pr;
     }
 
     async reloadP(): Promise<string[]> {

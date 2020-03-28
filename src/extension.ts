@@ -16,7 +16,8 @@ export function activate(context: vscode.ExtensionContext) {
         outputChannel,
         documentManagers: new Map(),
         workspaceManagers: new Map(),
-        workspaceTypeMap: new Map()
+        workspaceTypeMap: new Map(),
+        documentAssignment: new WeakMap()
     };
 
     registerRangeType(ext);
@@ -27,9 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const diagInit = registerDiagnostics(ext);
 
-    async function restart(): Promise<void> {
-        const stops = [];
-
+    function restart() {
         for (const [doc, session] of ext.documentManagers) {
             session.dispose();
         }
@@ -42,9 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         ext.workspaceManagers.clear();
 
-        ext.workspaceTypeMap.clear();
-
-        await Promise.all(stops);
+        ext.documentAssignment = new WeakMap();
 
         diagInit();
     }

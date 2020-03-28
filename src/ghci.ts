@@ -77,14 +77,6 @@ export class GhciManager implements Disposable {
         }
     }
 
-    async restart(): Promise<child_process.ChildProcess> {
-        if (process === null) {
-            return this.start();
-        } else {
-            await this.stop();
-        }
-    }
-
     currentCommand: {
         barrier: string,
         resolve: (result: string[]) => void,

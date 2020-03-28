@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionState, startSession, stopSession } from './extension-state';
 import { Session } from './session';
-import { getFeatures, documentIsHaskell } from './utils';
+import { getFeatures, documentIsHaskell, reportError } from './utils';
 
 const regex = {
 
@@ -121,9 +121,10 @@ function parseMessages(messages: string[]):
 }
 
 function stopHaskell(document: vscode.TextDocument, ext: ExtensionState) {
-    if (documentIsHaskell(document))
+    if (documentIsHaskell(document)) {
         stopSession(ext, document);
     }
+}
 
 async function checkHaskell(
     diagnosticCollection: vscode.DiagnosticCollection,
@@ -159,8 +160,10 @@ async function checkHaskell(
 export function registerDiagnostics(ext: ExtensionState) {
     const diagnosticCollection = vscode.languages.createDiagnosticCollection('ghc-simple');
 
-    const check = (d) => checkHaskell(diagnosticCollection, d, ext);
-    const stop = (d) => stopHaskell(d, ext);
+    const check = (d: vscode.TextDocument) =>
+        checkHaskell(diagnosticCollection, d, ext)
+        .catch(reportError(ext, `Error checking ${d.uri.fsPath}`));
+    const stop = (d: vscode.TextDocument) => stopHaskell(d, ext);
     const vws = vscode.workspace;
 
     ext.context.subscriptions.push(
@@ -172,7 +175,7 @@ export function registerDiagnostics(ext: ExtensionState) {
 
     function initialize() {
         for (const doc of vscode.workspace.textDocuments) {
-            checkHaskell(diagnosticCollection, doc, ext);
+            check(doc);
         }
     }
 

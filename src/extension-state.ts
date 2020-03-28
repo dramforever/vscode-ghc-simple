@@ -10,6 +10,10 @@ export interface ExtensionState {
     workspaceTypeMap: Map<vscode.WorkspaceFolder, Promise<HaskellWorkspaceType>>;
     documentManagers: Map<vscode.TextDocument, Session>;
     workspaceManagers: Map<vscode.WorkspaceFolder, Session>;
+    documentAssignment: WeakMap<
+        vscode.TextDocument,
+        { type: 'document' } | { type: 'workspace', folder: vscode.WorkspaceFolder }
+    >;
 }
 
 function getWorkspaceType(ext: ExtensionState, folder: vscode.WorkspaceFolder): Promise<HaskellWorkspaceType> {
@@ -31,12 +35,21 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
             if (! ext.workspaceManagers.has(folder))
                 ext.workspaceManagers.set(folder, new Session(ext, type, 'workspace', folder.uri));
 
+            ext.documentAssignment.set(doc, {
+                type: 'workspace',
+                folder: folder
+            });
+
             return ext.workspaceManagers.get(folder);
         } else {
             // bare or bare-stack
 
             if (! ext.documentManagers.has(doc))
                 ext.documentManagers.set(doc, new Session(ext, type, 'file', doc.uri));
+
+            ext.documentAssignment.set(doc, {
+                type: 'document'
+            });
 
             return ext.documentManagers.get(doc);
         }
@@ -45,20 +58,12 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
     return session;
 }
 
-export async function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
-    const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
-    const type = folder === undefined
-        ? await computeFileType()
-        : await getWorkspaceType(ext, folder);
-
-    if (-1 !== ['custom-workspace', 'stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
-
-        if (ext.workspaceManagers.has(folder)) {
-            const mgr = ext.workspaceManagers.get(folder);
-            mgr.removeFile(doc.uri.fsPath);
-        }
+export function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
+    const assignment = ext.documentAssignment.get(doc);
+    if (assignment.type === 'workspace') {
+        if (ext.workspaceManagers.has(assignment.folder))
+            ext.workspaceManagers.get(assignment.folder).removeFile(doc.uri.fsPath);
     } else {
-        // bare or bare-stack or custom-file
         if (ext.documentManagers.has(doc)) {
             ext.documentManagers.get(doc).dispose();
             ext.documentManagers.delete(doc);
