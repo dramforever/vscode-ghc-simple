@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.15
+
+- [#41](https://github.com/dramforever/vscode-ghc-simple/issues/41) Possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
+
 ## v0.1.14
 
 - ([#50](https://github.com/dramforever/vscode-ghc-simple/issues/50),[#47](https://github.com/dramforever/vscode-ghc-simple/issues/47)) Clean stack output on Windows. Workaround for some issues while reading `stack`'s output.
