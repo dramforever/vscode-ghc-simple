@@ -36,7 +36,13 @@ export class GhciManager implements Disposable {
     }
 
     async start(): Promise<child_process.ChildProcess> {
-        this.proc = child_process.exec(this.command, this.options);
+        this.proc = child_process.spawn(this.command, {
+            ... this.options,
+            shell: true
+        });
+        this.proc.on('exit', () => { this.proc = null; });
+        this.proc.on('error', () => { this.proc = null; });
+
         this.stdout = this.makeReadline(this.proc.stdout);
         this.stderr = this.makeReadline(this.proc.stderr);
         this.proc.stdin.on('close', this.handleClose.bind(this));
@@ -55,8 +61,10 @@ export class GhciManager implements Disposable {
     }
 
     kill() {
-        if (this.proc !== null)
+        if (this.proc !== null) {
             this.proc.kill();
+            this.proc = null;
+        }
     }
 
     async restart(): Promise<child_process.ChildProcess> {
