@@ -97,7 +97,7 @@ export class Session implements vscode.Disposable {
             this.checkDisposed();
             this.ghci = new GhciManager(
                 cmd,
-                Object.assign({ stdio: 'pipe' }, this.cwdOption),
+                this.cwdOption,
                 this.ext);
             const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);
             const configureCommands = [].concat(

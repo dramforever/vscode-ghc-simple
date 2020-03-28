@@ -47,6 +47,7 @@ export class GhciManager implements Disposable {
 
         this.proc = child_process.spawn(this.command, {
             ... this.options,
+            stdio: 'pipe',
             shell: true
         });
         this.proc.on('exit', () => { this.proc = null; });
