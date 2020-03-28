@@ -18,13 +18,16 @@ export class GhciManager implements Disposable {
     options: any;
     stdout: readline.ReadLine;
     stderr: readline.ReadLine;
-    output: OutputChannel
+    output: OutputChannel;
+
+    wasDisposed: boolean;
 
     constructor(command: string, options: any, ext: ExtensionState) {
         this.proc = null;
         this.command = command;
         this.options = options;
         this.output = ext.outputChannel;
+        this.wasDisposed = false;
     }
 
     makeReadline(stream): readline.ReadLine {
@@ -35,7 +38,13 @@ export class GhciManager implements Disposable {
         return res;
     }
 
+    checkDisposed() {
+        if (this.wasDisposed) throw 'ghci already disposed';
+    }
+
     async start(): Promise<child_process.ChildProcess> {
+        this.checkDisposed();
+
         this.proc = child_process.spawn(this.command, {
             ... this.options,
             shell: true
@@ -102,6 +111,8 @@ export class GhciManager implements Disposable {
         token: CancellationToken | null):
         Promise<string[]> {
         return new Promise((resolve, reject) => {
+            this.checkDisposed();
+
             const pending: PendingCommand = { token, commands, resolve, reject };
             if (this.currentCommand === null) {
                 this.launchCommand(pending);
@@ -171,6 +182,7 @@ export class GhciManager implements Disposable {
     }
 
     dispose() {
+        this.wasDisposed = true;
         if (this.proc !== null) {
             this.proc.kill();
             this.proc = null;

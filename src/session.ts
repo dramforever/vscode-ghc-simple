@@ -7,13 +7,15 @@ import { stackCommand } from './utils';
 
 export class Session implements vscode.Disposable {
     ghci: GhciManager;
-    starting: Promise<void>;
+    starting: Promise<void> | null;
     loading: Promise<void>;
     files: Set<string>;
     typeCache: Promise<string[]> | null;
     moduleMap: Map<string, string>;
     cwdOption: { cwd?: string };
-    basePath?: string
+    basePath?: string;
+
+    wasDisposed: boolean;
 
     constructor(
         public ext: ExtensionState,
@@ -21,18 +23,33 @@ export class Session implements vscode.Disposable {
         public resourceType: 'workspace' | 'file',
         public resource: vscode.Uri) {
         this.ghci = null;
+        this.starting = null;
         this.loading = null;
         this.files = new Set();
         this.typeCache = null;
         this.moduleMap = new Map();
         this.cwdOption = resourceType == 'workspace' ? { cwd: this.resource.fsPath } : {};
+        this.wasDisposed = false;
     }
 
-    async start() {
+    checkDisposed() {
+        if (this.wasDisposed) throw 'session already disposed';
+    }
+
+    start() {
+        if (this.starting === null) {
+            this.starting = this.startP();
+        }
+
+        return this.starting;
+    }
+
+    async startP() {
         if (this.ghci === null) {
             const wst = this.workspaceType;
 
             const getStackIdeTargets = async () => {
+                this.checkDisposed();
                 const result = await new Promise<string>((resolve, reject) => {
                     child_process.exec(
                         `${stackCommand} ide targets --stdout`,
@@ -47,6 +64,7 @@ export class Session implements vscode.Disposable {
                 return result.match(/^[^\s]+$/gm);
             }
 
+            this.checkDisposed();
             const cmd = await (async () => {
                 if (wst == 'custom-workspace' || wst == 'custom-file') {
                     let cmd = vscode.workspace.getConfiguration('ghcSimple', this.resource).replCommand;
@@ -76,6 +94,7 @@ export class Session implements vscode.Disposable {
                         ? 'default cwd'
                         : `cwd ${this.cwdOption.cwd}` })`);
 
+            this.checkDisposed();
             this.ghci = new GhciManager(
                 cmd,
                 Object.assign({ stdio: 'pipe' }, this.cwdOption),
@@ -163,7 +182,8 @@ export class Session implements vscode.Disposable {
     }
 
     dispose() {
+        this.wasDisposed = true;
         if (this.ghci !== null)
-            this.ghci.stop();
+            this.ghci.dispose();
     }
 }

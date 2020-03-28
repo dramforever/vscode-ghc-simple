@@ -31,15 +31,13 @@ export function activate(context: vscode.ExtensionContext) {
         const stops = [];
 
         for (const [doc, session] of ext.documentManagers) {
-            if (session.ghci)
-                stops.push(session.ghci.kill());
+            session.dispose();
         }
 
         ext.documentManagers.clear();
 
         for (const [ws, session] of ext.workspaceManagers) {
-            if (session.ghci)
-                stops.push(session.ghci.stop());
+            session.dispose();
         }
 
         ext.workspaceManagers.clear();
