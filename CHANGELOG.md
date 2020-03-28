@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.1.16
+
+- [#41](https://github.com/dramforever/vscode-ghc-simple/issues/41) Further possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
+- Internal: Fix warnings about unhandled rejected promises.
+
 ## v0.1.15
 
 - [#41](https://github.com/dramforever/vscode-ghc-simple/issues/41) Possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
