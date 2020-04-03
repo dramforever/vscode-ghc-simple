@@ -1,9 +1,9 @@
 # Change Log
 
-## v0.1.17
+## v0.1.18, v0.1.17
 
 - Nothing on the user side.
-- Internal: CI is now based on GitHub Actions.
+- Internal: CI is now based on GitHub Actions. VSCode Marketplace does not allow retracting versions so when errors were made, versions were wasted. Sorry for the inconvenience.
 
 ## v0.1.16
 
