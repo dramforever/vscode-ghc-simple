@@ -196,9 +196,9 @@
         "test": "node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
-        "@types/node": "^6.14.7",
+        "@types/node": "^6.14.9",
         "typescript": "^2.9.2",
-        "vsce": "^1.66.0",
+        "vsce": "^1.75.0",
         "vscode": "^1.1.36"
     }
 }
