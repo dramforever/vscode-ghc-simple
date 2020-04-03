@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.1.17
+
+- Nothing on the user side.
+- Internal: CI is now based on GitHub Actions.
+
 ## v0.1.16
 
 - [#41](https://github.com/dramforever/vscode-ghc-simple/issues/41) Further possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
