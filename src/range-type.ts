@@ -25,8 +25,7 @@ async function getType(
 
     await session.loading;
 
-    await session.ghci.sendCommand(
-        `:module *${session.getModuleName(doc.uri.fsPath)}`);
+    await session.loadInterpreted(doc.uri);
 
     let completed = false;
 

@@ -90,8 +90,12 @@ export function registerInlineRepl(ext: ExtensionState) {
 
                 const session = await startSession(ext, textEditor.document);
                 await session.loading;
-                await session.ghci.sendCommand(
-                    `:module *${session.getModuleName(textEditor.document.uri.fsPath)}`);
+                await session.ghci.sendCommand([
+                    ':set -fbyte-code',
+                    ':reload'
+                ]);
+                await session.loadInterpreted(textEditor.document.uri);
+
                 const response = await session.ghci.sendCommand(commands, { info: 'Running in REPL' });
                 if (response[0] == '') response.shift();
                 if (response[response.length - 1] == '') response.pop();

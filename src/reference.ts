@@ -19,9 +19,7 @@ export function registerReference(ext: ExtensionState) {
 
         await session.loading;
 
-        await session.ghci.sendCommand(
-            `:module *${session.getModuleName(document.uri.fsPath)}`,
-            { token });
+        await session.loadInterpreted(document.uri);
 
         const cmd = `:uses ${JSON.stringify(document.uri.fsPath)}`
             + ` ${1 + + range.start.line} ${1 + + range.start.character}`

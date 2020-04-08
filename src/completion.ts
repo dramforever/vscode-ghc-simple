@@ -35,9 +35,7 @@ export function registerCompletion(ext: ExtensionState) {
 
         await session.loading;
 
-        await session.ghci.sendCommand(
-            `:module *${session.getModuleName(document.uri.fsPath)}`,
-            { token });
+        await session.loadInterpreted(document.uri, token);
 
         const { maxCompletions } = vscode.workspace.getConfiguration('ghcSimple', document.uri);
 

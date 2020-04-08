@@ -152,29 +152,36 @@ export class Session implements vscode.Disposable {
 
     async reloadP(): Promise<string[]> {
         await this.start();
-        const loadCommand = `:load ${[... this.files.values()].map(x => JSON.stringify(`*${x}`)).join(' ')}`;
-        if (vscode.workspace.getConfiguration('ghcSimple', this.resource).useObjectCode)
-            await this.ghci.sendCommand([
-                ':set -fobject-code',
-                loadCommand
-            ], { info: 'Loading' });
+        const mods = [... this.files.values()];
 
         const res = await this.ghci.sendCommand([
-            ':set -fbyte-code',
+            ':set -fno-code -fwrite-interface',
             ':set +c',
-            loadCommand
+            `:load ${mods.map(x => JSON.stringify(`*${x}`)).join(' ')}`
         ], { info: 'Loading' });
         const modules = await this.ghci.sendCommand(':show modules');
 
         this.moduleMap.clear();
         for (const line of modules) {
-            const res = /^([^ ]+)\s+\( (.+), interpreted \)$/.exec(line);
+            const res = /^([^ ]+)\s+\( (.+), .+ \)$/.exec(line);
             if (res) {
                 this.moduleMap.set(vscode.Uri.file(res[2]).fsPath, res[1]);
             }
         }
         await this.ghci.sendCommand(':module');
         return res;
+    }
+
+    async loadInterpreted(
+        uri: vscode.Uri,
+        token: vscode.CancellationToken = null
+    ): Promise<void> {
+        const module = this.getModuleName(uri.fsPath);
+
+        await this.ghci.sendCommand(
+            [`:add *${module}`, `:m *${module}`],
+            { token }
+        );
     }
 
     getModuleName(filename: string): string {
