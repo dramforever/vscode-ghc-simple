@@ -24,6 +24,7 @@ export class StatusBar {
         this.bar = vscode.window.createStatusBarItem(
             vscode.StatusBarAlignment.Left);
         this.bar.command = "vscode-ghc-simple.openOutput";
+        this.bar.tooltip = "Simple GHC (Haskell) Integration";
 
         this.editorListener =
             vscode.window.onDidChangeActiveTextEditor(
@@ -44,7 +45,7 @@ export class StatusBar {
         const theStatus = theGhci && this.map.get(theGhci);
         const info = theStatus && theStatus.status == 'busy' && theStatus.info;
 
-        this.bar.text = ["GHC", counter, indicator, info]
+        this.bar.text = ["\u03BB", counter, indicator, info]
             .filter(x => x).join(" ");
     }
 
