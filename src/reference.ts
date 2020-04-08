@@ -21,14 +21,14 @@ export function registerReference(ext: ExtensionState) {
 
         await session.ghci.sendCommand(
             `:module *${session.getModuleName(document.uri.fsPath)}`,
-            token);
+            { token });
 
         const cmd = `:uses ${JSON.stringify(document.uri.fsPath)}`
             + ` ${1 + + range.start.line} ${1 + + range.start.character}`
             + ` ${1 + + range.end.line} ${1 + + range.end.character}`
             + ` ${document.getText(range)}`;
 
-        const res = (await session.ghci.sendCommand(cmd, token)).filter(s => s.trim().length > 0);
+        const res = (await session.ghci.sendCommand(cmd, { token })).filter(s => s.trim().length > 0);
 
         const workspacePath = vscode.workspace.getWorkspaceFolder(document.uri).uri.fsPath;
         const seen: Set<string> = new Set();

@@ -92,7 +92,7 @@ export function registerInlineRepl(ext: ExtensionState) {
                 await session.loading;
                 await session.ghci.sendCommand(
                     `:module *${session.getModuleName(textEditor.document.uri.fsPath)}`);
-                const response = await session.ghci.sendCommand(commands);
+                const response = await session.ghci.sendCommand(commands, { info: 'Running in REPL' });
                 if (response[0] == '') response.shift();
                 if (response[response.length - 1] == '') response.pop();
                 const filtRsponse = response.map(s => prefix + (s == '' ? '<BLANKLINE>' : s));

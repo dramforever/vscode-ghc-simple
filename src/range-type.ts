@@ -31,7 +31,7 @@ async function getType(
     let completed = false;
 
     if (session.typeCache === null) {
-        session.typeCache = session.ghci.sendCommand(':all-types');
+        session.typeCache = session.ghci.sendCommand(':all-types', { info: 'Loading types' });
 
         const shouldNotify = () =>
             ! hasNotified

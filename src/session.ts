@@ -157,13 +157,13 @@ export class Session implements vscode.Disposable {
             await this.ghci.sendCommand([
                 ':set -fobject-code',
                 loadCommand
-            ]);
+            ], { info: 'Loading' });
 
         const res = await this.ghci.sendCommand([
             ':set -fbyte-code',
             ':set +c',
             loadCommand
-        ]);
+        ], { info: 'Loading' });
         const modules = await this.ghci.sendCommand(':show modules');
 
         this.moduleMap.clear();

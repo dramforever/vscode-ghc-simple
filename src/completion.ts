@@ -37,13 +37,13 @@ export function registerCompletion(ext: ExtensionState) {
 
         await session.ghci.sendCommand(
             `:module *${session.getModuleName(document.uri.fsPath)}`,
-            token);
+            { token });
 
         const { maxCompletions } = vscode.workspace.getConfiguration('ghcSimple', document.uri);
 
         const complStrs = await session.ghci.sendCommand(
             `:complete repl ${maxCompletions} ${JSON.stringify(line)}`,
-            token);
+            { token });
 
         const firstLine = /^\d+ \d+ (".*")$/.exec(complStrs[0]);
 
@@ -84,7 +84,7 @@ export function registerCompletion(ext: ExtensionState) {
         if (itemDocument.has(item)) {
             const document = itemDocument.get(item);
             const session = await startSession(ext, document);
-            const docs = await session.ghci.sendCommand(`:info ${item.label}`, token);
+            const docs = await session.ghci.sendCommand(`:info ${item.label}`, { token });
 
             // Heuristic: If there's an error, then GHCi will output
             // a blank line before the error message

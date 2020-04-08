@@ -2,11 +2,19 @@
 
 import * as child_process from 'child_process';
 import * as readline from 'readline';
-import { Disposable, OutputChannel, CancellationToken } from "vscode";
+import { Disposable, CancellationToken } from "vscode";
 import { ExtensionState } from './extension-state';
 
-interface PendingCommand {
-    token: CancellationToken | null
+interface StrictCommandConfig {
+    token: CancellationToken,
+    info: string;
+}
+
+type CommandConfig = {
+    [K in keyof StrictCommandConfig]?: StrictCommandConfig[K]
+}
+
+interface PendingCommand extends StrictCommandConfig {
     commands: string[];
     resolve: (result: string[]) => void;
     reject: (reason: any) => void;
@@ -18,7 +26,7 @@ export class GhciManager implements Disposable {
     options: any;
     stdout: readline.ReadLine;
     stderr: readline.ReadLine;
-    output: OutputChannel;
+    ext: ExtensionState;
 
     wasDisposed: boolean;
 
@@ -26,7 +34,7 @@ export class GhciManager implements Disposable {
         this.proc = null;
         this.command = command;
         this.options = options;
-        this.output = ext.outputChannel;
+        this.ext = ext;
         this.wasDisposed = false;
     }
 
@@ -40,6 +48,23 @@ export class GhciManager implements Disposable {
 
     checkDisposed() {
         if (this.wasDisposed) throw 'ghci already disposed';
+    }
+
+    outputLine(line: string) {
+        this.ext.outputChannel.appendLine(line);
+    }
+
+    idle() {
+        this.ext.statusBar.update(this, {
+            status: 'idle'
+        });
+    }
+
+    busy(info: string | null = null) {
+        this.ext.statusBar.update(this, {
+            status: 'busy',
+            info
+        })
     }
 
     async start(): Promise<child_process.ChildProcess> {
@@ -56,8 +81,10 @@ export class GhciManager implements Disposable {
         this.stdout = this.makeReadline(this.proc.stdout);
         this.stderr = this.makeReadline(this.proc.stderr);
         this.proc.stdin.on('close', this.handleClose.bind(this));
-        await this.sendCommand(':set prompt ""')
-        await this.sendCommand(':set prompt-cont ""')
+        await this.sendCommand([':set prompt ""', ':set prompt-cont ""'], {
+            info: 'Starting'
+        });
+
         return this.proc;
     }
 
@@ -88,7 +115,7 @@ export class GhciManager implements Disposable {
 
     async sendCommand(
         cmds: string | string[],
-        token: CancellationToken | null = null):
+        config: CommandConfig = {}):
         Promise<string[]> {
         const commands = (typeof cmds === 'string') ? [cmds] : cmds;
 
@@ -96,17 +123,24 @@ export class GhciManager implements Disposable {
             await this.start()
         }
 
-        return this._sendCommand(commands, token);
+        return this._sendCommand(commands, config);
     }
 
-    _sendCommand(
-        commands: string[],
-        token: CancellationToken | null):
+    _sendCommand(commands: string[], config: CommandConfig = {}):
         Promise<string[]> {
         return new Promise((resolve, reject) => {
             this.checkDisposed();
 
-            const pending: PendingCommand = { token, commands, resolve, reject };
+            const nullConfig: StrictCommandConfig = {
+                token: null,
+                info: null
+            };
+
+            const pending: PendingCommand = {
+                ... nullConfig,
+                ... config,
+                commands, resolve, reject
+            };
             if (this.currentCommand === null) {
                 this.launchCommand(pending);
             } else {
@@ -117,7 +151,7 @@ export class GhciManager implements Disposable {
 
     handleLine(line: string) {
         line = line.replace(/\ufffd/g, ''); // Workaround for invalid characters showing up in output
-        this.output.appendLine(`ghci | ${line}`);
+        this.outputLine(`ghci | ${line}`);
         if (this.currentCommand === null) {
             // Ignore stray line
         } else {
@@ -128,28 +162,47 @@ export class GhciManager implements Disposable {
                     this.pendingCommands.length > 0
                     && this.pendingCommands[0].token !== null
                     && this.pendingCommands[0].token.isCancellationRequested) {
-                    this.output.appendLine(`Cancel ${this.pendingCommands[0].commands}`);
+                    this.outputLine(`Cancel ${this.pendingCommands[0].commands}`);
                     this.pendingCommands[0].reject('cancelled');
                     this.pendingCommands.shift();
                 }
 
                 if (this.pendingCommands.length > 0) {
                     this.launchCommand(this.pendingCommands.shift());
+                } else {
+                    this.idle();
                 }
             } else {
                 this.currentCommand.lines.push(line);
             }
+
+            // Status matches
+            {
+                const compilingRegex = /^(\[\d+ +of +\d+\]) Compiling ([^ ]+)/;
+                const match = line.match(compilingRegex);
+
+                if (match) {
+                    this.busy(`${match[1]} ${match[2]}`);
+                }
+            }
+
+            {
+                if (line.startsWith('Collecting type info for')) {
+                    this.busy('Collecting type info');
+                }
+            }
         }
     }
 
-    launchCommand({ commands, resolve, reject }: PendingCommand) {
+    launchCommand({ commands, info, resolve, reject }: PendingCommand) {
         const barrier = '===ghci_barrier_' + Math.random().toString() + '===';
         this.currentCommand = { resolve, reject, barrier, lines: [] };
+        this.busy(info);
 
         if (commands.length > 0) {
-            this.output.appendLine(`    -> ${commands[0]}`);
+            this.outputLine(`    -> ${commands[0]}`);
             for (const c of commands.slice(1))
-                this.output.appendLine(`    |> ${c}`);
+                this.outputLine(`    |> ${c}`);
         }
 
         for (const c of commands) {
@@ -176,6 +229,8 @@ export class GhciManager implements Disposable {
 
     dispose() {
         this.wasDisposed = true;
+
+        this.ext.statusBar.remove(this);
         if (this.proc !== null) {
             this.proc.kill();
             this.proc = null;

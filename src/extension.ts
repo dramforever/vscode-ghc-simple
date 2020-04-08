@@ -7,18 +7,24 @@ import { registerDiagnostics } from './diagnostics';
 import { registerDefinition } from './definition';
 import { registerReference } from './reference';
 import { registerInlineRepl } from './inline-repl';
+import { StatusBar } from './status-bar'
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
+    const documentAssignment = new WeakMap();
+    const statusBar = new StatusBar(documentAssignment);
 
     const ext: ExtensionState = {
         context,
         outputChannel,
+        statusBar,
         documentManagers: new Map(),
         workspaceManagers: new Map(),
         workspaceTypeMap: new Map(),
-        documentAssignment: new WeakMap()
+        documentAssignment
     };
+
+    context.subscriptions.push(outputChannel, statusBar);
 
     registerRangeType(ext);
     registerCompletion(ext);
@@ -41,14 +47,19 @@ export function activate(context: vscode.ExtensionContext) {
 
         ext.workspaceManagers.clear();
 
-        ext.documentAssignment = new WeakMap();
+        ext.documentAssignment = new Map();
 
         diagInit();
     }
 
+    function openOutput() {
+        ext.outputChannel.show();
+    }
+
     context.subscriptions.push(
         vscode.workspace.onDidChangeConfiguration(restart),
-        vscode.commands.registerCommand('vscode-ghc-simple.restart', restart));
+        vscode.commands.registerCommand('vscode-ghc-simple.restart', restart),
+        vscode.commands.registerCommand('vscode-ghc-simple.openOutput', openOutput));
 
     vscode.workspace.onDidChangeWorkspaceFolders((changeEvent) => {
         for (const folder of changeEvent.removed)
