@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         ext.workspaceManagers.clear();
 
-        ext.documentAssignment = new Map();
+        ext.documentAssignment = new WeakMap();
 
         diagInit();
     }
