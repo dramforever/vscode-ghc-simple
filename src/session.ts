@@ -52,11 +52,11 @@ export class Session implements vscode.Disposable {
                 this.checkDisposed();
                 const result = await new Promise<string>((resolve, reject) => {
                     child_process.exec(
-                        `${stackCommand} ide targets --stdout`,
+                        `${stackCommand} ide targets`,
                         this.cwdOption,
                         (err, stdout, stderr) => {
                             if (err) reject('Command stack ide targets failed:\n' + stderr);
-                            else resolve(stdout);
+                            else resolve(stderr);
                         }
                     )
                 });
