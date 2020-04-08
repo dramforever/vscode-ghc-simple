@@ -1,5 +1,12 @@
 # Change Log
 
+## v0.1.19
+
+- Better icon. Geometrically derived from the logo on <https://haskell.org> using [Inkscape](https://inkscape.org/), instead of the old mixture of eye-measured lines and manually painted background.
+- [#54](https://github.com/dramforever/vscode-ghc-simple/issues/54) Stack setup no longer uses `--stdout` with `stack ide targets`, making it compatible with older stack versions.
+- [#55](https://github.com/dramforever/vscode-ghc-simple/issues/55) Status bar indicator for GHC, telling you whether it is busy and what it's doing. Click to show logs.
+- Evaluation in GHCi no longer gets deferred type errors.
+
 ## v0.1.18, v0.1.17
 
 - Nothing on the user side.
