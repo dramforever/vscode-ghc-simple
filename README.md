@@ -5,6 +5,8 @@
     <p><em>Simple Haskell support using only GHCi.</em>
 </div>
 
+(Icon derived from logo on <http://haskell.org/>.)
+
 ## Shiny badges
 
 [![vscode-ghc-simple on Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/dramforever.vscode-ghc-simple.svg)](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple) [![CI](https://img.shields.io/github/workflow/status/dramforever/vscode-ghc-simple/CI.svg)](https://github.com/dramforever/vscode-ghc-simple/actions?query=workflow%3ACI)
