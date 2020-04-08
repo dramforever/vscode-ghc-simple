@@ -23,7 +23,7 @@ assignees: ''
 - Version of Haskell-related tools:
     <!-- Fill in for those you're using -->
     - GHC:
-    - Stack: 
+    - Stack:
     - Cabal:
 
 ## Steps to reproduce
@@ -42,4 +42,4 @@ assignees: ''
 
 ## GHC log
 
-<!-- Please include logs (e.g. gist.github.com) by reproducing the bug from a fresh start opening the output tab, selecting GHC from the dropdown and copying everything relevant. See https://github.com/dramforever/vscode-ghc-simple#debuggingissues for screenshot. -->
+<!-- Please include logs (e.g. gist.github.com) by reproducing the bug from a fresh start, clicking the 'GHC' item on the status bar, and copying everything relevant. See https://github.com/dramforever/vscode-ghc-simple#debuggingissues for screenshot. -->

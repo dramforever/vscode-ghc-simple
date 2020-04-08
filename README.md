@@ -63,11 +63,11 @@ Also note that when the project configuration is changed, the `Restart GHCi sess
 
 ### Debugging/issues
 
-The full log of interaction between GHCi and this extension can be found in *Output* tab for *GHC* as shown below:
+The full log of interaction between GHCi and this extension can be found by clicking the 'GHC' item on the status bar:
 
-![VSCode GHC Output-tab](images/vs-code-output-tab-ghc.png)
+![Status bar item 'GHC'](images/status-bar-ghc.png)
 
-When reporting an issue please also attach relevant log output, ideally (but not necessarily) from a fresh start (`Developer: Reload Window` command) to reproduction of the bug. You can also check there when things go unexpectedly to see.
+When reporting an issue please also attach relevant log output, ideally (but not necessarily) from a fresh start (`Developer: Reload Window` command) to reproduction of the bug. You can also check there when things go unexpectedly.
 
 ### Commands
 
