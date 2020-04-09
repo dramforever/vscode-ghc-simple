@@ -61,7 +61,7 @@ export class Session implements vscode.Disposable {
                     )
                 });
 
-                return result.match(/^[^\s]+$/gm);
+                return result.match(/^[^\s]+:[^\s]+$/gm)
             }
 
             this.checkDisposed();
