@@ -40,7 +40,10 @@ export class StatusBar {
 
     updateDisplay() {
         const prefix = vscode.workspace.getConfiguration('ghcSimple.statusBar').get('prefix');
-        const indicator = this.busyCount > 0 ? "$(sync~spin)" : "$(primitive-square)";
+        const indicator =
+            this.busyCount > 0 ? "$(sync~spin)"
+            : this.map.size > 0 ? "$(primitive-square)"
+            : null;
         const counter = this.map.size > 1 && `(${this.busyCount}/${this.map.size})`
 
         const theGhci =
