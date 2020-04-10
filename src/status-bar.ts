@@ -13,6 +13,7 @@ export class StatusBar {
     focusedGhci: GhciManager | null;
     bar: vscode.StatusBarItem;
     editorListener: vscode.Disposable;
+    configListener: vscode.Disposable;
 
     constructor(
         public documentAssignment:
@@ -30,10 +31,15 @@ export class StatusBar {
                 this.handleSwitchEditor.bind(this)
             );
 
+        this.configListener = vscode.workspace.onDidChangeConfiguration(
+            this.updateDisplay.bind(this)
+        )
+
         this.updateDisplay();
     }
 
     updateDisplay() {
+        const prefix = vscode.workspace.getConfiguration('ghcSimple.statusBar').get('prefix');
         const indicator = this.busyCount > 0 ? "$(sync~spin)" : "$(primitive-square)";
         const counter = this.map.size > 1 && `(${this.busyCount}/${this.map.size})`
 
@@ -44,7 +50,7 @@ export class StatusBar {
         const theStatus = theGhci && this.map.get(theGhci);
         const info = theStatus && theStatus.status == 'busy' && theStatus.info;
 
-        this.bar.text = ["GHC", counter, indicator, info]
+        this.bar.text = [prefix, counter, indicator, info]
             .filter(x => x).join(" ");
     }
 
@@ -89,6 +95,8 @@ export class StatusBar {
     }
 
     dispose() {
-        this.bar.dispose()
+        this.bar.dispose();
+        this.editorListener.dispose();
+        this.configListener.dispose();
     }
 }

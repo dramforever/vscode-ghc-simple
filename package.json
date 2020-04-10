@@ -180,6 +180,12 @@
                     "default": false,
                     "scope": "resource",
                     "description": "Do not show message for slow range type"
+                },
+                "ghcSimple.statusBar.prefix": {
+                    "type": "string",
+                    "default": "GHC",
+                    "scope": "application",
+                    "markdownDescription": "Prefix of the status bar item of this extension"
                 }
             }
         }
