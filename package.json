@@ -97,6 +97,12 @@
                     "scope": "resource",
                     "description": "Enable inline GHCi REPL"
                 },
+                "ghcSimple.feature.documentation": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "description": "Enable documentation on hover"
+                },
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
