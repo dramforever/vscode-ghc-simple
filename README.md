@@ -108,10 +108,6 @@ When reporting an issue please also attach relevant log output, ideally (but not
 
     Change the options in workspace settings instead of user settings if you want to apply the settings to a workspace locally.
 
-- `ghcSimple.useObjectCode`: Speed up GHCi reloads using `-fobject-code`
-
-    Enabled by default. Load everything with `-fobject-code` first before loading needed files with `-fbyte-code`. This way only changed files need to be recompiled, which greatly speeds up GHCi on large projects.
-
 - `ghcSimple.maxCompletions`: Maximum number of completion items to show.
 
 - `ghcSimple.inlineRepl.codeLens`: Show code lens for GHCi REPL blocks
