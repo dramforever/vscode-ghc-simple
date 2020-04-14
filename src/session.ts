@@ -111,6 +111,7 @@ export class Session implements vscode.Disposable {
                 reportError(this.ext, 'Error starting GHCi')(e);
                 vscode.window.showWarningMessage(
                     'Error while start GHCi. Further information might be found in output tab.');
+                throw e;
             }
             try {
                 const res = await this.ghci.sendCommand(':show paths');
