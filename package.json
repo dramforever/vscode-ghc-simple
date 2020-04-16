@@ -145,6 +145,8 @@
                         "type": "string"
                     },
                     "default": [
+                        "System.IO.hSetBuffering System.IO.stderr System.IO.NoBuffering",
+                        "System.IO.hSetBuffering System.IO.stdout System.IO.NoBuffering",
                         ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
                         ":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables",
                         ":seti -fno-defer-type-errors -fno-defer-typed-holes -fno-defer-out-of-scope-variables",
@@ -187,6 +189,16 @@
                     "default": true,
                     "scope": "resource",
                     "markdownDescription": "Show code lens for GHCi REPL blocks"
+                },
+                "ghcSimple.inlineRepl.loadType": {
+                    "type": "string",
+                    "enum": ["byte-code", "object-code"],
+                    "default": "byte-code",
+                    "markdownEnumDescriptions": [
+                        "Use `-fbyte-code` for GHCi REPL blocks",
+                        "Use `-fobject-code` for GHCi REPL blocks"
+                    ],
+                    "markdownDescription": "Whether to load modules with `-fbyte-code` or `-fobject-code` when using the REPL. The former is the default as it loads faster. The latter runs faster and can use FFI. Write `:set -fbyte-code` or `:set -fobject-code` as first line of GHCi REPL block to override."
                 },
                 "ghcSimple.flag.noNotifySlowRangeType": {
                     "type": "boolean",

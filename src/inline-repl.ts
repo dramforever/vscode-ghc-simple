@@ -2,6 +2,18 @@ import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
 import { haskellReplLine, getFeatures, haskellSelector, reportError } from './utils';
 
+function generateReplacement(
+    response: string[],
+    outputRange: vscode.Range,
+    prefix: string
+): string {
+    response = response.slice();
+    if (response[0] == '') response.shift();
+    if (response[response.length - 1] == '') response.pop();
+    const filtRsponse = response.map(s => prefix + (s == '' ? '<BLANKLINE>' : s));
+    const end = outputRange.isEmpty ? '\n' : '';
+    return filtRsponse.map(s => s + '\n').join('') + prefix.replace(/\s+$/, '') + end;
+}
 
 export function registerInlineRepl(ext: ExtensionState) {
     const availableRepl: WeakMap<vscode.TextDocument, [vscode.Range, vscode.Command][]> = new WeakMap();
@@ -90,18 +102,37 @@ export function registerInlineRepl(ext: ExtensionState) {
 
                 const session = await startSession(ext, textEditor.document);
                 await session.loading;
-                await session.ghci.sendCommand([
-                    ':set -fbyte-code',
+
+                let loadType : 'byte-code' | 'object-code' =
+                    vscode.workspace.getConfiguration(
+                        'ghcSimple.inlineRepl', textEditor.document.uri
+                    ).loadType;
+
+                const extraLoadCommands = [];
+
+                if (commands[0].match(/^\s*:set/)) {
+                    extraLoadCommands.push(commands.shift());
+                }
+
+                const messages = await session.ghci.sendCommand([
+                    `:set -f${loadType}`,
+                    ... extraLoadCommands,
                     ':reload'
-                ]);
-                await session.loadInterpreted(textEditor.document.uri);
+                ], { info: 'Reloading' });
+
+                if (messages.some(x => x.startsWith('Failed'))) {
+                    const msgs = [
+                        '(Error while loading modules for evaluation)',
+                        ...messages
+                    ];
+                    const replacement = generateReplacement(msgs, outputRange, prefix);
+                    await textEditor.edit(e => e.replace(outputRange, replacement),
+                        { undoStopBefore: ! arg.batch, undoStopAfter: ! arg.batch });
+                    return;
+                }
 
                 const response = await session.ghci.sendCommand(commands, { info: 'Running in REPL' });
-                if (response[0] == '') response.shift();
-                if (response[response.length - 1] == '') response.pop();
-                const filtRsponse = response.map(s => prefix + (s == '' ? '<BLANKLINE>' : s));
-                const end = outputRange.isEmpty ? '\n' : '';
-                const replacement = filtRsponse.map(s => s + '\n').join('') + prefix.replace(/\s+$/, '') + end;
+                const replacement = generateReplacement(response, outputRange, prefix);
                 await textEditor.edit(e => e.replace(outputRange, replacement),
                     { undoStopBefore: ! arg.batch, undoStopAfter: ! arg.batch });
             } finally {

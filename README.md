@@ -47,6 +47,8 @@ Currently implemented features:
 
     ![Inline REPL demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/inline-repl.png)
 
+    If the first line of a block begins with `:set`, it also applies to loading dependency modules. One use is to override `-fbyte-code` or `-fobject-code` settings.
+
 
 6. **Definition and usages:** See definitions amd references of identifiers. Supports both module level and local identifiers. Implemented with `:loc-at` and `uses`. Does not yet support identifiers imported from packages.
 
@@ -121,3 +123,7 @@ When reporting an issue please also attach relevant log output, ideally (but not
 - `ghcSimple.inlineRepl.codeLens`: Show code lens for GHCi REPL blocks
 
     Disable this if you don't like 'Run in GHCi' code lens littered around your files. If you disable the inline repl feature using `ghcSimple.feature.inlineRepl` you will also not see code lens.
+
+- `ghcSimple.inlineRepl.loadType`: `-fbyte-code` or `-fobject-code` for REPL
+
+    Whether to load modules with `-fbyte-code` or `-fobject-code` when using the REPL. The former is the default as it loads faster. The latter runs faster and can use FFI. Write `:set -fbyte-code` or `:set -fobject-code` as first line of GHCi REPL block to override. Note that code in GHCi is always interpreted bytecode.

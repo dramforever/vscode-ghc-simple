@@ -176,10 +176,10 @@ export class Session implements vscode.Disposable {
     async loadInterpreted(
         uri: vscode.Uri,
         token: vscode.CancellationToken = null
-    ): Promise<void> {
+    ): Promise<string[]> {
         const module = this.getModuleName(uri.fsPath);
 
-        await this.ghci.sendCommand(
+        return await this.ghci.sendCommand(
             [`:add *${module}`, `:m *${module}`],
             { token }
         );
