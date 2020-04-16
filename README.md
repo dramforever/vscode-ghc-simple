@@ -31,20 +31,24 @@ Currently implemented features:
 
     ![Squiggle demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/squiggle.png)
 
-2. **Completion:** Crude completion with GHCi's `:complete` command, with `:info` lookup. Works okay with imported and top level identifiers.
+2. **Completion:** Crude completion with GHCi's `:complete` command, with `:info` and `:doc` lookup. Works okay with imported and top level identifiers.
 
-    ![Completion demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/completion-info.PNG)
+    ![Completion demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/completion-doc.png)
 
-3. **Type:** View types by selecting in the code. The minimal expression covering the selection will have its type shown. Implemented with `:all-types`.
+3. **Hover:** Hover to see `:info` and `:doc` lookup.
+
+    ![Completion demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/hover-doc.png)
+
+4. **Type:** View types by selecting in the code. The minimal expression covering the selection will have its type shown. Implemented with `:all-types`.
 
     ![Range type demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/range-type.png)
 
-4. **Inline REPL:** Add REPL blocks to your code with haddock syntax, either using no spaces before `>>>` or put it in a comment like `-- >>>`. Click on the code lens or type `Shift+Enter` to run a single block, or type `Shift+Alt+Enter` to run all blocks in a file.
+5. **Inline REPL:** Add REPL blocks to your code with haddock syntax, either using no spaces before `>>>` or put it in a comment like `-- >>>`. Click on the code lens or type `Shift+Enter` to run a single block, or type `Shift+Alt+Enter` to run all blocks in a file.
 
     ![Inline REPL demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/inline-repl.png)
 
 
-5. **Definition and usages:** See definitions amd references of identifiers. Supports both module level and local identifiers. Implemented with `:loc-at` and `uses`. Does not yet support identifiers imported from packages.
+6. **Definition and usages:** See definitions amd references of identifiers. Supports both module level and local identifiers. Implemented with `:loc-at` and `uses`. Does not yet support identifiers imported from packages.
 
     ![Definition demo screenshot](https://github.com/dramforever/dram.cf/raw/master/repo/vscode-ghc-simple/definition.png)
 
@@ -82,6 +86,10 @@ When reporting an issue please also attach relevant log output, ideally (but not
 - `ghcSimple.feature.*`: Feature switches
 
     Some users might want only a subset of the features provided in vscode-ghc-simple. These options can be used to disabled unneeded features.
+
+- `ghcSimple.filterInfo`: Shorten `:info` output
+
+    GHCi's `:info` writes instance information, which is usually excessively long and not useful for a quick look. With this option, these are filtered out. Enabled by default.
 
 - `ghcSimple.workspaceType`: *This option is deprecated.* See `ghcSimple.replCommand` and `ghcSimple.replScope`.
 
