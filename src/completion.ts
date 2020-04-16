@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionState, startSession } from './extension-state';
-import { getFeatures, haskellReplLine, haskellSelector } from './utils';
+import { getFeatures, haskellReplLine, haskellSelector, getIdentifierDocs } from './utils';
 
 export function registerCompletion(ext: ExtensionState) {
     const itemDocument: Map<vscode.CompletionItem, vscode.TextDocument> = new Map();
@@ -82,14 +82,11 @@ export function registerCompletion(ext: ExtensionState) {
         if (itemDocument.has(item)) {
             const document = itemDocument.get(item);
             const session = await startSession(ext, document);
-            const docs = await session.ghci.sendCommand(`:info ${item.label}`, { token });
+            await session.loading;
 
-            // Heuristic: If there's an error, then GHCi will output
-            // a blank line before the error message
-            if (docs[0].trim() != '') {
-                const fixedDocs = docs.map((s) => s.replace('\t--', '\n--').trim());
-                item.detail = fixedDocs.join('\n');
-            }
+            item.documentation = new vscode.MarkdownString (
+                await getIdentifierDocs(
+                    session, document.uri, item.label, token));
         }
         return item;
     }

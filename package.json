@@ -97,11 +97,17 @@
                     "scope": "resource",
                     "description": "Enable inline GHCi REPL"
                 },
-                "ghcSimple.feature.documentation": {
+                "ghcSimple.feature.hover": {
                     "type": "boolean",
                     "default": true,
                     "scope": "resource",
                     "description": "Enable documentation on hover"
+                },
+                "ghcSimple.filterInfo": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "markdownDescription": "Shorten `:info` output"
                 },
                 "ghcSimple.workspaceType": {
                     "type": "string",
@@ -142,6 +148,7 @@
                         ":set -fno-diagnostics-show-caret -fdiagnostics-color=never -ferror-spans",
                         ":set -fdefer-type-errors -fdefer-typed-holes -fdefer-out-of-scope-variables",
                         ":seti -fno-defer-type-errors -fno-defer-typed-holes -fno-defer-out-of-scope-variables",
+                        ":set -haddock",
                         ":set -fno-hide-source-paths",
                         ":set -Wno-error=missing-home-modules"
                     ],

@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ExtensionState } from './extension-state';
+import { Session } from './session';
 
 export const haskellSymbolRegex = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
 export const haskellReplLine = /^(\s*-{2,}\s+)?>>>(.*)$/;
@@ -41,4 +42,92 @@ export function reportError(ext: ExtensionState, msg: string) {
         console.error(`${msg}: ${err}`);
         ext.outputChannel.appendLine(`${msg}: ${err}`);
     }
+}
+
+export async function getIdentifierDocs(
+    session: Session,
+    docUri: vscode.Uri,
+    ident: string,
+    token?: vscode.CancellationToken
+): Promise<string | null> {
+    const filterInfo =
+        vscode.workspace.getConfiguration('ghcSimple', docUri).filterInfo as boolean;
+    // Failsafe: ident should be something reasonable
+    if (ident.indexOf('\n') !== -1) return null;
+
+    const lines = [];
+
+    const info = await session.ghci.sendCommand(
+        `:info ${ident}`, { token });
+
+    // Heuristic: If there's an error, then GHCi will output
+    // a blank line before the error message
+    if (info[0].trim() != '') {
+        lines.push('```haskell');
+        if (filterInfo) {
+            for (let i = 0; i < info.length;) {
+                if (info[i].startsWith('instance ')) {
+                    do { i ++; }
+                    while (i < info.length && info[i].match(/^\s/));
+                } else {
+                    lines.push(info[i]);
+                    i ++;
+                }
+            }
+
+        } else {
+            lines.push(...info);
+        }
+        lines.push('```');
+    }
+
+    await session.loadInterpreted(docUri);
+
+    const docs = (await session.ghci.sendCommand(
+        `:doc ${ident}`, { token })).join('\n');
+
+    if (! docs.match(/^<interactive>[\d\s:-]+error/m)
+        && ! docs.startsWith('<has no documentation>')) {
+        // Convert Haddock markup into Markdown so it can be displayed properly in hover
+        const markdown = docs
+        .replace(/^ /gm, "")
+        .replace(/^$/gm, "  ")
+
+        // Non-code lines
+        .replace(/^(?!\s*>)[^\n]*$/gm, (match) =>
+            match
+            // Header: ===
+            .replace(/^(=+)/gm, (_, $1) => $1.replace(/=/g, "#"))
+            // Emphasis: /.../
+            .replace(/(?<!\\)\/(.+?)(?<!\\)\//g, "_$1_")
+            // Hyperlinked definition: 'T'
+            .replace(/(?<!\\)'(\S+)'(?<!\\)/gm, "`$1`")
+            // Module: "Prelude"
+            .replace(/(?<!\\)"(\S+)"(?<!\\)/gm, "`$1`")
+        )
+
+        // Example:
+        // >>> fib 10
+        // 55
+        .replace(/^>>> .+$\n^.+/gm, m => m.replace(/^.+$/gm, "> $&"))
+        // Definition list:
+        // [Element]
+        //    Definition
+        .replace(/^\s*\[(.+?)\]:?\s*([\s\S]+?)(?=\s*^\S)/gm, "$1  \n&nbsp;&nbsp;&nbsp;&nbsp;$2  ")
+        // Inline code block: @...@
+        .replace(/@(.+?)@/gm, (_, $1) => `\`${$1.replace(/`(.+?)`/gm, "$1")}\``)
+        .replace(/^ *(?=`)/gm, m => m.replace(/ /g, "&nbsp;"))
+        // Code block:
+        // @
+        // ...
+        // @
+        .replace(/^@\n([\s\S]+?)^@/gm, (_, $1) => `\`\`\`haskell\n${$1.replace(/`(.+?)`/gm, "$1")}\`\`\`\n`)
+        // Code block:
+        // >
+        // >
+        .replace(/(?:^>(?!>).*\n?)+/gm, m => `\`\`\`haskell\n${m.replace(/^> ?(.*\n?)/gm, "$1")}\`\`\`\n`);
+        lines.push(markdown);
+    }
+
+    return lines.length ? lines.join('\n') : null;
 }
