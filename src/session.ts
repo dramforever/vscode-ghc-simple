@@ -180,7 +180,7 @@ export class Session implements vscode.Disposable {
         const module = this.getModuleName(uri.fsPath);
 
         return await this.ghci.sendCommand(
-            [`:add *${module}`, `:m *${module}`],
+            [`:add *${uri.fsPath}`, `:m *${module}`],
             { token }
         );
     }
