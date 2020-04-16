@@ -27,20 +27,41 @@ export function registerDocumentation(ext: ExtensionState) {
         const cmd = `:doc ${document.getText(range)}`;
         const response = await session.ghci.sendCommand(cmd, { token });
 
-        // Convert Haddock markup into Markdown so it can be displayed properly in hover
-        const documentation = response
-            .map(l => l.replace(/^$/m, "  "))
+        const haddock = response
             .join("\n")
-            .replace(/^\s/gm, "")
-            .replace(/^(=+)/gm, (_, $1) => $1.replace(/=/g, "#"))  // Header: ===
-            .replace(/@(.+?)@/gm, (_, $1) => `\`${$1.replace(/'(.+?)'/gm, "$1")}\``) // Code block: @...@
-            .replace(/(?<!\\)'(\S+)'(?<!\\)/gm, "`$1`")  // Hyperlinked definition: 'T'
-            .replace(/(?<!\\)"(\S+)"(?<!\\)/gm, "`$1`")  // Module: "Prelude"
-            .replace(/(?<!\\)\/(.+?)(?<!\\)\//g, "_$1_") // Emphasis: /.../ 
-            .replace(/(>>> .+$\n^.+)/gm, "```haskell\n$1\n```")  // Repl: >>>
-            .replace(/\[(.+?)\]:\s(.+)$/gm, "$1  \n&nbsp;&nbsp;&nbsp;&nbsp;$2  ")  // Definition list: [Element]:
-            .replace(/(?:^>(?!>).*\n?)+/gm, m => `\`\`\`haskell\n${m.replace(/^>(.*\n?)/gm, "$1")}\n\`\`\``) // Code block: >
-        return new Hover(new MarkdownString(documentation), range);
+            .replace(/^ /gm, "")
+            .replace(/^$/gm, "  ");
+            
+        // Convert Haddock markup into Markdown so it can be displayed properly in hover
+        const markdown = haddock
+            // Header: ===
+            .replace(/^(=+)/gm, (_, $1) => $1.replace(/=/g, "#"))
+            // Emphasis: /.../
+            .replace(/(?<!\\)\/(.+?)(?<!\\)\//g, "_$1_")
+            // Hyperlinked definition: 'T'
+            .replace(/(?<!\\)'(\S+)'(?<!\\)/gm, "`$1`")
+            // Module: "Prelude"
+            .replace(/(?<!\\)"(\S+)"(?<!\\)/gm, "`$1`")
+            // Example:
+            // >>> fib 10
+            // 55
+            .replace(/^>>> .+$\n^.+/gm, m => m.replace(/^.+$/gm, "> $&"))   
+            // Definition list:
+            // [Element]
+            //    Definition
+            .replace(/^\s*\[(.+?)\]:?\s*([\s\S]+?)(?=\s*^\S)/gm, "$1  \n&nbsp;&nbsp;&nbsp;&nbsp;$2  ")
+            // Inline code block: @...@
+            .replace(/@(.+?)@/gm, (_, $1) => `\`${$1.replace(/`(.+?)`/gm, "$1")}\``)
+            .replace(/^ *(?=`)/gm, m => m.replace(/ /g, "&nbsp;"))
+            // Code block:
+            // @
+            // ...
+            // @
+            .replace(/^@\n([\s\S]+?)^@/gm, (_, $1) => `\`\`\`haskell\n${$1.replace(/`(.+?)`/gm, "$1")}\`\`\`\n`)
+            // Code block:
+            // >
+            // >
+            .replace(/(?:^>(?!>).*\n?)+/gm, m => `\`\`\`haskell\n${m.replace(/^> ?(.*\n?)/gm, "$1")}\`\`\`\n`);
 
         if(! markdown.match(/<interactive>[\d\s:-]+error/)) {
             return new Hover(new MarkdownString(markdown), range);
