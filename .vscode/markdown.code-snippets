@@ -1,0 +1,17 @@
+{
+	"Issue": {
+		"scope": "markdown",
+		"prefix": "issue",
+		"body": "[#$1](https://github.com/dramforever/vscode-ghc-simple/issues/$1)"
+	},
+	"Pull request": {
+		"scope": "markdown",
+		"prefix": "pr",
+		"body": "[#$1](https://github.com/dramforever/vscode-ghc-simple/pull/$1)"
+	},
+	"User": {
+		"scope": "markdown",
+		"prefix": "user",
+		"body": "[$1](https://github.com/$1)"
+	}
+}
