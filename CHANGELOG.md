@@ -1,5 +1,10 @@
 # Change Log
 
+## Unreleased changes
+
+- [#12](https://github.com/dramforever/vscode-ghc-simple/issues/12), [#59](https://github.com/dramforever/vscode-ghc-simple/pull/59), [#60](https://github.com/dramforever/vscode-ghc-simple/pull/60) `:doc` output is available in completion and hover. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
+- [#27](https://github.com/dramforever/vscode-ghc-simple/issues/27), [#36](https://github.com/dramforever/vscode-ghc-simple/issues/36) Now when loading modules `-fno-code` is always used, and just before a REPL run either `-fbyte-code` (default) or `-fobject-code` is used to load the modules (configurable per workspace and per REPL block. See README).
+
 ## v0.1.19
 
 - Better icon. Geometrically derived from the logo on <https://haskell.org> using [Inkscape](https://inkscape.org/), instead of the old mixture of eye-measured lines and manually painted background.
