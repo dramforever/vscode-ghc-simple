@@ -7,12 +7,15 @@ export function registerDocumentation(ext: ExtensionState) {
     async function provideHover(
         document: vscode.TextDocument,
         position: vscode.Position,
-        token: vscode.CancellationToken) {
+        token: vscode.CancellationToken):
+        Promise<null | Hover> {
         if (! getFeatures(document.uri).documentation)
             // Documentation disabled by user
             return null;
 
         const range = document.getWordRangeAtPosition(position, haskellSymbolRegex);
+        if(! range)
+            return null;
 
         const session = await startSession(ext, document);
         await session.loading;
@@ -38,6 +41,12 @@ export function registerDocumentation(ext: ExtensionState) {
             .replace(/\[(.+?)\]:\s(.+)$/gm, "$1  \n&nbsp;&nbsp;&nbsp;&nbsp;$2  ")  // Definition list: [Element]:
             .replace(/(?:^>(?!>).*\n?)+/gm, m => `\`\`\`haskell\n${m.replace(/^>(.*\n?)/gm, "$1")}\n\`\`\``) // Code block: >
         return new Hover(new MarkdownString(documentation), range);
+
+        if(! markdown.match(/<interactive>[\d\s:-]+error/)) {
+            return new Hover(new MarkdownString(markdown), range);
+        } else {
+            return null;
+        }
     }
 
     ext.context.subscriptions.push(
