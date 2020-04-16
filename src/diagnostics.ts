@@ -31,7 +31,7 @@ function parseMessages(messages: string[]):
         const heading = messages.shift();
 
         if (/^(Ok|Failed),(.*) loaded.$/.test(heading))
-            break;
+            continue;
 
         const res_heading = regex.message_base.exec(heading);
         if (res_heading !== null) {
