@@ -40,6 +40,10 @@ export class Session implements vscode.Disposable {
         if (this.starting === null) {
             this.starting = this.startP();
             this.starting.catch(err => {
+                if (this.wasDisposed) {
+                    // We are disposed so do not report error
+                    return;
+                }
                 reportError(this.ext, err.toString());
                 vscode.window.showWarningMessage(
                     'Error while starting GHCi.',
