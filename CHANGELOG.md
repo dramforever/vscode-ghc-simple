@@ -1,5 +1,13 @@
 # Change Log
 
+## v0.1.21
+
+- Warnings are no longer duplicated. Workaround for [GHC issue #18068](https://gitlab.haskell.org/ghc/ghc/issues/18068).
+- Extension will now only automatically restart GHCi sessions based on settings change if the change is related to this extension.
+- Extension will no longer report failure when GHCi sessions are being restarted.
+- Status bar activity indicator is more reliable.
+- Other minor fixes and improvements.
+
 ## v0.1.20
 
 - ([#12](https://github.com/dramforever/vscode-ghc-simple/issues/12), [#59](https://github.com/dramforever/vscode-ghc-simple/pull/59), [#60](https://github.com/dramforever/vscode-ghc-simple/pull/60)) `:doc` output is available in completion and hover. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
