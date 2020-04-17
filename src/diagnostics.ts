@@ -33,6 +33,11 @@ function parseMessages(messages: string[]):
         if (/^(Ok|Failed),(.*) loaded.$/.test(heading))
             continue;
 
+        // Avoid duplicated warnings
+        // https://gitlab.haskell.org/ghc/ghc/issues/18068
+        if (/Collecting type info for \d+ module\(s\) .../.test(heading))
+            break;
+
         const res_heading = regex.message_base.exec(heading);
         if (res_heading !== null) {
             const range: vscode.Range = (() => {
