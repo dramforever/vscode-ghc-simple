@@ -55,7 +55,7 @@ export async function getIdentifierDocs(
     // Failsafe: ident should be something reasonable
     if (ident.indexOf('\n') !== -1) return null;
 
-    const lines = [];
+    const segments: string[] = [];
 
     const info = await session.ghci.sendCommand(
         `:info ${ident}`, { token });
@@ -63,6 +63,7 @@ export async function getIdentifierDocs(
     // Heuristic: If there's an error, then GHCi will output
     // a blank line before the error message
     if (info[0].trim() != '') {
+        const lines = [];
         lines.push('```haskell');
         if (filterInfo) {
             for (let i = 0; i < info.length;) {
@@ -78,7 +79,8 @@ export async function getIdentifierDocs(
         } else {
             lines.push(...info);
         }
-        lines.push('```', '---');
+        lines.push('```');
+        segments.push(lines.map(x => x + '\n').join(''));
     }
 
     await session.loadInterpreted(docUri);
@@ -89,6 +91,7 @@ export async function getIdentifierDocs(
     if (! docs.match(/^<interactive>[\d\s:-]+error/m)
         && ! docs.startsWith('<has no documentation>')
         && ! docs.startsWith('ghc: Can\'t find any documentation')) {
+
         // Convert Haddock markup into Markdown so it can be displayed properly in hover
         const markdown = docs
         .replace(/^ /gm, "")
@@ -127,8 +130,8 @@ export async function getIdentifierDocs(
         // >
         // >
         .replace(/(?:^>(?!>).*\n?)+/gm, m => `\`\`\`haskell\n${m.replace(/^> ?(.*\n?)/gm, "$1")}\`\`\`\n`);
-        lines.push(markdown);
+        segments.push(markdown);
     }
 
-    return lines.length ? lines.join('\n') : null;
+    return segments.length ? segments.join('\n---\n') : null;
 }
