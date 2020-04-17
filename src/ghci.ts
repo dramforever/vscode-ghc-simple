@@ -117,6 +117,12 @@ export class GhciManager implements Disposable {
         cmds: string | string[],
         config: CommandConfig = {}):
         Promise<string[]> {
+        if (config.token) {
+            config.token.onCancellationRequested(
+                this.handleCancellation.bind(this)
+            );
+        }
+
         const commands = (typeof cmds === 'string') ? [cmds] : cmds;
 
         if (this.proc === null) {
@@ -158,38 +164,43 @@ export class GhciManager implements Disposable {
             if (this.currentCommand.barrier === line) {
                 this.currentCommand.resolve(this.currentCommand.lines);
                 this.currentCommand = null;
-                while (
-                    this.pendingCommands.length > 0
-                    && this.pendingCommands[0].token !== null
-                    && this.pendingCommands[0].token.isCancellationRequested) {
-                    this.outputLine(`Cancel ${this.pendingCommands[0].commands}`);
-                    this.pendingCommands[0].reject('cancelled');
-                    this.pendingCommands.shift();
-                }
+                this.handleCancellation();
 
                 if (this.pendingCommands.length > 0) {
                     this.launchCommand(this.pendingCommands.shift());
-                } else {
-                    this.idle();
                 }
             } else {
                 this.currentCommand.lines.push(line);
             }
 
-            // Status matches
-            {
-                const compilingRegex = /^(\[\d+ +of +\d+\]) Compiling ([^ ]+)/;
-                const match = line.match(compilingRegex);
+            this.handleStatusUpdate(line);
+        }
+    }
 
-                if (match) {
-                    this.busy(`${match[1]} ${match[2]}`);
-                }
+    handleCancellation() {
+        while (this.pendingCommands.length > 0
+            && this.pendingCommands[0].token
+            && this.pendingCommands[0].token.isCancellationRequested) {
+            this.outputLine(`Cancel ${this.pendingCommands[0].commands}`);
+            this.pendingCommands[0].reject('cancelled');
+            this.pendingCommands.shift();
+        }
+
+        if (this.pendingCommands.length == 0)
+            this.idle();
+    }
+
+    handleStatusUpdate(line: string) {
+        {
+            const compilingRegex = /^(\[\d+ +of +\d+\]) Compiling ([^ ]+)/;
+            const match = line.match(compilingRegex);
+            if (match) {
+                this.busy(`${match[1]} ${match[2]}`);
             }
-
-            {
-                if (line.startsWith('Collecting type info for')) {
-                    this.busy('Collecting type info');
-                }
+        }
+        {
+            if (line.startsWith('Collecting type info for')) {
+                this.busy('Collecting type info');
             }
         }
     }
