@@ -85,12 +85,15 @@ export async function getIdentifierDocs(
 
     await session.loadInterpreted(docUri);
 
-    const docs = (await session.ghci.sendCommand(
-        `:doc ${ident}`, { token })).join('\n');
+    const docsLines = (await session.ghci.sendCommand(
+        `:doc ${ident}`, { token }))
+        .filter(x => x != '<has no documentation>');
 
-    if (! docs.match(/^<interactive>[\d\s:-]+error/m)
-        && ! docs.startsWith('<has no documentation>')
-        && ! docs.startsWith('ghc: Can\'t find any documentation')) {
+    const badDocsRegex = /^(\s*|<interactive>[\d\s:-]+error.+)$/m
+
+    if (! docsLines.every(line => line.match(badDocsRegex))
+        && ! docsLines[0].startsWith('ghc: Can\'t find any documentation for')) {
+        const docs = docsLines.join('\n');
 
         // Convert Haddock markup into Markdown so it can be displayed properly in hover
         const markdown = docs
