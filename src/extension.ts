@@ -59,7 +59,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     context.subscriptions.push(
-        vscode.workspace.onDidChangeConfiguration(restart),
+        vscode.workspace.onDidChangeConfiguration((event) => {
+            if (event.affectsConfiguration('ghcSimple'))
+                restart();
+        }),
         vscode.commands.registerCommand('vscode-ghc-simple.restart', restart),
         vscode.commands.registerCommand('vscode-ghc-simple.openOutput', openOutput));
 
