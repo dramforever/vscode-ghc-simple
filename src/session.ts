@@ -39,6 +39,20 @@ export class Session implements vscode.Disposable {
     start() {
         if (this.starting === null) {
             this.starting = this.startP();
+            this.starting.catch(err => {
+                reportError(this.ext, err.toString());
+                vscode.window.showWarningMessage(
+                    'Error while starting GHCi.',
+                    'Open log'
+                ).then(
+                    (item) => {
+                        if (item === 'Open log') {
+                            this.ext.outputChannel.show();
+                        }
+                    },
+                    (err) => console.error(err)
+                );
+            })
         }
 
         return this.starting;
@@ -105,14 +119,8 @@ export class Session implements vscode.Disposable {
                 wst === 'bare-stack' || wst === 'bare' ? cmds.bare : [],
                 cmds.custom
             );
-            try {
-                await this.ghci.sendCommand(configureCommands);
-            } catch(e) {
-                reportError(this.ext, 'Error starting GHCi')(e);
-                vscode.window.showWarningMessage(
-                    'Error while start GHCi. Further information might be found in output tab.');
-                throw e;
-            }
+            await this.ghci.sendCommand(configureCommands);
+
             try {
                 const res = await this.ghci.sendCommand(':show paths');
                 if (res.length < 1) {
