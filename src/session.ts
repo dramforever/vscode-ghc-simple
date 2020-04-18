@@ -66,44 +66,8 @@ export class Session implements vscode.Disposable {
         if (this.ghci === null) {
             const wst = this.workspaceType;
 
-            const getStackIdeTargets = async () => {
-                this.checkDisposed();
-                const result = await new Promise<string>((resolve, reject) => {
-                    child_process.exec(
-                        `${stackCommand} ide targets`,
-                        this.cwdOption,
-                        (err, stdout, stderr) => {
-                            if (err) reject('Command stack ide targets failed:\n' + stderr);
-                            else resolve(stderr);
-                        }
-                    )
-                });
-
-                return result.match(/^[^\s]+:[^\s]+$/gm)
-            }
-
             this.checkDisposed();
-            const cmd = await (async () => {
-                if (wst == 'custom-workspace' || wst == 'custom-file') {
-                    let cmd = vscode.workspace.getConfiguration('ghcSimple', this.resource).replCommand;
-                    if (cmd.indexOf('$stack_ide_targets') !== -1) {
-                        const sit = await getStackIdeTargets();
-                        cmd.replace(/\$stack_ide_targets/g, sit.join(' '));
-                    }
-                    return cmd;
-                } else if (wst == 'stack') {
-                    return `${stackCommand} repl --no-load ${(await getStackIdeTargets()).join(' ')}`;
-                } else if (wst == 'cabal')
-                    return 'cabal repl';
-                else if (wst == 'cabal new')
-                    return 'cabal new-repl all';
-                else if (wst == 'cabal v2')
-                    return 'cabal v2-repl all';
-                else if (wst == 'bare-stack')
-                    return `${stackCommand} exec ghci`;
-                else if (wst == 'bare')
-                    return 'ghci';
-            })();
+            const cmd = await this.getGhciCommand();
 
             this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
             this.ext.outputChannel.appendLine(
@@ -125,26 +89,71 @@ export class Session implements vscode.Disposable {
             );
             await this.ghci.sendCommand(configureCommands);
 
-            try {
-                const res = await this.ghci.sendCommand(':show paths');
-                if (res.length < 1) {
-                    throw new Error('":show paths" has too few lines');
+            this.basePath = await this.generateBasePath();
+        }
+    }
+
+    async getStackIdeTargets() {
+        this.checkDisposed();
+        const result = await new Promise<string>((resolve, reject) => {
+            child_process.exec(
+                `${stackCommand} ide targets`,
+                this.cwdOption,
+                (err, stdout, stderr) => {
+                    if (err) reject('Command stack ide targets failed:\n' + stderr);
+                    else resolve(stderr);
                 }
-                // expect second line of the output to be current ghci path
-                const basePath = res[1].trim();
-                if (basePath.length <= 0 || basePath[0] != '/') {
-                    throw new Error(`Invalid path value: ${basePath}`);
-                }
-                const doesExist = await new Promise(resolve => fs.exists(basePath, resolve));
-                if (!doesExist) {
-                    throw new Error(`Detected path doesn\'t exist: ${basePath}`);
-                }
-                this.ext.outputChannel.appendLine(`Detected base path: ${basePath}`);
-                this.basePath = basePath;
-            } catch(e) {
-                this.ext.outputChannel.appendLine(`Error detecting base path: ${e}`);
-                this.ext.outputChannel.appendLine('Will fallback to document\'s workspace folder');
+            )
+        });
+
+        return result.match(/^[^\s]+:[^\s]+$/gm)
+    }
+
+    async getGhciCommand() {
+        const wst = this.workspaceType;
+
+        if (wst == 'custom-workspace' || wst == 'custom-file') {
+            let cmd = vscode.workspace.getConfiguration('ghcSimple', this.resource).replCommand;
+            if (cmd.indexOf('$stack_ide_targets') !== -1) {
+                const sit = await this.getStackIdeTargets();
+                cmd.replace(/\$stack_ide_targets/g, sit.join(' '));
             }
+            return cmd;
+        } else if (wst == 'stack') {
+            return `${stackCommand} repl --no-load ${(await this.getStackIdeTargets()).join(' ')}`;
+        } else if (wst == 'cabal')
+            return 'cabal repl';
+        else if (wst == 'cabal new')
+            return 'cabal new-repl all';
+        else if (wst == 'cabal v2')
+            return 'cabal v2-repl all';
+        else if (wst == 'bare-stack')
+            return `${stackCommand} exec ghci`;
+        else if (wst == 'bare')
+            return 'ghci';
+    }
+
+    async generateBasePath(): Promise<string | undefined> {
+        try {
+            const res = await this.ghci.sendCommand(':show paths');
+            if (res.length < 1) {
+                throw new Error('":show paths" has too few lines');
+            }
+            // expect second line of the output to be current ghci path
+            const basePath = res[1].trim();
+            if (basePath.length <= 0 || basePath[0] != '/') {
+                throw new Error(`Invalid path value: ${basePath}`);
+            }
+            const doesExist = await new Promise(resolve => fs.exists(basePath, resolve));
+            if (!doesExist) {
+                throw new Error(`Detected path doesn\'t exist: ${basePath}`);
+            }
+            this.ext.outputChannel.appendLine(`Detected base path: ${basePath}`);
+            return basePath;
+        } catch(e) {
+            this.ext.outputChannel.appendLine(`Error detecting base path: ${e}`);
+            this.ext.outputChannel.appendLine('Will fallback to document\'s workspace folder');
+            return undefined;
         }
     }
 
