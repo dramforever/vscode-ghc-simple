@@ -168,7 +168,7 @@ export class Session implements vscode.Disposable {
         const mods = [... this.files.values()];
 
         const res = await this.ghci.sendCommand([
-            ':set -fno-code -fwrite-interface',
+            ':set -fno-code',
             ':set +c',
             `:load ${mods.map(x => JSON.stringify(`*${x}`)).join(' ')}`
         ], { info: 'Loading' });
