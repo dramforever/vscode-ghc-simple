@@ -121,11 +121,11 @@ export class Session implements vscode.Disposable {
                 // expect second line of the output to be current ghci path
                 const basePath = res[1].trim();
                 if (basePath.length <= 0 || basePath[0] != '/') {
-                    throw new Error('Invalid path value: ${basePath}');
+                    throw new Error(`Invalid path value: ${basePath}`);
                 }
                 const doesExist = await new Promise(resolve => fs.exists(basePath, resolve));
                 if (!doesExist) {
-                    throw new Error('Detected path doesn\'t exist: ${basePath}');
+                    throw new Error(`Detected path doesn\'t exist: ${basePath}`);
                 }
                 this.ext.outputChannel.appendLine(`Detected base path: ${basePath}`);
                 this.basePath = basePath;
