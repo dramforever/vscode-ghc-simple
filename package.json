@@ -103,6 +103,12 @@
                     "scope": "resource",
                     "description": "Enable documentation on hover"
                 },
+                "ghcSimple.feature.codeFormatting": {
+                    "type": "boolean",
+                    "default": true,
+                    "scope": "resource",
+                    "markdownDescription": "Enable code formatting through `ormolu`"
+                },
                 "ghcSimple.filterInfo": {
                     "type": "boolean",
                     "default": true,
@@ -192,7 +198,10 @@
                 },
                 "ghcSimple.inlineRepl.loadType": {
                     "type": "string",
-                    "enum": ["byte-code", "object-code"],
+                    "enum": [
+                        "byte-code",
+                        "object-code"
+                    ],
                     "default": "byte-code",
                     "markdownEnumDescriptions": [
                         "Use `-fbyte-code` for GHCi REPL blocks",
