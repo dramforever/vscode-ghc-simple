@@ -20,6 +20,19 @@ interface PendingCommand extends StrictCommandConfig {
     reject: (reason: any) => void;
 }
 
+export class GhciOptions {
+    startOptions?: string;
+    reloadCommands?: string[] = [
+        ":set -fno-code",
+        ":set +c"
+    ];
+    startupCommands: {
+        all?: string[];
+        bare?: string[];
+        custom?: string[];
+    } = {}
+}
+
 export class GhciManager implements Disposable {
     proc: child_process.ChildProcess | null;
     command: string;

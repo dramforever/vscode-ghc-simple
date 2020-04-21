@@ -2,6 +2,7 @@ import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { Session } from './session';
 import { StatusBar } from './status-bar';
+import { GhciOptions } from './ghci';
 
 export type HaskellWorkspaceType = 'custom-workspace' | 'custom-file' | 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
 
@@ -21,7 +22,7 @@ function getWorkspaceType(ext: ExtensionState, folder: vscode.WorkspaceFolder): 
     return ext.workspaceTypeMap.get(folder);
 }
 
-export async function startSession(ext: ExtensionState, doc: vscode.TextDocument): Promise<Session> {
+export async function startSession(ext: ExtensionState, doc: vscode.TextDocument, ghciOptions: GhciOptions = new GhciOptions): Promise<Session> {
     const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
     const type = folder === undefined
         ? await computeFileType()
@@ -33,7 +34,7 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 
             if (! ext.workspaceManagers.has(folder))
                 ext.workspaceManagers.set(folder,
-                    new Session(ext, type, 'workspace', folder.uri));
+                    new Session(ext, type, 'workspace', folder.uri, ghciOptions));
 
             return ext.workspaceManagers.get(folder);
         } else {
@@ -41,7 +42,7 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 
             if (! ext.documentManagers.has(doc))
                 ext.documentManagers.set(doc,
-                    new Session(ext, type, 'file', doc.uri));
+                    new Session(ext, type, 'file', doc.uri, ghciOptions));
 
             return ext.documentManagers.get(doc);
         }

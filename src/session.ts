@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
-import { GhciManager } from "./ghci";
+import { GhciManager, GhciOptions } from "./ghci";
 import { ExtensionState, HaskellWorkspaceType } from "./extension-state";
 import { stackCommand, reportError } from './utils';
 
@@ -21,7 +21,8 @@ export class Session implements vscode.Disposable {
         public ext: ExtensionState,
         public workspaceType: HaskellWorkspaceType,
         public resourceType: 'workspace' | 'file',
-        public resource: vscode.Uri) {
+        public resource: vscode.Uri,
+        public ghciOptions: GhciOptions = new GhciOptions) {
         this.ghci = null;
         this.starting = null;
         this.loading = null;
@@ -92,17 +93,17 @@ export class Session implements vscode.Disposable {
                     }
                     return cmd;
                 } else if (wst == 'stack') {
-                    return `${stackCommand} repl --no-load ${(await getStackIdeTargets()).join(' ')}`;
+                    return `${stackCommand} repl --no-load${this.getStartOptions(' --ghci-options "', '"')} ${(await getStackIdeTargets()).join(' ')}`;
                 } else if (wst == 'cabal')
-                    return 'cabal repl';
+                    return `cabal repl${this.getStartOptions(' --ghc-options "', '"')}`;
                 else if (wst == 'cabal new')
-                    return 'cabal new-repl all';
+                    return `cabal new-repl all${this.getStartOptions(' --ghc-options "', '"')}`;
                 else if (wst == 'cabal v2')
-                    return 'cabal v2-repl all';
+                    return `cabal v2-repl all${this.getStartOptions(' --ghc-options "', '"')}`;
                 else if (wst == 'bare-stack')
-                    return `${stackCommand} exec ghci`;
+                    return `${stackCommand} exec ghci${this.getStartOptions(' -- ')}`;
                 else if (wst == 'bare')
-                    return 'ghci';
+                    return `ghci${this.getStartOptions(' ')}`;
             })();
 
             this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
@@ -119,9 +120,9 @@ export class Session implements vscode.Disposable {
                 this.ext);
             const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);
             const configureCommands = [].concat(
-                cmds.all,
-                wst === 'bare-stack' || wst === 'bare' ? cmds.bare : [],
-                cmds.custom
+                this.ghciOptions.startupCommands.all || cmds.all,
+                wst === 'bare-stack' || wst === 'bare' ? this.ghciOptions.startupCommands.bare || cmds.bare : [],
+                this.ghciOptions.startupCommands.custom || cmds.custom
             );
             await this.ghci.sendCommand(configureCommands);
 
@@ -168,8 +169,7 @@ export class Session implements vscode.Disposable {
         const mods = [... this.files.values()];
 
         const res = await this.ghci.sendCommand([
-            ':set -fno-code',
-            ':set +c',
+            ... this.ghciOptions.reloadCommands || [],
             `:load ${mods.map(x => JSON.stringify(`*${x}`)).join(' ')}`
         ], { info: 'Loading' });
         const modules = await this.ghci.sendCommand(':show modules');
@@ -199,6 +199,12 @@ export class Session implements vscode.Disposable {
 
     getModuleName(filename: string): string {
         return this.moduleMap.get(filename);
+    }
+
+    getStartOptions(prefix?: string, postfix?: string): string {
+        return this.ghciOptions.startOptions ?
+            `${prefix ||''}${this.ghciOptions.startOptions}${postfix || ''}` :
+            "";
     }
 
     dispose() {
