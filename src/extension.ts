@@ -57,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     function openOutput() {
-        ext.outputChannel.show();
+        ext.outputChannel?.show();
     }
 
     context.subscriptions.push(
@@ -79,10 +79,6 @@ export function activate(context: vscode.ExtensionContext) {
      */
     interface Api {
         /**
-         * [output channel](#vscode.OutputChannel) containing GHCi output
-         */
-        outputChannel: vscode.OutputChannel;
-        /**
          * Create a new GHCi session
          * @param doc Current document
          * @param ghciOptions Various options to be passed to GHCi
@@ -96,13 +92,13 @@ export function activate(context: vscode.ExtensionContext) {
          * Create new instance of Simple GHC API  
          * Call this function only once, probably during extension activation
          * @param context Calling extension context
-         * @param channel Output channel for GHCi output. New session will use existing `GHC` channel if ommited
+         * @param outputChannel Output channel for GHCi output. No output will be logged if omitted.
          * @returns Simple GHC `Api`
          */
-        startApi(context: vscode.ExtensionContext, channel?: vscode.OutputChannel): Api {
+        startApi(context: vscode.ExtensionContext, outputChannel?: vscode.OutputChannel): Api {
             const ext = {
                 context,
-                outputChannel: channel || outputChannel,
+                outputChannel: outputChannel,
                 statusBar: null,
                 documentManagers: new Map(),
                 workspaceManagers: new Map(),
@@ -110,7 +106,6 @@ export function activate(context: vscode.ExtensionContext) {
                 documentAssignment: new WeakMap()
             };
             return {
-                outputChannel: ext.outputChannel,
                 startSession: (doc, ghciOptions?) =>
                     startSession(ext, doc, ghciOptions)
             };

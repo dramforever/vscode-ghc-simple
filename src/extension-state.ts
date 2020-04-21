@@ -8,7 +8,7 @@ export type HaskellWorkspaceType = 'custom-workspace' | 'custom-file' | 'cabal' 
 
 export interface ExtensionState {
     context: vscode.ExtensionContext;
-    outputChannel: vscode.OutputChannel;
+    outputChannel?: vscode.OutputChannel;
     statusBar?: StatusBar;
     workspaceTypeMap: Map<vscode.WorkspaceFolder, Promise<HaskellWorkspaceType>>;
     documentManagers: Map<vscode.TextDocument, Session>;

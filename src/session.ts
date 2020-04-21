@@ -52,7 +52,7 @@ export class Session implements vscode.Disposable {
                 ).then(
                     (item) => {
                         if (item === 'Open log') {
-                            this.ext.outputChannel.show();
+                            this.ext.outputChannel?.show();
                         }
                     },
                     (err) => console.error(err)
@@ -106,8 +106,8 @@ export class Session implements vscode.Disposable {
                     return `ghci${this.getStartOptions(' ')}`;
             })();
 
-            this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
-            this.ext.outputChannel.appendLine(
+            this.ext.outputChannel?.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
+            this.ext.outputChannel?.appendLine(
                 `(Under ${
                     this.cwdOption.cwd === undefined
                         ? 'default cwd'
@@ -120,9 +120,9 @@ export class Session implements vscode.Disposable {
                 this.ext);
             const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);
             const configureCommands = [].concat(
-                this.ghciOptions.startupCommands.all || cmds.all,
-                wst === 'bare-stack' || wst === 'bare' ? this.ghciOptions.startupCommands.bare || cmds.bare : [],
-                this.ghciOptions.startupCommands.custom || cmds.custom
+                this.ghciOptions.startupCommands?.all || cmds.all,
+                wst === 'bare-stack' || wst === 'bare' ? this.ghciOptions.startupCommands?.bare || cmds.bare : [],
+                this.ghciOptions.startupCommands?.custom || cmds.custom
             );
             await this.ghci.sendCommand(configureCommands);
 
@@ -140,11 +140,11 @@ export class Session implements vscode.Disposable {
                 if (!doesExist) {
                     throw new Error(`Detected path doesn\'t exist: ${basePath}`);
                 }
-                this.ext.outputChannel.appendLine(`Detected base path: ${basePath}`);
+                this.ext.outputChannel?.appendLine(`Detected base path: ${basePath}`);
                 this.basePath = basePath;
             } catch(e) {
-                this.ext.outputChannel.appendLine(`Error detecting base path: ${e}`);
-                this.ext.outputChannel.appendLine('Will fallback to document\'s workspace folder');
+                this.ext.outputChannel?.appendLine(`Error detecting base path: ${e}`);
+                this.ext.outputChannel?.appendLine('Will fallback to document\'s workspace folder');
             }
         }
     }

@@ -40,7 +40,7 @@ export function getFeatures(resource: vscode.Uri): { [k: string]: any } {
 export function reportError(ext: ExtensionState, msg: string) {
     return (err) => {
         console.error(`${msg}: ${err}`);
-        ext.outputChannel.appendLine(`${msg}: ${err}`);
+        ext.outputChannel?.appendLine(`${msg}: ${err}`);
     }
 }
 
