@@ -15,7 +15,7 @@ const regex = {
     single_line_error: /^error: (?:\[.+\] )?([^\[].*)$/,
     single_line_warning: /^warning: \[(.+)\] (.+)$/,
     error: /^error:(?: \[.*\])?$/,
-    warning: /^warning: \[(.+)\]$/
+    warning: /^warning:(?: \[(.+)\])?$/
 };
 
 interface DiagnosticWithFile {
@@ -105,6 +105,7 @@ function parseMessages(messages: string[]):
                     if (res_error !== null) {
                         return sev.Error;
                     } else if (res_warning !== null
+                        && res_warning[1]
                         && error_warnings.indexOf(res_warning[1]) >= 0) {
                         return sev.Error;
                     } else if (res_warning !== null) {
