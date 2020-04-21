@@ -2,13 +2,15 @@
 import * as vscode from 'vscode';
 import { registerRangeType } from './range-type';
 import { registerCompletion } from './completion';
-import { ExtensionState } from './extension-state';
+import { ExtensionState, startSession } from './extension-state';
 import { registerDiagnostics } from './diagnostics';
 import { registerDefinition } from './definition';
 import { registerReference } from './reference';
 import { registerInlineRepl } from './inline-repl';
 import { StatusBar } from './status-bar'
 import { registerHover } from './hover';
+import { Session } from './session';
+import { GhciOptions } from './ghci';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
@@ -70,7 +72,51 @@ export function activate(context: vscode.ExtensionContext) {
         for (const folder of changeEvent.removed)
             if (ext.workspaceManagers.has(folder))
                 ext.workspaceManagers.get(folder).dispose();
-    })
+    });
+
+    /**
+     * Simple GHC Api
+     */
+    interface Api {
+        /**
+         * [output channel](#vscode.OutputChannel) containing GHCi output
+         */
+        outputChannel: vscode.OutputChannel;
+        /**
+         * Create a new GHCi session
+         * @param doc Current document
+         * @param ghciOptions Various options to be passed to GHCi
+         * @returns `Promise` with newly created `Session`
+         */
+        startSession: (doc: vscode.TextDocument, ghciOptions?: GhciOptions) => Promise<Session>;
+    }
+
+    let api = {
+        /**
+         * Create new instance of Simple GHC API  
+         * Call this function only once, probably during extension activation
+         * @param context Calling extension context
+         * @param channel Output channel for GHCi output. New session will use existing `GHC` channel if ommited
+         * @returns Simple GHC `Api`
+         */
+        startApi(context: vscode.ExtensionContext, channel?: vscode.OutputChannel): Api {
+            const ext = {
+                context,
+                outputChannel: channel || outputChannel,
+                statusBar: null,
+                documentManagers: new Map(),
+                workspaceManagers: new Map(),
+                workspaceTypeMap: new Map(),
+                documentAssignment: new WeakMap()
+            };
+            return {
+                outputChannel: ext.outputChannel,
+                startSession: (doc, ghciOptions?) =>
+                    startSession(ext, doc, ghciOptions)
+            };
+        }
+    }
+    return api;
 }
 
 export function deactivate() {

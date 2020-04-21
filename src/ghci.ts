@@ -68,13 +68,13 @@ export class GhciManager implements Disposable {
     }
 
     idle() {
-        this.ext.statusBar.update(this, {
+        this.ext.statusBar && this.ext.statusBar.update(this, {
             status: 'idle'
         });
     }
 
     busy(info: string | null = null) {
-        this.ext.statusBar.update(this, {
+        this.ext.statusBar && this.ext.statusBar.update(this, {
             status: 'busy',
             info
         })
@@ -254,7 +254,7 @@ export class GhciManager implements Disposable {
     dispose() {
         this.wasDisposed = true;
 
-        this.ext.statusBar.remove(this);
+        this.ext.statusBar && this.ext.statusBar.remove(this);
         if (this.proc !== null) {
             this.proc.kill();
             this.proc = null;
