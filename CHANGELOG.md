@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.1.22
+
+- Reloads are now done with `:reload` when possible to greatly improve speed.
+- `-fno-code` is no longer used for loading since it doesn't seem to do any good.
+- Fix rare case where warning without corresponding flag breaks diagnostics.
+
 ## v0.1.21
 
 - Warnings are no longer duplicated. Workaround for [GHC issue #18068](https://gitlab.haskell.org/ghc/ghc/issues/18068).
