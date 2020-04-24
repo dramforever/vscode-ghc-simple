@@ -14,6 +14,7 @@ export class Session implements vscode.Disposable {
     moduleMap: Map<string, string>;
     cwdOption: { cwd?: string };
     basePath?: string;
+    lastReload: string[] | null;
 
     wasDisposed: boolean;
 
@@ -30,6 +31,7 @@ export class Session implements vscode.Disposable {
         this.moduleMap = new Map();
         this.cwdOption = resourceType == 'workspace' ? { cwd: this.resource.fsPath } : {};
         this.wasDisposed = false;
+        this.lastReload = null;
     }
 
     checkDisposed() {
@@ -175,11 +177,20 @@ export class Session implements vscode.Disposable {
     async reloadP(): Promise<string[]> {
         await this.start();
         const mods = [... this.files.values()];
+        mods.sort();
+
+        const sameModules = (
+            this.lastReload
+            && this.lastReload.length == mods.length
+            && this.lastReload.every((val, i) => val === mods[i]));
+
+        this.lastReload = mods;
 
         const res = await this.ghci.sendCommand([
-            ':set -fno-code',
             ':set +c',
-            `:load ${mods.map(x => JSON.stringify(`*${x}`)).join(' ')}`
+            sameModules
+                ? ':reload'
+                : `:load ${mods.map(x => JSON.stringify(`*${x}`)).join(' ')}`
         ], { info: 'Loading' });
         const modules = await this.ghci.sendCommand(':show modules');
 
@@ -197,11 +208,11 @@ export class Session implements vscode.Disposable {
     async loadInterpreted(
         uri: vscode.Uri,
         token: vscode.CancellationToken = null
-    ): Promise<string[]> {
+    ): Promise<void> {
         const module = this.getModuleName(uri.fsPath);
 
-        return await this.ghci.sendCommand(
-            [`:add *${uri.fsPath}`, `:m *${module}`],
+        await this.ghci.sendCommand(
+            [`:m *${module}`],
             { token }
         );
     }
