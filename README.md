@@ -11,6 +11,11 @@
 
 [![vscode-ghc-simple on Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/dramforever.vscode-ghc-simple.svg)](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple) [![CI](https://img.shields.io/github/workflow/status/dramforever/vscode-ghc-simple/CI.svg)](https://github.com/dramforever/vscode-ghc-simple/actions?query=workflow%3ACI)
 
+## Related and recommended extensions
+
+- [Haskutil](https://github.com/EduardSergeev/vscode-haskutil) provides Quick Fix actions for tasks like missing/redundant imports that GHC reports. It works with this extension by reading the diagnostics it produces.
+
+
 ## Installation
 
 Get vscode-ghc-simple from the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple) or run the following in Quick Open:
