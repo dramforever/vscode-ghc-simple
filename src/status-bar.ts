@@ -24,6 +24,7 @@ export class StatusBar {
         this.focusedGhci = null;
         this.bar = vscode.window.createStatusBarItem(
             vscode.StatusBarAlignment.Left);
+        this.bar.tooltip = 'GHC - Open Output';
         this.bar.command = "vscode-ghc-simple.openOutput";
 
         this.editorListener =
