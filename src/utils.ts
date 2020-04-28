@@ -13,7 +13,7 @@ export const haskellSelector: vscode.DocumentSelector = [
 ];
 
 export function documentIsHaskell(doc: vscode.TextDocument) {
-    return (
+    return doc.uri.scheme === 'file' && (
         [ 'haskell', 'literate haskell' ].indexOf(doc.languageId) !== -1
         || [ '.hs', '.lhs' ].some(suf => doc.uri.fsPath.endsWith(suf)));
 }
