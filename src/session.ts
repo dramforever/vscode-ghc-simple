@@ -10,7 +10,8 @@ export class Session implements vscode.Disposable {
     starting: Promise<void> | null;
     loading: Promise<void>;
     files: Set<string>;
-    typeCache: Promise<string[]> | null;
+    onWillReload: vscode.Event<void>;
+    onWillReloadEmitter: vscode.EventEmitter<void>;
     moduleMap: Map<string, string>;
     cwdOption: { cwd?: string };
     basePath?: string;
@@ -27,7 +28,8 @@ export class Session implements vscode.Disposable {
         this.starting = null;
         this.loading = null;
         this.files = new Set();
-        this.typeCache = null;
+        this.onWillReloadEmitter = new vscode.EventEmitter();
+        this.onWillReload = this.onWillReloadEmitter.event;
         this.moduleMap = new Map();
         this.cwdOption = resourceType == 'workspace' ? { cwd: this.resource.fsPath } : {};
         this.wasDisposed = false;
@@ -168,7 +170,7 @@ export class Session implements vscode.Disposable {
     }
 
     async reload(): Promise<string[]> {
-        this.typeCache = null;
+        this.onWillReloadEmitter.fire();
         const pr = this.reloadP();
         this.loading = pr.then(() => undefined);
         return pr;
@@ -225,5 +227,6 @@ export class Session implements vscode.Disposable {
         this.wasDisposed = true;
         if (this.ghci !== null)
             this.ghci.dispose();
+        this.onWillReloadEmitter.dispose();
     }
 }

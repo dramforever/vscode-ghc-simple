@@ -4,12 +4,20 @@ import { Session } from './session';
 import { getFeatures, documentIsHaskell, reportError } from './utils';
 
 let hasNotified = false;
+const typeCacheMap: WeakMap<Session, Promise<string[]> | null> = new WeakMap;
 
 async function getType(
     session: Session,
     sel: vscode.Selection | vscode.Position | vscode.Range,
     doc: vscode.TextDocument):
     Promise<null | [vscode.Range, string]> {
+
+    if (! typeCacheMap.has(session)) {
+        typeCacheMap.set(session, null);
+        session.onWillReload(() => {
+            typeCacheMap.set(session, null);
+        });
+    }
 
     const selRangeOrPos: vscode.Range | vscode.Position = (() => {
         if (sel instanceof vscode.Selection) {
@@ -29,8 +37,14 @@ async function getType(
 
     let completed = false;
 
-    if (session.typeCache === null) {
-        session.typeCache = session.ghci.sendCommand(':all-types', { info: 'Loading types' });
+    if (typeCacheMap.get(session) === null) {
+        typeCacheMap.set(
+            session,
+            session.ghci.sendCommand(
+                ':all-types',
+                { info: 'Loading types' }
+            )
+        );
 
         const shouldNotify = () =>
             ! hasNotified
@@ -71,7 +85,7 @@ async function getType(
         }
     }
 
-    const typesB = await session.typeCache;
+    const typesB = await typeCacheMap.get(session);
     completed = true;
 
     const strTypes = typesB.filter((x) => x.startsWith(doc.uri.fsPath));
