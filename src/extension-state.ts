@@ -84,8 +84,10 @@ function hasStack(cwd?: string): Promise<boolean> {
 }
 
 export async function computeFileType(): Promise<HaskellWorkspaceType> {
-    if (await hasStack())
-        return 'bare-stack'
+    if (vscode.workspace.getConfiguration('ghcSimple').replCommand)
+        return 'custom-file';
+    else if (await hasStack())
+        return 'bare-stack';
     else
         return 'bare';
 }
