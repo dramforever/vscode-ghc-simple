@@ -10,7 +10,7 @@
     "version": "0.1.22",
     "publisher": "dramforever",
     "engines": {
-        "vscode": "^1.28.0"
+        "vscode": "^1.40.0"
     },
     "categories": [
         "Programming Languages"
@@ -223,9 +223,13 @@
         "compile": "tsc -watch -p ./"
     },
     "devDependencies": {
+        "@types/js-yaml": "^4.0.0",
         "@types/node": "^14.14.21",
-        "@types/vscode": "^1.52.0",
+        "@types/vscode": "^1.40.0",
         "typescript": "^4.1.3",
         "vsce": "^1.83.0"
+    },
+    "dependencies": {
+        "js-yaml": "^4.0.0"
     }
 }
