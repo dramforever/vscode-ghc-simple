@@ -7,8 +7,9 @@ import { registerDiagnostics } from './diagnostics';
 import { registerDefinition } from './definition';
 import { registerReference } from './reference';
 import { registerInlineRepl } from './inline-repl';
-import { StatusBar } from './status-bar'
 import { registerHover } from './hover';
+import { registerCodeFormatting } from './formatting';
+import { StatusBar } from './status-bar'
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
@@ -33,6 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
     registerReference(ext);
     registerInlineRepl(ext);
     registerHover(ext);
+    registerCodeFormatting(ext);
 
     const diagInit = registerDiagnostics(ext);
 
