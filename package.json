@@ -49,12 +49,12 @@
             {
                 "command": "vscode-ghc-simple.inline-repl-run",
                 "key": "shift+enter",
-                "when": "editorLangId == haskell && editorFocus && config.ghcSimple.feature.inlineRepl"
+                "when": "editorLangId == haskell && editorTextFocus && config.ghcSimple.feature.inlineRepl"
             },
             {
                 "command": "vscode-ghc-simple.inline-repl-run-all",
                 "key": "shift+alt+enter",
-                "when": "editorLangId == haskell && config.ghcSimple.feature.inlineRepl"
+                "when": "editorLangId == haskell && editorTextFocus && config.ghcSimple.feature.inlineRepl"
             }
         ],
         "configuration": {
