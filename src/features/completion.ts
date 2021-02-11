@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from './extension-state';
-import { getFeatures, haskellReplLine, haskellSelector, getIdentifierDocs } from './utils';
+import { ExtensionState, startSession } from '../extension-state';
+import { getFeatures, haskellReplLine, haskellSelector, getIdentifierDocs } from '../utils';
 
 export function registerCompletion(ext: ExtensionState) {
     const itemDocument: Map<vscode.CompletionItem, vscode.TextDocument> = new Map();

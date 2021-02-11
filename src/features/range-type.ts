@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from './extension-state';
-import { Session } from './session';
-import { getFeatures, documentIsHaskell, reportError } from './utils';
+import { ExtensionState, startSession } from '../extension-state';
+import { Session } from '../session';
+import { getFeatures, documentIsHaskell, reportError } from '../utils';
 
 let hasNotified = false;
 const typeCacheMap: WeakMap<Session, Promise<string[]> | null> = new WeakMap;

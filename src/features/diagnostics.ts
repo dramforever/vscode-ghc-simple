@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionState, startSession, stopSession } from './extension-state';
-import { Session } from './session';
-import { getFeatures, documentIsHaskell, reportError } from './utils';
+import { ExtensionState, startSession, stopSession } from '../extension-state';
+import { Session } from '../session';
+import { getFeatures, documentIsHaskell, reportError } from '../utils';
 
 const regex = {
 

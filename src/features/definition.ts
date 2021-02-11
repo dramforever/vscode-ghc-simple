@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from './extension-state';
-import { strToLocation, haskellSymbolRegex, getFeatures, haskellSelector } from './utils';
+import { ExtensionState, startSession } from '../extension-state';
+import { strToLocation, haskellSymbolRegex, getFeatures, haskellSelector } from '../utils';
 
 export function registerDefinition(ext: ExtensionState) {
     async function provideDefinition(

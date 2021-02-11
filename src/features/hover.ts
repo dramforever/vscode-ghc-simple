@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from './extension-state';
-import { haskellSymbolRegex, haskellSelector, getFeatures, getIdentifierDocs } from './utils';
+import { ExtensionState, startSession } from '../extension-state';
+import { haskellSymbolRegex, haskellSelector, getFeatures, getIdentifierDocs } from '../utils';
 import { Hover, MarkdownString } from 'vscode';
 
 export function registerHover(ext: ExtensionState) {

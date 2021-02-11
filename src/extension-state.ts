@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { Session } from './session';
-import { StatusBar } from './status-bar';
+import { StatusBar } from './features/status-bar';
 
 export type HaskellWorkspaceType = 'custom-workspace' | 'custom-file' | 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
 

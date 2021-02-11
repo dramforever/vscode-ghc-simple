@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from './extension-state';
-import { haskellReplLine, getFeatures, haskellSelector, reportError } from './utils';
+import { ExtensionState, startSession } from '../extension-state';
+import { haskellReplLine, getFeatures, haskellSelector, reportError } from '../utils';
 
 function generateReplacement(
     response: string[],
