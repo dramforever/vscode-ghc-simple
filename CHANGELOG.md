@@ -1,5 +1,12 @@
 # Change Log
 
+## v0.1.23
+
+- ([#81](https://github.com/dramforever/vscode-ghc-simple/issues/81) Opening a file without a workspace honors `ghcSimple.replCommand`. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
+- ([#85](https://github.com/dramforever/vscode-ghc-simple/issues/85) Running inline REPL now loads the module in which the code block is located. Should mean less confusing behavior. If before you get strange issues with variables not found, and it is worked around by making a random edit to the file, this should fix this problem for you.
+- ([#83](https://github.com/dramforever/vscode-ghc-simple/issues/83) The extension no longer blocks `shift+enter` from being used with the search bar.
+- Dependency updates and other minor fixes and improvements
+
 ## v0.1.22
 
 - Reloads are now done with `:reload` when possible to greatly improve speed.
