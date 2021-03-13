@@ -102,6 +102,7 @@ export function registerInlineRepl(ext: ExtensionState) {
 
                 const session = await startSession(ext, textEditor.document);
                 await session.loading;
+                await session.loadInterpreted(textEditor.document.uri);
 
                 let loadType : 'byte-code' | 'object-code' =
                     vscode.workspace.getConfiguration(
