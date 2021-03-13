@@ -97,6 +97,10 @@ async function getType(
     let curBestRange: null | vscode.Range = null, curType: null | string = null;
 
     for (const [_whatever, startLine, startCol, endLine, endCol, type] of allTypes) {
+        if (+endCol <= 0) {
+            // Weird generated type with empty range, ignore
+            continue
+        }
         const curRange = new vscode.Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol - 1);
         if (curRange.contains(selRangeOrPos)) {
             if (curBestRange === null || curBestRange.contains(curRange)) {
