@@ -1,7 +1,7 @@
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { Session } from './session';
-import { StatusBar } from './features/status-bar';
+import { StatusBar } from '../features/status-bar';
 
 export type HaskellWorkspaceType = 'custom-workspace' | 'custom-file' | 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
 
@@ -21,27 +21,62 @@ function getWorkspaceType(ext: ExtensionState, folder: vscode.WorkspaceFolder): 
     return ext.workspaceTypeMap.get(folder);
 }
 
+let compatibilityWarningLastShown = -1;
+
 export async function startSession(ext: ExtensionState, doc: vscode.TextDocument): Promise<Session> {
     const folder = vscode.workspace.getWorkspaceFolder(doc.uri);
+
+
     const type = folder === undefined
         ? await computeFileType()
         : await getWorkspaceType(ext, folder);
+
+    function displayCompatibilityWarning() {
+        const conf = vscode.workspace.getConfiguration('ghcSimple', folder.uri);
+        const configWorkspaceType = conf.workspaceType;
+
+        if (configWorkspaceType && configWorkspaceType !== 'detect') {
+            if (+ new Date() - compatibilityWarningLastShown < 1000) {
+                return;
+            }
+
+            compatibilityWarningLastShown = + new Date();
+
+            vscode.window.showWarningMessage(
+                'The configuration workspaceType no longer has any effect. Please use provide an hie.yaml. See extension readme for details. Remove from settings to dismiss.',
+                'Remove workspaceType configuration'
+            ).then((opt) => {
+                compatibilityWarningLastShown = + new Date();
+                if (opt == 'Remove workspaceType configuration') {
+                    const insp = conf.inspect('workspaceType');
+                    if (insp.globalValue)
+                        conf.update('workspaceType', undefined, true);
+                    if (insp.workspaceValue)
+                        conf.update('workspaceType', undefined, false);
+                }
+            });
+        }
+    }
 
     const session = (() => {
         if (-1 !== ['custom-workspace', 'stack', 'cabal', 'cabal new', 'cabal v2'].indexOf(type)) {
             // stack or cabal
 
-            if (! ext.workspaceManagers.has(folder))
+            if (! ext.workspaceManagers.has(folder)) {
+                displayCompatibilityWarning();
                 ext.workspaceManagers.set(folder,
                     new Session(ext, type, 'workspace', folder.uri));
+            }
 
             return ext.workspaceManagers.get(folder);
         } else {
             // bare or bare-stack
 
-            if (! ext.documentManagers.has(doc))
+            if (! ext.documentManagers.has(doc)) {
+                displayCompatibilityWarning();
                 ext.documentManagers.set(doc,
                     new Session(ext, type, 'file', doc.uri));
+            }
 
             return ext.documentManagers.get(doc);
         }
@@ -84,10 +119,8 @@ function hasStack(cwd?: string): Promise<boolean> {
 }
 
 export async function computeFileType(): Promise<HaskellWorkspaceType> {
-    if (vscode.workspace.getConfiguration('ghcSimple').replCommand)
-        return 'custom-file';
-    else if (await hasStack())
-        return 'bare-stack';
+    if (await hasStack())
+        return 'bare-stack'
     else
         return 'bare';
 }

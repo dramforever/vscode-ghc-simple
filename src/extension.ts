@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { registerRangeType } from './features/range-type';
 import { registerCompletion } from './features/completion';
-import { ExtensionState } from './extension-state';
+import { ExtensionState } from './bios/extension-state';
 import { registerDiagnostics } from './features/diagnostics';
 import { registerDefinition } from './features/definition';
 import { registerReference } from './features/reference';

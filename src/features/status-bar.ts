@@ -1,6 +1,6 @@
-import { GhciManager } from "../ghci";
+import { GhciManager } from "../bios/ghci";
 import * as vscode from "vscode";
-import { Session } from "../session";
+import { Session } from "../bios/session";
 
 export type GhciStatus =
     { status: "busy", info: string | null }

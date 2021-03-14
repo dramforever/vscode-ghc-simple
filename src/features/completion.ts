@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from '../extension-state';
+import { ExtensionState, startSession } from '../bios/extension-state';
 import { getFeatures, haskellReplLine, haskellSelector, getIdentifierDocs } from '../utils';
 
 export function registerCompletion(ext: ExtensionState) {

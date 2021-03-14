@@ -98,7 +98,7 @@ When reporting an issue please also attach relevant log output, ideally (but not
 
     GHCi's `:info` writes instance information, which is usually excessively long and not useful for a quick look. With this option, these are filtered out. Enabled by default.
 
-- `ghcSimple.workspaceType`: *This option is deprecated.* See `ghcSimple.replCommand` and `ghcSimple.replScope`.
+- `ghcSimple.workspaceType`: Removed and has no effect. Please use an `hie.yaml` file.
 
 - `ghcSimple.replCommand`: The command used to start GHCi.
 

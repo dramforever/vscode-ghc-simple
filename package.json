@@ -112,7 +112,7 @@
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
-                    "markdownDescription": "*This option is deprecated.* See `ghcSimple.replCommand` and `ghcSimple.replScope`.",
+                    "markdownDescription": "Removed and has no effect. Please use an `hie.yaml` file. See readme for details.",
                     "scope": "resource",
                     "enum": [
                         "detect",

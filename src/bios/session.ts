@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { GhciManager } from "./ghci";
 import { ExtensionState, HaskellWorkspaceType } from "./extension-state";
-import { stackCommand, reportError } from './utils';
+import { stackCommand, reportError } from '../utils';
 
 export class Session implements vscode.Disposable {
     ghci: GhciManager;
