@@ -139,6 +139,10 @@
                     "default": "workspace",
                     "markdownDescription": "Whether GHCi should be started for a project or individual files.\n\n**Note**: This option has no effect when `ghcSimple.replCommand` is set to empty string for auto detection."
                 },
+                "ghcSimple.replLinger": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Whether GHCi sessions for workspaces linger after closing all associated documents.\n\nWhen enabled, the GHCi startup time is saved but takes more memory when idle. When disabled, kills GHCi after all associated files are closed, saves memory but takes time to restart. GHCi for a single file never linger."
                 },
                 "ghcSimple.startupCommands.all": {
                     "type": "array",

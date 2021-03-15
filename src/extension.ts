@@ -36,8 +36,20 @@ export function activate(context: vscode.ExtensionContext) {
     const diagInit = registerDiagnostics(ext);
 
     function restart() {
-        for (const [doc, state] of ext.documentSessions) {
-            state.session.dispose();
+        const disposed = new Set();
+
+        for (const [_doc, state] of ext.documentSessions) {
+            if (! disposed.has(state)) {
+                state.session.dispose();
+                disposed.add(state);
+            }
+        }
+
+        for (const [_keyString, state] of ext.sharableSessions) {
+            if (! disposed.has(state)) {
+                state.session.dispose();
+                disposed.add(state);
+            }
         }
 
         ext.documentSessions.clear();

@@ -89,6 +89,8 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 }
 
 export function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
+    const cfg = vscode.workspace.getConfiguration('ghcSimple', doc);
+
     if (! ext.documentSessions.has(doc)) {
         return; // Nothing to stop
     }
@@ -98,7 +100,8 @@ export function stopSession(ext: ExtensionState, doc: vscode.TextDocument) {
     state.documents.delete(doc);
     ext.documentSessions.delete(doc);
 
-    if (state.documents.size === 0 && state.key === null) {
+    if (state.documents.size === 0
+        && (state.key === null || ! cfg.replLinger)) {
         state.session.dispose();
         ext.sharableSessions.delete(config.configKeyToString(state.key));
     }
