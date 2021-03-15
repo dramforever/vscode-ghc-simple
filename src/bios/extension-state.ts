@@ -73,6 +73,7 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 
     ext.outputChannel.appendLine(`Starting for ${doc.uri.fsPath}, key = ${keyString}`);
     const session = new Session(ext, conf.command, conf.cwd, doc.uri);
+    displayCompatibilityWarning();
     const state: SessionState = {
         session,
         key: conf.key,
