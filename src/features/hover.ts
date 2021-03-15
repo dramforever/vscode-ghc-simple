@@ -17,6 +17,8 @@ export function registerHover(ext: ExtensionState) {
         if (! range) return null;
 
         const session = await startSession(ext, document);
+        if (session === null) return null;
+
         await session.loading;
         const documentation = await getIdentifierDocs(
             session, document.uri, document.getText(range)

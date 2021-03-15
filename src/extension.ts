@@ -12,17 +12,16 @@ import { registerHover } from './features/hover';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
-    const documentAssignment = new WeakMap();
-    const statusBar = new StatusBar(documentAssignment);
+    const documentSessions = new Map();
+    const sharableSessions = new Map();
+    const statusBar = new StatusBar(documentSessions);
 
     const ext: ExtensionState = {
         context,
         outputChannel,
         statusBar,
-        documentManagers: new Map(),
-        workspaceManagers: new Map(),
-        workspaceTypeMap: new Map(),
-        documentAssignment
+        documentSessions,
+        sharableSessions
     };
 
     context.subscriptions.push(outputChannel, statusBar);
@@ -37,19 +36,12 @@ export function activate(context: vscode.ExtensionContext) {
     const diagInit = registerDiagnostics(ext);
 
     function restart() {
-        for (const [doc, session] of ext.documentManagers) {
-            session.dispose();
+        for (const [doc, state] of ext.documentSessions) {
+            state.session.dispose();
         }
 
-        ext.documentManagers.clear();
-
-        for (const [ws, session] of ext.workspaceManagers) {
-            session.dispose();
-        }
-
-        ext.workspaceManagers.clear();
-
-        ext.documentAssignment = new WeakMap();
+        ext.documentSessions.clear();
+        ext.sharableSessions.clear();
 
         diagInit();
     }
@@ -66,10 +58,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('vscode-ghc-simple.restart', restart),
         vscode.commands.registerCommand('vscode-ghc-simple.openOutput', openOutput));
 
-    vscode.workspace.onDidChangeWorkspaceFolders((changeEvent) => {
-        for (const folder of changeEvent.removed)
-            if (ext.workspaceManagers.has(folder))
-                ext.workspaceManagers.get(folder).dispose();
+    vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        restart();
     })
 }
 

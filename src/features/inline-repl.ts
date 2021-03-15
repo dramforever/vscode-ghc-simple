@@ -101,6 +101,8 @@ export function registerInlineRepl(ext: ExtensionState) {
                 const { outputRange, commands, prefix } = res;
 
                 const session = await startSession(ext, textEditor.document);
+                if (session === null) return;
+
                 await session.loading;
                 await session.loadInterpreted(textEditor.document.uri);
 

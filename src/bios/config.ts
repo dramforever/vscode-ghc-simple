@@ -1,5 +1,6 @@
 import * as child_process from 'child_process';
 import * as vscode from 'vscode';
+import { getStackIdeTargets } from '../utils';
 import * as hie from './hie-bios';
 
 /**
@@ -30,7 +31,7 @@ export interface Configuration {
      * configurations have a sharing key and the key is the same, they can share
      * a GHCi.
      */
-    sharing: 'none' | ConfigKey ;
+    key: null | ConfigKey ;
 
     /**
      * The command to run, in the form of shell command string or argument list
@@ -72,14 +73,14 @@ function hasStack(): Promise<boolean> {
 async function singleConfig(cwd?: string): Promise<Configuration> {
     if (await hasStack()) {
         return {
-            sharing: 'none',
+            key: null,
             command: 'stack exec ghci',
             cwd,
             dependencies: []
         };
     } else {
         return {
-            sharing: 'none',
+            key: null,
             command: 'ghci',
             cwd,
             dependencies: []
@@ -88,14 +89,19 @@ async function singleConfig(cwd?: string): Promise<Configuration> {
 }
 
 /** Configuration for a custom command */
-function customConfig(
+async function customConfig(
     replScope: 'workspace' | 'file',
     replCommand: string,
     workspaceUri: vscode.Uri
-): Configuration {
+): Promise<Configuration> {
+    if (replCommand.indexOf('$stack_ide_targets') !== -1) {
+        const sit = await this.getStackIdeTargets();
+        replCommand.replace(/\$stack_ide_targets/g, sit.join(' '));
+    }
+
     return {
-        sharing: replScope === 'file'
-            ? 'none'
+        key: replScope === 'file'
+            ? null
             : { type: 'custom-workspace', uri: workspaceUri.toString() },
         cwd: workspaceUri.fsPath,
         command: replCommand,
@@ -140,7 +146,7 @@ async function hieBiosConfig(
     const worker = (config: hie.HieConfig): Configuration => {
 
         const makeCabalConfig = (component: string): Configuration => ({
-            sharing: {
+            key: {
                 type: 'hie-bios-cabal',
                 uri: workspace.uri.toString(),
                 component: component
@@ -148,22 +154,22 @@ async function hieBiosConfig(
             cwd: workspace.uri.fsPath,
             command: [ 'cabal', 'repl', component ],
             dependencies:  [
-                ... config.dependencies,
+                ... config.dependencies || [],
                 new vscode.RelativePattern(workspace, 'hie.yaml'),
                 new vscode.RelativePattern(workspace, '*.cabal')
             ]
         });
 
         const makeStackConfig = (component: string): Configuration => ({
-            sharing: {
-                type: 'hie-bios-cabal',
+            key: {
+                type: 'hie-bios-stack',
                 uri: workspace.uri.toString(),
                 component: component
             },
             cwd: workspace.uri.fsPath,
             command: [ 'stack', 'repl', component ],
             dependencies:  [
-                ... config.dependencies,
+                ... config.dependencies || [],
                 new vscode.RelativePattern(workspace, 'hie.yaml'),
                 new vscode.RelativePattern(workspace, '*.cabal'),
                 new vscode.RelativePattern(workspace, 'package.yaml'),
@@ -231,4 +237,45 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
         // hie-bios cradle
         return hieBiosConfig(workspace, docUri);
     }
+
+    const makeCabalConfig = (): Configuration => ({
+        key: {
+            type: 'detect-cabal',
+            uri: workspace.uri.toString(),
+        },
+        cwd: workspace.uri.fsPath,
+        command: [ 'cabal', 'v2-repl', 'all' ],
+        dependencies:  [
+            new vscode.RelativePattern(workspace, '*.cabal'),
+            new vscode.RelativePattern(workspace, 'cabal.project')
+        ]
+    });
+
+    const makeStackConfig = (targets: string[]): Configuration => ({
+        key: {
+            type: 'detect-stack',
+            uri: workspace.uri.toString(),
+        },
+        cwd: workspace.uri.fsPath,
+        command: [ 'stack', 'repl', ... targets],
+        dependencies:  [
+            new vscode.RelativePattern(workspace, '*.cabal'),
+            new vscode.RelativePattern(workspace, 'package.yaml'),
+            new vscode.RelativePattern(workspace, 'stack.yaml'),
+        ]
+    });
+
+    if ((await find('stack.yaml')).length > 0) {
+        try {
+            return makeStackConfig(await getStackIdeTargets());
+        } catch (e) {
+            // Try others
+        }
+    }
+
+    if ((await find('*.cabal')).length > 0 || (await find('cabal.project')).length > 0) {
+        return makeCabalConfig();
+    }
+
+    return singleConfig();
 }

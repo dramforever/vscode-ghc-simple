@@ -22,7 +22,7 @@ interface PendingCommand extends StrictCommandConfig {
 
 export class GhciManager implements Disposable {
     proc: child_process.ChildProcess | null;
-    command: string;
+    command: string | string[];
     options: any;
     stdout: readline.ReadLine;
     stderr: readline.ReadLine;
@@ -30,7 +30,7 @@ export class GhciManager implements Disposable {
 
     wasDisposed: boolean;
 
-    constructor(command: string, options: any, ext: ExtensionState) {
+    constructor(command: string | string[], options: any, ext: ExtensionState) {
         this.proc = null;
         this.command = command;
         this.options = options;
@@ -70,11 +70,24 @@ export class GhciManager implements Disposable {
     async start(): Promise<child_process.ChildProcess> {
         this.checkDisposed();
 
-        this.proc = child_process.spawn(this.command, {
-            ... this.options,
-            stdio: 'pipe',
-            shell: true
-        });
+        if (Array.isArray(this.command)) {
+            this.proc = child_process.spawn(
+                this.command[0],
+                this.command.slice(1),
+                {
+                    ... this.options,
+                    stdio: 'pipe',
+                    shell: false,
+                }
+            );
+        } else {
+            this.proc = child_process.spawn(this.command, {
+                ... this.options,
+                stdio: 'pipe',
+                shell: true
+            });
+        }
+
         this.proc.on('exit', () => { this.proc = null; });
         this.proc.on('error', () => { this.proc = null; });
 

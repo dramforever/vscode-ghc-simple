@@ -14,6 +14,7 @@ export function registerReference(ext: ExtensionState) {
             return;
 
         const session = await startSession(ext, document);
+        if (session === null) return;
 
         const range = document.getWordRangeAtPosition(position, haskellSymbolRegex);
 

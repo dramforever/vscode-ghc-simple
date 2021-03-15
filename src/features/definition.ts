@@ -14,6 +14,7 @@ export function registerDefinition(ext: ExtensionState) {
             return null;
 
         const session = await startSession(ext, document);
+        if (session === null) return null;
 
         //             ------------------------ maybe qualified
         //                                      ------------------------ operator

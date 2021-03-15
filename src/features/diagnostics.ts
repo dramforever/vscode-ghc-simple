@@ -148,6 +148,7 @@ async function checkHaskell(
 
     if (documentIsHaskell(document)) {
         const session: Session = await startSession(ext, document);
+        if (session === null) return false;
 
         const result = await session.reload();
 

@@ -183,6 +183,8 @@ export function registerRangeType(ext: ExtensionState) {
             selTimeout = setTimeout(async () => {
                 try {
                     const session = await startSession(ext, doc);
+                    if (session === null) return;
+
                     const res = await getType(session, sel, doc);
                     if (res !== null) {
                         const [range, type] = res;
