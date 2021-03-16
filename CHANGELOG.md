@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.1.24
+
+- ([#88](https://github.com/dramforever/vscode-ghc-simple/issues/88)) Work around cases where GHC prints diagnostics with column number 0. Thanks to [agocorona](https://github.com/agocorona) for reporting this issue.
+
 ## v0.1.23
 
 - ([#81](https://github.com/dramforever/vscode-ghc-simple/issues/81) Opening a file without a workspace honors `ghcSimple.replCommand`. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
