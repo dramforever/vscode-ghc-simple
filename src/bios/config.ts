@@ -145,14 +145,14 @@ async function hieBiosConfig(
 
     const worker = (config: hie.HieConfig): Configuration => {
 
-        const makeCabalConfig = (component: string): Configuration => ({
+        const makeCabalConfig = (component: hie.CabalComponent): Configuration => ({
             key: {
                 type: 'hie-bios-cabal',
                 uri: workspace.uri.toString(),
-                component: component
+                component: component.component
             },
             cwd: workspace.uri.fsPath,
-            command: [ 'cabal', 'repl', component ],
+            command: [ 'cabal', 'repl', component.component ],
             dependencies:  [
                 ... config.dependencies || [],
                 new vscode.RelativePattern(workspace, 'hie.yaml'),
@@ -160,22 +160,32 @@ async function hieBiosConfig(
             ]
         });
 
-        const makeStackConfig = (component: string): Configuration => ({
-            key: {
-                type: 'hie-bios-stack',
-                uri: workspace.uri.toString(),
-                component: component
-            },
-            cwd: workspace.uri.fsPath,
-            command: [ 'stack', 'repl', component ],
-            dependencies:  [
-                ... config.dependencies || [],
-                new vscode.RelativePattern(workspace, 'hie.yaml'),
-                new vscode.RelativePattern(workspace, '*.cabal'),
-                new vscode.RelativePattern(workspace, 'package.yaml'),
-                new vscode.RelativePattern(workspace, 'stack.yaml'),
-            ]
-        });
+        const makeStackConfig = (
+            component: hie.StackComponent,
+            defaultStackYaml: string | null
+        ): Configuration => {
+            const stackYaml = component.stackYaml || defaultStackYaml;
+            const stackYamlOpts =
+                stackYaml
+                ? [ '--stack-yaml', stackYaml ]
+                : [];
+
+            return {
+                key: {
+                    type: 'hie-bios-stack',
+                    uri: workspace.uri.toString(),
+                    component: component.component
+                },
+                cwd: workspace.uri.fsPath,
+                command: [ 'stack', 'repl', ... stackYamlOpts, component.component ],
+                dependencies:  [
+                    ... config.dependencies || [],
+                    new vscode.RelativePattern(workspace, 'hie.yaml'),
+                    new vscode.RelativePattern(workspace, '*.cabal'),
+                    new vscode.RelativePattern(workspace, 'package.yaml')
+                ]
+            }
+        };
 
         const cradle = config.cradle;
 
@@ -185,7 +195,7 @@ async function hieBiosConfig(
                 if (res === null) {
                     return null;
                 } else {
-                    return makeCabalConfig(res.component);
+                    return makeCabalConfig(res);
                 }
             };
 
@@ -194,15 +204,18 @@ async function hieBiosConfig(
             } else if (Array.isArray(cradle.cabal)) {
                 return go(cradle.cabal);
             } else {
-                return makeCabalConfig(cradle.cabal.component);
+                return makeCabalConfig(cradle.cabal);
             }
         } else if ('stack' in cradle) {
+            const defaultStackYaml =
+                ('stackYaml' in cradle.stack) ? cradle.stack.stackYaml : null;
+
             const go = (components: hie.Multi<hie.StackComponent>) => {
                 const res = findMulti(components);
                 if (res === null) {
                     return null;
                 } else {
-                    return makeStackConfig(res.component);
+                    return makeStackConfig(res, defaultStackYaml);
                 }
             };
 
@@ -211,7 +224,7 @@ async function hieBiosConfig(
             } else if (Array.isArray(cradle.stack)) {
                 return go(cradle.stack);
             } else {
-                return makeStackConfig(cradle.stack.component);
+                return makeStackConfig(cradle.stack, defaultStackYaml);
             }
         } else if ('multi' in cradle) {
             const res = findMulti(cradle.multi);
@@ -259,6 +272,7 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
         command: [ 'cabal', 'v2-repl', 'all' ],
         dependencies:  [
             new vscode.RelativePattern(workspace, '*.cabal'),
+            new vscode.RelativePattern(workspace, 'package.yaml'),
             new vscode.RelativePattern(workspace, 'cabal.project'),
             new vscode.RelativePattern(workspace, 'cabal.project.local')
         ]

@@ -17,12 +17,16 @@ export type Cabal =
 
 export interface StackComponent {
     component: string;
+    stackYaml?: string;
 }
 
 export type Stack =
     StackComponent
     | Multi<StackComponent>
-    | { components: Multi<StackComponent> };
+    | {
+        stackYaml?: string,
+        components: Multi<StackComponent>
+    };
 
 export interface Bios {
     program: string,
