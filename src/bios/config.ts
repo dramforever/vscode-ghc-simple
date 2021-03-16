@@ -292,7 +292,12 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
         ]
     });
 
-    if ((await find('stack.yaml')).length > 0) {
+    if ((await find('dist-newstyle')).length > 0) {
+        return makeCabalConfig();
+    }
+
+    if ((await find('.stack-work')).length > 0
+        || (await find('stack.yaml')).length > 0) {
         try {
             return makeStackConfig(await getStackIdeTargets());
         } catch (e) {
