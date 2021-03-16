@@ -42,20 +42,26 @@ function parseMessages(messages: string[]):
         if (res_heading !== null) {
             const range: vscode.Range = (() => {
 
+            // Column number can be 0, which when passed to VSCode becomes -1.
+            // VSCode does not like this and errors out.
+            //
+            // https://github.com/dramforever/vscode-ghc-simple/issues/88
+            const fixCol = (n: number) => (n <= 0) ? 1 : n;
+
             function num(n: number): number { return parseInt(res_heading[n]); }
                 if (res_heading[2]) {
                     // line:col
                     const line = num(2);
                     const col = num(3);
 
-                    return new vscode.Range(line - 1, col - 1, line - 1, col);
+                    return new vscode.Range(line - 1, fixCol(col - 1), line - 1, fixCol(col));
                 } else if (res_heading[4]) {
                     // line:col-col
                     const line = num(4);
                     const col0 = num(5);
                     const col1 = num(6);
 
-                    return new vscode.Range(line - 1, col0 - 1, line - 1, col1);
+                    return new vscode.Range(line - 1, fixCol(col0 - 1), line - 1, fixCol(col1));
                 } else if (res_heading[7]) {
                     // (line,col)-(line,col)
                     const line0 = num(7);
@@ -63,7 +69,7 @@ function parseMessages(messages: string[]):
                     const line1 = num(9);
                     const col1 = num(10);
 
-                    return new vscode.Range(line0 - 1, col0 - 1, line1 - 1, col1);
+                    return new vscode.Range(line0 - 1, fixCol(col0 - 1), line1 - 1, fixCol(col1));
                 } else {
                     // Shouldn't happen!
                     throw 'Strange heading in parseMessages';
