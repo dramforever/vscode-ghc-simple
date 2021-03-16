@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const diagInit = registerDiagnostics(ext);
 
-    function restart() {
+    function killEverything() {
         const disposed = new Set();
 
         for (const [_doc, state] of ext.documentSessions) {
@@ -54,7 +54,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         ext.documentSessions.clear();
         ext.sharableSessions.clear();
+    }
 
+    function restart() {
+        killEverything();
         diagInit();
     }
 
@@ -67,6 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (event.affectsConfiguration('ghcSimple'))
                 restart();
         }),
+        { dispose: killEverything },
         vscode.commands.registerCommand('vscode-ghc-simple.restart', restart),
         vscode.commands.registerCommand('vscode-ghc-simple.openOutput', openOutput));
 

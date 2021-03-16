@@ -1,8 +1,8 @@
-import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { Session } from './session';
 import { StatusBar } from '../features/status-bar';
 import * as config from './config';
+import { kill } from 'process';
 
 export type HaskellWorkspaceType = 'custom-workspace' | 'custom-file' | 'cabal' | 'cabal new' | 'cabal v2' | 'stack' | 'bare-stack' | 'bare';
 
@@ -73,12 +73,41 @@ export async function startSession(ext: ExtensionState, doc: vscode.TextDocument
 
     ext.outputChannel.appendLine(`Starting for ${doc.uri.fsPath}, key = ${keyString}`);
     const session = new Session(ext, conf.command, conf.cwd, doc.uri);
+
     displayCompatibilityWarning();
     const state: SessionState = {
         session,
         key: conf.key,
         documents: new Set([doc])
     };
+
+    let isDisposed = false;
+
+    const watchers = conf.dependencies.map((glob) => {
+        const w = vscode.workspace.createFileSystemWatcher(glob);
+        w.onDidChange(killSession);
+        w.onDidCreate(killSession);
+        w.onDidDelete(killSession);
+        return w;
+    })
+
+    function killSession() {
+        if (isDisposed) return;
+        isDisposed = true;
+
+        for (const w of watchers) {
+            w.dispose();
+        }
+
+        session.dispose();
+
+        for (const doc of state.documents)
+            ext.documentSessions.delete(doc);
+
+        if (conf.key !== null) {
+            ext.sharableSessions.delete(keyString);
+        }
+    }
 
     ext.documentSessions.set(doc, state);
     if (conf.key !== null) {
