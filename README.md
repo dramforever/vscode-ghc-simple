@@ -64,17 +64,63 @@ Currently implemented features:
 
 Since around GHC 8, the compiler GHC and its interactive REPL GHCi has gained various tooling-related features. These allow for more tooling that communicate with the compiler using text IO and files, instead of a Haskell API. This project aims to explore the possibilities provided by said features, by implementing Haskell tooling within the editor VSCode.
 
-## Usage
-
-### Basic usage
+## Basic usage
 
 Install the extension from the marketplace or using the Quick Open command `ext install dramforever.vscode-ghc-simple`. Open individual Haskell source files or projects, and vscode-ghc-simple will auto-detect the appropriate way to start a GHCi and communicate with it to provide editor tooling. Configuration options can be used to tweak the (see below).
 
-Please note that projects should be opened so that the top-level configuration file (`stack.yaml` or `*.cabal`) is at the workspace root. This way the extension can detect the project.
+Please note that projects should be opened so that the top-level configuration file (`stack.yaml` or `*.cabal`) is at the workspace root. This way the extension can detect the project correctly.
 
-Also note that when the project configuration is changed, the `Restart GHCi sessions` command needs to be issued manually for changes to take place. Again, see below.
+## Configuration
 
-### Debugging/issues
+There are three ways to use vscode-ghc-simple:
+
+### Using `hie.yaml` (Recommended)
+
+Create a file called `hie.yaml` in your project root, and configure it based on [hie-bios documentation].
+
+[hie-bios documentation]: https://github.com/mpickering/hie-bios#explicit-configuration
+
+Examples taken from hie-bios documentation, shortened for breivity:
+
+```yaml
+cradle:
+  cabal:
+    - path: "./src"
+      component: "lib:hie-bios"
+    - path: "./exe"
+      component: "exe:hie-bios"
+    # More components
+```
+
+```yaml
+cradle:
+  stack:
+    - path: "./src"
+      component: "hie-bios:lib"
+    - path: "./exe"
+      component: "hie-bios:exe:hie-bios"
+    # More components
+```
+
+We currently support basic features of `stack` and `cabal` cradles.
+
+### Legacy configuration
+
+You can use `ghcSimple.replCommand` as before, but it cannot handle multi-components
+
+If you specify neither of the above, your project may work anyway, but multi-component and/or multi-package projects may have issues.
+
+### Removed: `workspaceType`
+
+`ghcSimple.workspaceType` was deprecated, and now has no effect. Please consider other options. You will be shown a warning if a set `ghcSimple.workspaceType` is detected and will be prompted to remove it.
+
+## Restarting GHCi sessions
+
+vscode-ghc-simple tries to watch for changes in crucial configuration files, such as `stack.yaml`, `hie.yaml` or `*.cabal`. If however it does not work and the sessions use stale configuration anyway, or if reasons other than configurations file changing causes stale configuration to be used, you can use the `Restart GHCi sessions` command in the Command Palette to manually restart the GHCi sessions.
+
+Common symptoms include dependencies not appearing, or extensions specified in `*.cabal` or `package.yaml` not being enabled. If you are affected by this, and the need to restart can be detected from a workspace file change, consider opening an issue.
+
+## Debugging/issues
 
 The full log of interaction between GHCi and this extension can be found by clicking the 'GHC' item on the status bar:
 
@@ -82,13 +128,13 @@ The full log of interaction between GHCi and this extension can be found by clic
 
 When reporting an issue please also attach relevant log output, ideally (but not necessarily) from a fresh start (`Developer: Reload Window` command) to reproduction of the bug. You can also check there when things go unexpectedly.
 
-### Commands
+## Commands
 
 - `vscode-ghc-simple.restart`: Restart GHCi sessions
 
-    vscode-ghc-simple currently lacks a way of detecting changes of critical configuration files such as `stack.yaml` or `*.cabal`. Run this command whenever, had you been running GHCi manually, you would restart it.
+    vscode-ghc-simple tries to watch for changes in crucial configuration files. If however it does not work and the sessions use stale configuration, you can use this command to manually restart the GHCi sessions.
 
-### Configuration options
+## Configuration options
 
 - `ghcSimple.feature.*`: Feature switches
 
