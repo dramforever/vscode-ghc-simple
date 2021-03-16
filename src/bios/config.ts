@@ -247,7 +247,8 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
         command: [ 'cabal', 'v2-repl', 'all' ],
         dependencies:  [
             new vscode.RelativePattern(workspace, '*.cabal'),
-            new vscode.RelativePattern(workspace, 'cabal.project')
+            new vscode.RelativePattern(workspace, 'cabal.project'),
+            new vscode.RelativePattern(workspace, 'cabal.project.local')
         ]
     });
 
@@ -261,7 +262,7 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
         dependencies:  [
             new vscode.RelativePattern(workspace, '*.cabal'),
             new vscode.RelativePattern(workspace, 'package.yaml'),
-            new vscode.RelativePattern(workspace, 'stack.yaml'),
+            new vscode.RelativePattern(workspace, 'stack.yaml')
         ]
     });
 
@@ -273,7 +274,9 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
         }
     }
 
-    if ((await find('*.cabal')).length > 0 || (await find('cabal.project')).length > 0) {
+    if ((await find('*.cabal')).length > 0
+        || (await find('cabal.project')).length > 0
+        || (await find('cabal.project.local')).length > 0) {
         return makeCabalConfig();
     }
 
