@@ -10,13 +10,19 @@ export interface CabalComponent {
     component: string;
 }
 
-export type Cabal = CabalComponent | Multi<CabalComponent>;
+export type Cabal =
+    CabalComponent
+    | Multi<CabalComponent>
+    | { components: Multi<CabalComponent> };
 
 export interface StackComponent {
     component: string;
 }
 
-export type Stack = StackComponent | Multi<StackComponent>;
+export type Stack =
+    StackComponent
+    | Multi<StackComponent>
+    | { components: Multi<StackComponent> };
 
 export interface Bios {
     program: string,

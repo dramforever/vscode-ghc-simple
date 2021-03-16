@@ -180,24 +180,36 @@ async function hieBiosConfig(
         const cradle = config.cradle;
 
         if ('cabal' in cradle) {
-            if (Array.isArray(cradle.cabal)) { // multi
-                const res = findMulti(cradle.cabal);
+            const go = (components: hie.Multi<hie.CabalComponent>) => {
+                const res = findMulti(components);
                 if (res === null) {
                     return null;
                 } else {
                     return makeCabalConfig(res.component);
                 }
+            };
+
+            if ('components' in cradle.cabal) {
+                return go(cradle.cabal.components);
+            } else if (Array.isArray(cradle.cabal)) {
+                return go(cradle.cabal);
             } else {
                 return makeCabalConfig(cradle.cabal.component);
             }
         } else if ('stack' in cradle) {
-            if (Array.isArray(cradle.stack)) {
-                const res = findMulti(cradle.stack);
+            const go = (components: hie.Multi<hie.StackComponent>) => {
+                const res = findMulti(components);
                 if (res === null) {
                     return null;
                 } else {
                     return makeStackConfig(res.component);
                 }
+            };
+
+            if ('components' in cradle.stack) {
+                return go(cradle.stack.components);
+            } else if (Array.isArray(cradle.stack)) {
+                return go(cradle.stack);
             } else {
                 return makeStackConfig(cradle.stack.component);
             }
