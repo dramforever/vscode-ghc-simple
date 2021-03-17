@@ -11,17 +11,19 @@ export interface CabalComponent {
 }
 
 export type Cabal =
-    CabalComponent
+    null
+    | CabalComponent
     | Multi<CabalComponent>
     | { components: Multi<CabalComponent> };
 
 export interface StackComponent {
-    component: string;
+    component?: string;
     stackYaml?: string;
 }
 
 export type Stack =
-    StackComponent
+    null
+    | StackComponent
     | Multi<StackComponent>
     | {
         stackYaml?: string,

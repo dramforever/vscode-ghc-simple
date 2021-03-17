@@ -160,15 +160,28 @@ async function hieBiosConfig(
             ]
         });
 
+        const makeCabalNullConfig = (): Configuration => ({
+            key: {
+                type: 'hie-bios-cabal-null',
+                uri: workspace.uri.toString()
+            },
+            cwd: workspace.uri.fsPath,
+            command: [ 'cabal', 'repl' ],
+            dependencies:  [
+                ... config.dependencies || [],
+                new vscode.RelativePattern(workspace, 'stack.yaml'),
+                new vscode.RelativePattern(workspace, 'hie.yaml'),
+                new vscode.RelativePattern(workspace, '*.cabal')
+            ]
+        });
+
         const makeStackConfig = (
             component: hie.StackComponent,
             defaultStackYaml: string | null
         ): Configuration => {
             const stackYaml = component.stackYaml || defaultStackYaml;
-            const stackYamlOpts =
-                stackYaml
-                ? [ '--stack-yaml', stackYaml ]
-                : [];
+            const stackYamlOpts = stackYaml ? [ '--stack-yaml', stackYaml ] : [];
+            const componentOpts = component.component ? [ component.component ] : [];
 
             return {
                 key: {
@@ -177,7 +190,25 @@ async function hieBiosConfig(
                     component: component.component
                 },
                 cwd: workspace.uri.fsPath,
-                command: [ 'stack', 'repl', ... stackYamlOpts, component.component ],
+                command: [ 'stack', 'repl', ... stackYamlOpts, ... componentOpts ],
+                dependencies:  [
+                    ... config.dependencies || [],
+                    stackYaml || new vscode.RelativePattern(workspace, 'stack.yaml'),
+                    new vscode.RelativePattern(workspace, 'hie.yaml'),
+                    new vscode.RelativePattern(workspace, '*.cabal'),
+                    new vscode.RelativePattern(workspace, 'package.yaml')
+                ]
+            }
+        };
+
+        const makeStackNullConfig = (): Configuration => {
+            return {
+                key: {
+                    type: 'hie-bios-stack-null',
+                    uri: workspace.uri.toString()
+                },
+                cwd: workspace.uri.fsPath,
+                command: [ 'stack', 'repl' ],
                 dependencies:  [
                     ... config.dependencies || [],
                     new vscode.RelativePattern(workspace, 'hie.yaml'),
@@ -199,7 +230,9 @@ async function hieBiosConfig(
                 }
             };
 
-            if ('components' in cradle.cabal) {
+            if (cradle.cabal === null) {
+                return makeCabalNullConfig();
+            } else if ('components' in cradle.cabal) {
                 return go(cradle.cabal.components);
             } else if (Array.isArray(cradle.cabal)) {
                 return go(cradle.cabal);
@@ -208,7 +241,7 @@ async function hieBiosConfig(
             }
         } else if ('stack' in cradle) {
             const defaultStackYaml =
-                ('stackYaml' in cradle.stack) ? cradle.stack.stackYaml : null;
+                (cradle.stack && 'stackYaml' in cradle.stack) ? cradle.stack.stackYaml : null;
 
             const go = (components: hie.Multi<hie.StackComponent>) => {
                 const res = findMulti(components);
@@ -219,7 +252,9 @@ async function hieBiosConfig(
                 }
             };
 
-            if ('components' in cradle.stack) {
+            if (cradle.stack === null) {
+                return makeStackNullConfig();
+            } else if ('components' in cradle.stack) {
                 return go(cradle.stack.components);
             } else if (Array.isArray(cradle.stack)) {
                 return go(cradle.stack);
