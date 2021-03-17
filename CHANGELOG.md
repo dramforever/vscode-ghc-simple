@@ -6,9 +6,9 @@
 
 ## v0.1.23
 
-- ([#81](https://github.com/dramforever/vscode-ghc-simple/issues/81) Opening a file without a workspace honors `ghcSimple.replCommand`. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
-- ([#85](https://github.com/dramforever/vscode-ghc-simple/issues/85) Running inline REPL now loads the module in which the code block is located. Should mean less confusing behavior. If before you get strange issues with variables not found, and it is worked around by making a random edit to the file, this should fix this problem for you.
-- ([#83](https://github.com/dramforever/vscode-ghc-simple/issues/83) The extension no longer blocks `shift+enter` from being used with the search bar.
+- ([#81](https://github.com/dramforever/vscode-ghc-simple/issues/81)) Opening a file without a workspace honors `ghcSimple.replCommand`. Thanks to [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
+- ([#85](https://github.com/dramforever/vscode-ghc-simple/issues/85)) Running inline REPL now loads the module in which the code block is located. Should mean less confusing behavior. If before you get strange issues with variables not found, and it is worked around by making a random edit to the file, this should fix this problem for you.
+- ([#83](https://github.com/dramforever/vscode-ghc-simple/issues/83)) The extension no longer blocks `shift+enter` from being used with the search bar.
 - Dependency updates and other minor fixes and improvements
 
 ## v0.1.22
@@ -36,8 +36,8 @@
 ## v0.1.19
 
 - Better icon. Geometrically derived from the logo on <https://haskell.org> using [Inkscape](https://inkscape.org/), instead of the old mixture of eye-measured lines and manually painted background.
-- [#54](https://github.com/dramforever/vscode-ghc-simple/issues/54) Stack setup no longer uses `--stdout` with `stack ide targets`, making it compatible with older stack versions.
-- [#55](https://github.com/dramforever/vscode-ghc-simple/issues/55) Status bar indicator for GHC, telling you whether it is busy and what it's doing. Click to show logs.
+- ([#54](https://github.com/dramforever/vscode-ghc-simple/issues/54)) Stack setup no longer uses `--stdout` with `stack ide targets`, making it compatible with older stack versions.
+- ([#55](https://github.com/dramforever/vscode-ghc-simple/issues/55)) Status bar indicator for GHC, telling you whether it is busy and what it's doing. Click to show logs.
 - Evaluation in GHCi no longer gets deferred type errors.
 
 ## v0.1.18, v0.1.17
@@ -47,12 +47,12 @@
 
 ## v0.1.16
 
-- [#41](https://github.com/dramforever/vscode-ghc-simple/issues/41) Further possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
+- ([#41](https://github.com/dramforever/vscode-ghc-simple/issues/41)) Further possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
 - Internal: Fix warnings about unhandled rejected promises.
 
 ## v0.1.15
 
-- [#41](https://github.com/dramforever/vscode-ghc-simple/issues/41) Possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
+- ([#41](https://github.com/dramforever/vscode-ghc-simple/issues/41)) Possible fix for 'rogue' GHCi processes consuming large amount of CPU and memory resources.
 
 ## v0.1.14
 
@@ -60,7 +60,7 @@
 
 ## v0.1.13
 
-- Detect current ghci search for go to definition for multi-package setups. By [dimsmol](https://github.com/dimsmol) ([#42](https://github.com/dramforever/vscode-ghc-simple/pull/42))
+- ([#42](https://github.com/dramforever/vscode-ghc-simple/pull/42)) Detect current ghci search for go to definition for multi-package setups. By [dimsmol](https://github.com/dimsmol)
 - Filter out 'it' and 'Ghci*.it' in completion results
 - Internal: Updated dependencies
 
@@ -111,7 +111,7 @@
 
 ## v0.1.3
 
-- Minor fixes, including [#25](https://github.com/dramforever/vscode-ghc-simple/pull/25) from [edmundnoble](https://github.com/edmundnoble) and [#26](https://github.com/dramforever/vscode-ghc-simple/pull/26) from [EduardSergeev](https://github.com/EduardSergeev).
+- ([#25](https://github.com/dramforever/vscode-ghc-simple/pull/25), [#26](https://github.com/dramforever/vscode-ghc-simple/pull/26)) Minor fixes. Thanks to [edmundnoble](https://github.com/edmundnoble) and [EduardSergeev](https://github.com/EduardSergeev) for the contribution.
 
 ## v0.1.2
 
