@@ -95,7 +95,7 @@ async function customConfig(
     workspaceUri: vscode.Uri
 ): Promise<Configuration> {
     if (replCommand.indexOf('$stack_ide_targets') !== -1) {
-        const sit = await this.getStackIdeTargets();
+        const sit = await this.getStackIdeTargets(workspaceUri);
         replCommand.replace(/\$stack_ide_targets/g, sit.join(' '));
     }
 
@@ -334,9 +334,11 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
     if ((await find('.stack-work')).length > 0
         || (await find('stack.yaml')).length > 0) {
         try {
-            return makeStackConfig(await getStackIdeTargets());
+            const targets = await getStackIdeTargets(workspace.uri);
+            return makeStackConfig(targets);
         } catch (e) {
-            // Try others
+            console.error('Error detecting stack configuration:', e);
+            console.log('Trying others...');
         }
     }
 

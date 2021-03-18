@@ -143,14 +143,14 @@ export async function getIdentifierDocs(
     return segments.length ? segments.join('\n---\n') : null;
 }
 
-export async function getStackIdeTargets() {
+export async function getStackIdeTargets(workspaceUri: vscode.Uri) {
     const result = await new Promise<string>((resolve, reject) => {
         child_process.exec(
             `${stackCommand} ide targets`,
-            this.cwdOption,
+            { cwd: workspaceUri.fsPath },
             (err, stdout, stderr) => {
                 if (err) reject('Command stack ide targets failed:\n' + stderr);
-                else resolve(stderr.toString('utf-8'));
+                else resolve(stderr.toString());
             }
         )
     });
