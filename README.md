@@ -24,7 +24,7 @@ Get vscode-ghc-simple from the [Visual Studio Marketplace](https://marketplace.v
 ext install dramforever.vscode-ghc-simple
 ```
 
-Alternatively, if you want the latest and greatest, you can download `vsix` files from [GitHub Actions](https://github.com/dramforever/vscode-ghc-simple/actions?query=workflow%3ACI). Pick the latest build, and check out the 'Artifacts' tab.
+Alternatively, if you want the latest and greatest, you can download `vsix` files from [GitHub Actions](https://github.com/dramforever/vscode-ghc-simple/actions?query=workflow%3ACI). Pick the latest build, and check out the 'Artifacts' section.
 
 ## What?
 

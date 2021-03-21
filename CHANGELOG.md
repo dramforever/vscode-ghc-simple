@@ -1,5 +1,14 @@
 # Change Log
 
+## v0.2.0
+
+([#89](https://github.com/dramforever/vscode-ghc-simple/pull/89)) Big update: New BIOS is now available. Multi-component/multi-package projects are now supported through `hie.yaml`, the same configuration file used for hie-bios. Check out the wiki page [Project Configuration](https://github.com/dramforever/vscode-ghc-simple/wiki/Project-Configuration) for details.
+
+Other notable
+
+- Much of the documentation that was in `README.md` has been moved to the [wiki](https://github.com/dramforever/vscode-ghc-simple/wiki). This was to make it easier to edit and manage.
+- The configuration `ghcSimple.workspaceType` is now removed and has no effect. Please check the [FAQ](https://github.com/dramforever/vscode-ghc-simple/wiki/FAQ#migrating-from-workspacetype) for help on migration.
+
 ## v0.1.24
 
 - ([#88](https://github.com/dramforever/vscode-ghc-simple/issues/88)) Work around cases where GHC prints diagnostics with column number 0. Thanks to [agocorona](https://github.com/agocorona) for reporting this issue.
