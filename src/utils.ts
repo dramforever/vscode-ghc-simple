@@ -1,7 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionState } from './extension-state';
-import { Session } from './session';
+import { ExtensionState } from './bios/extension-state';
+import { Session } from './bios/session';
+import * as child_process from 'child_process';
 
 export const haskellSymbolRegex = /([A-Z][A-Za-z0-9_']*\.)*([!#$%&*+./<=>?@\^|\-~:]+|[A-Za-z_][A-Za-z0-9_']*)/;
 export const haskellReplLine = /^(\s*-{2,}\s+)?>>>(.*)$/;
@@ -140,4 +141,19 @@ export async function getIdentifierDocs(
     }
 
     return segments.length ? segments.join('\n---\n') : null;
+}
+
+export async function getStackIdeTargets(workspaceUri: vscode.Uri) {
+    const result = await new Promise<string>((resolve, reject) => {
+        child_process.exec(
+            `${stackCommand} ide targets`,
+            { cwd: workspaceUri.fsPath },
+            (err, stdout, stderr) => {
+                if (err) reject('Command stack ide targets failed:\n' + stderr);
+                else resolve(stderr.toString());
+            }
+        )
+    });
+
+    return result.match(/^[^\s]+:[^\s]+$/gm)
 }

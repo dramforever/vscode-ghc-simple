@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from '../extension-state';
+import { ExtensionState, startSession } from '../bios/extension-state';
 import { getFeatures, haskellReplLine, haskellSelector, getIdentifierDocs } from '../utils';
 
 export function registerCompletion(ext: ExtensionState) {
@@ -15,6 +15,7 @@ export function registerCompletion(ext: ExtensionState) {
             return null;
 
         const session = await startSession(ext, document);
+        if (session === null) return null;
 
         const firstInLine = position.with({ character: 0 });
         let line = document.getText(new vscode.Range(firstInLine, position));
@@ -82,6 +83,8 @@ export function registerCompletion(ext: ExtensionState) {
         if (itemDocument.has(item)) {
             const document = itemDocument.get(item);
             const session = await startSession(ext, document);
+            if (session === null) return item;
+
             await session.loading;
 
             item.documentation = new vscode.MarkdownString (

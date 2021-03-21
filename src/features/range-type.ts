@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from '../extension-state';
-import { Session } from '../session';
+import { ExtensionState, startSession } from '../bios/extension-state';
+import { Session } from '../bios/session';
 import { getFeatures, documentIsHaskell, reportError } from '../utils';
 
 let hasNotified = false;
@@ -183,6 +183,8 @@ export function registerRangeType(ext: ExtensionState) {
             selTimeout = setTimeout(async () => {
                 try {
                     const session = await startSession(ext, doc);
+                    if (session === null) return;
+
                     const res = await getType(session, sel, doc);
                     if (res !== null) {
                         const [range, type] = res;

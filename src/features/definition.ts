@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from '../extension-state';
+import { ExtensionState, startSession } from '../bios/extension-state';
 import { strToLocation, haskellSymbolRegex, getFeatures, haskellSelector } from '../utils';
 
 export function registerDefinition(ext: ExtensionState) {
@@ -14,6 +14,7 @@ export function registerDefinition(ext: ExtensionState) {
             return null;
 
         const session = await startSession(ext, document);
+        if (session === null) return null;
 
         //             ------------------------ maybe qualified
         //                                      ------------------------ operator

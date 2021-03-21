@@ -7,7 +7,7 @@
         "url": "https://github.com/dramforever/vscode-ghc-simple"
     },
     "license": "ISC",
-    "version": "0.1.24",
+    "version": "0.1.99",
     "publisher": "dramforever",
     "engines": {
         "vscode": "^1.40.0"
@@ -112,7 +112,7 @@
                 "ghcSimple.workspaceType": {
                     "type": "string",
                     "default": "detect",
-                    "markdownDescription": "*This option is deprecated.* See `ghcSimple.replCommand` and `ghcSimple.replScope`.",
+                    "markdownDescription": "Removed and has no effect. Please use an `hie.yaml` file. See readme for details.",
                     "scope": "resource",
                     "enum": [
                         "detect",
@@ -128,7 +128,7 @@
                     "type": "string",
                     "default": "",
                     "scope": "resource",
-                    "markdownDescription": "The command used to start GHCi. `$stack_ide_targets` will be replaced by the output of `stack ide targets`. Leave blank for auto detection. When set, overrides the deprecated `ghcSimple.workspaceType`. If you set this, please also set `ghcSimple.replScope` to an appropriate value."
+                    "markdownDescription": "The command used to start GHCi. `$stack_ide_targets` will be replaced by the output of `stack ide targets`. Leave blank for auto detection.\n\nWhen set, overrides the deprecated `ghcSimple.workspaceType`. If you set this, please also set `ghcSimple.replScope` to an appropriate value."
                 },
                 "ghcSimple.replScope": {
                     "type": "string",
@@ -137,7 +137,12 @@
                         "file"
                     ],
                     "default": "workspace",
-                    "markdownDescription": "Whether GHCi should be started for a project or individual files. **Note**: This option has no effect when `ghcSimple.replCommand` is set to empty string for auto detection."
+                    "markdownDescription": "Whether GHCi should be started for a project or individual files.\n\n**Note**: This option has no effect when `ghcSimple.replCommand` is set to empty string for auto detection."
+                },
+                "ghcSimple.replLinger": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Whether GHCi sessions for workspaces linger after closing all associated documents.\n\nWhen enabled, the GHCi startup time is saved but takes more memory when idle. When disabled, kills GHCi after all associated files are closed, saves memory but takes time to restart. GHCi for a single file never linger."
                 },
                 "ghcSimple.startupCommands.all": {
                     "type": "array",
@@ -155,7 +160,7 @@
                         ":set -Wno-error=missing-home-modules"
                     ],
                     "scope": "resource",
-                    "markdownDescription": "GHCi commands on startup to use for all workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
+                    "markdownDescription": "GHCi commands on startup to use for all workspace types.\n\nThe default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
                 },
                 "ghcSimple.startupCommands.bare": {
                     "type": "array",
@@ -167,7 +172,7 @@
                         ":seti -Wno-type-defaults"
                     ],
                     "scope": "resource",
-                    "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types. The default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
+                    "markdownDescription": "GHCi commands on startup to use for 'bare' workspace types.\n\nThe default value is for use within vscode-ghc-simple and you can customize these if needed. Since these might be updated in the future, Custom commands should go to `ghcSimple.startupCommands.custom`"
                 },
                 "ghcSimple.startupCommands.custom": {
                     "type": "array",
@@ -201,7 +206,7 @@
                         "Use `-fbyte-code` for GHCi REPL blocks",
                         "Use `-fobject-code` for GHCi REPL blocks"
                     ],
-                    "markdownDescription": "Whether to load modules with `-fbyte-code` or `-fobject-code` when using the REPL. The former is the default as it loads faster. The latter runs faster and can use FFI. Write `:set -fbyte-code` or `:set -fobject-code` as first line of GHCi REPL block to override."
+                    "markdownDescription": "Whether to load modules with `-fbyte-code` or `-fobject-code` when using the REPL.\n\nThe former is the default as it loads faster. The latter runs faster and can use FFI. Write `:set -fbyte-code` or `:set -fobject-code` as first line of GHCi REPL block to override."
                 },
                 "ghcSimple.flag.noNotifySlowRangeType": {
                     "type": "boolean",

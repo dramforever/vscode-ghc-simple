@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from '../extension-state';
+import { ExtensionState, startSession } from '../bios/extension-state';
 import { haskellReplLine, getFeatures, haskellSelector, reportError } from '../utils';
 
 function generateReplacement(
@@ -101,6 +101,8 @@ export function registerInlineRepl(ext: ExtensionState) {
                 const { outputRange, commands, prefix } = res;
 
                 const session = await startSession(ext, textEditor.document);
+                if (session === null) return;
+
                 await session.loading;
                 await session.loadInterpreted(textEditor.document.uri);
 

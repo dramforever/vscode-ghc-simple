@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ExtensionState, startSession } from '../extension-state';
+import { ExtensionState, startSession } from '../bios/extension-state';
 import { haskellSymbolRegex, haskellSelector, getFeatures, getIdentifierDocs } from '../utils';
 import { Hover, MarkdownString } from 'vscode';
 
@@ -17,6 +17,8 @@ export function registerHover(ext: ExtensionState) {
         if (! range) return null;
 
         const session = await startSession(ext, document);
+        if (session === null) return null;
+
         await session.loading;
         const documentation = await getIdentifierDocs(
             session, document.uri, document.getText(range)

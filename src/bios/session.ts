@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import { GhciManager } from "./ghci";
-import { ExtensionState, HaskellWorkspaceType } from "./extension-state";
-import { stackCommand, reportError } from './utils';
+import { ExtensionState } from "./extension-state";
+import { reportError } from '../utils';
 
 export class Session implements vscode.Disposable {
     ghci: GhciManager;
@@ -21,8 +21,8 @@ export class Session implements vscode.Disposable {
 
     constructor(
         public ext: ExtensionState,
-        public workspaceType: HaskellWorkspaceType,
-        public resourceType: 'workspace' | 'file',
+        public cmd: string | string[],
+        public cwd: string | undefined,
         public resource: vscode.Uri) {
         this.ghci = null;
         this.starting = null;
@@ -31,7 +31,7 @@ export class Session implements vscode.Disposable {
         this.onWillReloadEmitter = new vscode.EventEmitter();
         this.onWillReload = this.onWillReloadEmitter.event;
         this.moduleMap = new Map();
-        this.cwdOption = resourceType == 'workspace' ? { cwd: this.resource.fsPath } : {};
+        this.cwdOption = cwd ? { cwd } : {};
         this.wasDisposed = false;
         this.lastReload = null;
     }
@@ -68,12 +68,9 @@ export class Session implements vscode.Disposable {
 
     async startP() {
         if (this.ghci === null) {
-            const wst = this.workspaceType;
-
             this.checkDisposed();
-            const cmd = await this.getGhciCommand();
 
-            this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(cmd)}`);
+            this.ext.outputChannel.appendLine(`Starting GHCi with: ${JSON.stringify(this.cmd)}`);
             this.ext.outputChannel.appendLine(
                 `(Under ${
                     this.cwdOption.cwd === undefined
@@ -82,59 +79,19 @@ export class Session implements vscode.Disposable {
 
             this.checkDisposed();
             this.ghci = new GhciManager(
-                cmd,
+                this.cmd,
                 this.cwdOption,
                 this.ext);
             const cmds = vscode.workspace.getConfiguration('ghcSimple.startupCommands', this.resource);
             const configureCommands = [].concat(
                 cmds.all,
-                wst === 'bare-stack' || wst === 'bare' ? cmds.bare : [],
+                this.cwd ? [] : cmds.bare,
                 cmds.custom
             );
             await this.ghci.sendCommand(configureCommands);
 
             this.basePath = await this.generateBasePath();
         }
-    }
-
-    async getStackIdeTargets() {
-        this.checkDisposed();
-        const result = await new Promise<string>((resolve, reject) => {
-            child_process.exec(
-                `${stackCommand} ide targets`,
-                this.cwdOption,
-                (err, stdout, stderr) => {
-                    if (err) reject('Command stack ide targets failed:\n' + stderr);
-                    else resolve(stderr);
-                }
-            )
-        });
-
-        return result.match(/^[^\s]+:[^\s]+$/gm)
-    }
-
-    async getGhciCommand() {
-        const wst = this.workspaceType;
-
-        if (wst == 'custom-workspace' || wst == 'custom-file') {
-            let cmd = vscode.workspace.getConfiguration('ghcSimple', this.resource).replCommand;
-            if (cmd.indexOf('$stack_ide_targets') !== -1) {
-                const sit = await this.getStackIdeTargets();
-                cmd.replace(/\$stack_ide_targets/g, sit.join(' '));
-            }
-            return cmd;
-        } else if (wst == 'stack') {
-            return `${stackCommand} repl --no-load ${(await this.getStackIdeTargets()).join(' ')}`;
-        } else if (wst == 'cabal')
-            return 'cabal repl';
-        else if (wst == 'cabal new')
-            return 'cabal new-repl all';
-        else if (wst == 'cabal v2')
-            return 'cabal v2-repl all';
-        else if (wst == 'bare-stack')
-            return `${stackCommand} exec ghci`;
-        else if (wst == 'bare')
-            return 'ghci';
     }
 
     async generateBasePath(): Promise<string | undefined> {

@@ -1,6 +1,6 @@
-import { GhciManager } from "../ghci";
+import { GhciManager } from "../bios/ghci";
 import * as vscode from "vscode";
-import { Session } from "../session";
+import { Session } from "../bios/session";
 
 export type GhciStatus =
     { status: "busy", info: string | null }
@@ -16,8 +16,7 @@ export class StatusBar {
     configListener: vscode.Disposable;
 
     constructor(
-        public documentAssignment:
-            WeakMap<vscode.TextDocument, Session>) {
+        public documentSessions: Map<vscode.TextDocument, Session>) {
         this.map = new Map();
         this.disposedSet = new WeakSet();
         this.busyCount = 0;
@@ -75,8 +74,8 @@ export class StatusBar {
     }
 
     handleSwitchEditor(editor: vscode.TextEditor) {
-        if (this.documentAssignment.has(editor.document)) {
-            const session = this.documentAssignment.get(editor.document);
+        if (this.documentSessions.has(editor.document)) {
+            const session = this.documentSessions.get(editor.document);
             if (this.map.has(session.ghci))
                 this.focusedGhci = session.ghci;
             else

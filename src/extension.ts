@@ -2,7 +2,7 @@
 import * as vscode from 'vscode';
 import { registerRangeType } from './features/range-type';
 import { registerCompletion } from './features/completion';
-import { ExtensionState } from './extension-state';
+import { ExtensionState } from './bios/extension-state';
 import { registerDiagnostics } from './features/diagnostics';
 import { registerDefinition } from './features/definition';
 import { registerReference } from './features/reference';
@@ -12,17 +12,16 @@ import { registerHover } from './features/hover';
 
 export function activate(context: vscode.ExtensionContext) {
     const outputChannel = vscode.window.createOutputChannel('GHC');
-    const documentAssignment = new WeakMap();
-    const statusBar = new StatusBar(documentAssignment);
+    const documentSessions = new Map();
+    const sharableSessions = new Map();
+    const statusBar = new StatusBar(documentSessions);
 
     const ext: ExtensionState = {
         context,
         outputChannel,
         statusBar,
-        documentManagers: new Map(),
-        workspaceManagers: new Map(),
-        workspaceTypeMap: new Map(),
-        documentAssignment
+        documentSessions,
+        sharableSessions
     };
 
     context.subscriptions.push(outputChannel, statusBar);
@@ -36,21 +35,29 @@ export function activate(context: vscode.ExtensionContext) {
 
     const diagInit = registerDiagnostics(ext);
 
+    function killEverything() {
+        const disposed = new Set();
+
+        for (const [_doc, state] of ext.documentSessions) {
+            if (! disposed.has(state)) {
+                state.session.dispose();
+                disposed.add(state);
+            }
+        }
+
+        for (const [_keyString, state] of ext.sharableSessions) {
+            if (! disposed.has(state)) {
+                state.session.dispose();
+                disposed.add(state);
+            }
+        }
+
+        ext.documentSessions.clear();
+        ext.sharableSessions.clear();
+    }
+
     function restart() {
-        for (const [doc, session] of ext.documentManagers) {
-            session.dispose();
-        }
-
-        ext.documentManagers.clear();
-
-        for (const [ws, session] of ext.workspaceManagers) {
-            session.dispose();
-        }
-
-        ext.workspaceManagers.clear();
-
-        ext.documentAssignment = new WeakMap();
-
+        killEverything();
         diagInit();
     }
 
@@ -63,13 +70,12 @@ export function activate(context: vscode.ExtensionContext) {
             if (event.affectsConfiguration('ghcSimple'))
                 restart();
         }),
+        { dispose: killEverything },
         vscode.commands.registerCommand('vscode-ghc-simple.restart', restart),
         vscode.commands.registerCommand('vscode-ghc-simple.openOutput', openOutput));
 
-    vscode.workspace.onDidChangeWorkspaceFolders((changeEvent) => {
-        for (const folder of changeEvent.removed)
-            if (ext.workspaceManagers.has(folder))
-                ext.workspaceManagers.get(folder).dispose();
+    vscode.workspace.onDidChangeWorkspaceFolders(() => {
+        restart();
     })
 }
 
