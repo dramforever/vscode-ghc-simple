@@ -54,14 +54,14 @@ function parseMessages(messages: string[]):
                     const line = num(2);
                     const col = num(3);
 
-                    return new vscode.Range(line - 1, fixCol(col - 1), line - 1, fixCol(col));
+                    return new vscode.Range(line - 1, fixCol(col) - 1, line - 1, fixCol(col));
                 } else if (res_heading[4]) {
                     // line:col-col
                     const line = num(4);
                     const col0 = num(5);
                     const col1 = num(6);
 
-                    return new vscode.Range(line - 1, fixCol(col0 - 1), line - 1, fixCol(col1));
+                    return new vscode.Range(line - 1, fixCol(col0) - 1, line - 1, fixCol(col1));
                 } else if (res_heading[7]) {
                     // (line,col)-(line,col)
                     const line0 = num(7);
@@ -69,7 +69,7 @@ function parseMessages(messages: string[]):
                     const line1 = num(9);
                     const col1 = num(10);
 
-                    return new vscode.Range(line0 - 1, fixCol(col0 - 1), line1 - 1, fixCol(col1));
+                    return new vscode.Range(line0 - 1, fixCol(col0) - 1, line1 - 1, fixCol(col1));
                 } else {
                     // Shouldn't happen!
                     throw 'Strange heading in parseMessages';
