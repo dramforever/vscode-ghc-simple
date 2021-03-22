@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.1
+
+- Fix a bug when sometimes diagnostics squiggles are put at the wrong position.
+
 ## v0.2.0
 
 ([#89](https://github.com/dramforever/vscode-ghc-simple/pull/89)) Big update: New BIOS is now available. Multi-component/multi-package projects are now supported through `hie.yaml`, the same configuration file used for hie-bios. Check out the wiki page [Project Configuration](https://github.com/dramforever/vscode-ghc-simple/wiki/Project-Configuration) for details.
