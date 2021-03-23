@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.2
+
+- Fix an off-by-one error in range types.
+
 ## v0.2.1
 
 - Fix a bug when sometimes diagnostics squiggles are put at the wrong position.
