@@ -95,7 +95,7 @@ async function customConfig(
     workspaceUri: vscode.Uri
 ): Promise<Configuration> {
     if (replCommand.indexOf('$stack_ide_targets') !== -1) {
-        const sit = await this.getStackIdeTargets(workspaceUri);
+        const sit = await getStackIdeTargets(workspaceUri);
         replCommand.replace(/\$stack_ide_targets/g, sit.join(' '));
     }
 
