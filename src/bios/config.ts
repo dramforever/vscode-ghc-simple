@@ -191,7 +191,7 @@ async function hieBiosConfig(
                     component: component.component
                 },
                 cwd: workspace.uri.fsPath,
-                command: [ 'stack', ...stackOptions, 'repl', ... stackYamlOpts, ... componentOpts ],
+                command: [ 'stack', ...stackOptions, 'repl', '--no-load', ... stackYamlOpts, ... componentOpts ],
                 dependencies:  [
                     ... config.dependencies || [],
                     stackYaml || new vscode.RelativePattern(workspace, 'stack.yaml'),
@@ -209,7 +209,7 @@ async function hieBiosConfig(
                     uri: workspace.uri.toString()
                 },
                 cwd: workspace.uri.fsPath,
-                command: [ 'stack', ...stackOptions, 'repl' ],
+                command: [ 'stack', ...stackOptions, 'repl', '--no-load' ],
                 dependencies:  [
                     ... config.dependencies || [],
                     new vscode.RelativePattern(workspace, 'hie.yaml'),
@@ -320,7 +320,7 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
             uri: workspace.uri.toString(),
         },
         cwd: workspace.uri.fsPath,
-        command: [ 'stack', ...stackOptions, 'repl', ... targets],
+        command: [ 'stack', ...stackOptions, 'repl', '--no-load', ... targets],
         dependencies:  [
             new vscode.RelativePattern(workspace, '*.cabal'),
             new vscode.RelativePattern(workspace, 'package.yaml'),
