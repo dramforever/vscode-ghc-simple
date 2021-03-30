@@ -49,6 +49,7 @@ export interface Configuration {
     dependencies: vscode.GlobPattern[];
 }
 
+const stackOptions = ["--no-terminal", "--color", "never"]
 
 /** Detect if stack is available */
 function hasStack(): Promise<boolean> {
@@ -190,7 +191,7 @@ async function hieBiosConfig(
                     component: component.component
                 },
                 cwd: workspace.uri.fsPath,
-                command: [ 'stack', 'repl', ... stackYamlOpts, ... componentOpts ],
+                command: [ 'stack', ...stackOptions, 'repl', ... stackYamlOpts, ... componentOpts ],
                 dependencies:  [
                     ... config.dependencies || [],
                     stackYaml || new vscode.RelativePattern(workspace, 'stack.yaml'),
@@ -208,7 +209,7 @@ async function hieBiosConfig(
                     uri: workspace.uri.toString()
                 },
                 cwd: workspace.uri.fsPath,
-                command: [ 'stack', 'repl' ],
+                command: [ 'stack', ...stackOptions, 'repl' ],
                 dependencies:  [
                     ... config.dependencies || [],
                     new vscode.RelativePattern(workspace, 'hie.yaml'),
@@ -319,7 +320,7 @@ export async function fileConfig(docUri: vscode.Uri): Promise<Configuration | nu
             uri: workspace.uri.toString(),
         },
         cwd: workspace.uri.fsPath,
-        command: [ 'stack', 'repl', ... targets],
+        command: [ 'stack', ...stackOptions, 'repl', ... targets],
         dependencies:  [
             new vscode.RelativePattern(workspace, '*.cabal'),
             new vscode.RelativePattern(workspace, 'package.yaml'),
