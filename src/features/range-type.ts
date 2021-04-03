@@ -101,7 +101,12 @@ async function getType(
             // Weird generated type with empty range, ignore
             continue
         }
-        const curRange = new vscode.Range(+startLine - 1, +startCol - 1, +endLine - 1, +endCol);
+        const fixedEndCol = (+endCol == 0) ? 1 : +endCol;
+        const curRange = new vscode.Range(
+            +startLine - 1,
+            +startCol - 1,
+            +endLine - 1,
+            fixedEndCol - 1);
         if (curRange.contains(selRangeOrPos)) {
             if (curBestRange === null || curBestRange.contains(curRange)) {
                 curBestRange = curRange;
