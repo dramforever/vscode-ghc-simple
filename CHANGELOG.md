@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.2.3
+
+- Security fix: A `ghcSimple.replCommand` configuration must be explicitly trusted by the user. Both the command and the workspace path have to match for it to be considered the same as a configuration trusted before. Otherwise, a malicious workspace could set it to an arbitrary command and the user would unknowingly run this command when a Haskell file is opened. Thanks to RyotaK for discovering this.
+- ([#91](https://github.com/dramforever/vscode-ghc-simple/issues/91)) Fix path handling on Windows with New BIOS. `path` configurations in `hie.yaml` should now work as intended.
+- Other minor fixes.
+
 ## v0.2.2
 
 - Fix an off-by-one error in range types.
