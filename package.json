@@ -144,6 +144,12 @@
                     "default": true,
                     "markdownDescription": "Whether GHCi sessions for workspaces linger after closing all associated documents.\n\nWhen enabled, the GHCi startup time is saved but takes more memory when idle. When disabled, kills GHCi after all associated files are closed, saves memory but takes time to restart. GHCi for a single file never linger."
                 },
+                "ghcSimple.trustedReplCommandConfigs": {
+                    "type": "object",
+                    "default": {},
+                    "scope": "application",
+                    "markdownDescription": "Using a `#ghcSimple.replCommand#` configuration from an untrusted workspace can pose a security risk. Whenever such a configuration occurs, you will be notified and if you choose to trust it, it will be recorded here."
+                },
                 "ghcSimple.startupCommands.all": {
                     "type": "array",
                     "items": {

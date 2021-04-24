@@ -89,12 +89,45 @@ async function singleConfig(cwd?: string): Promise<Configuration> {
     }
 }
 
+const alreadyShown = new Set();
+
+function handleReplCommandTrust(
+    workspaceUri: vscode.Uri,
+    replCommand: string
+): boolean {
+    if (workspaceUri.scheme !== 'file') return false;
+    const config = vscode.workspace.getConfiguration('ghcSimple', null);
+    const insp = config.inspect('trustedReplCommandConfigs').globalValue ?? {};
+    if (insp[workspaceUri.fsPath] === replCommand) {
+        return true;
+    } else {
+        if (! alreadyShown.has(workspaceUri.fsPath)) {
+            alreadyShown.add(workspaceUri.fsPath);
+            vscode.window.showWarningMessage(
+                `This workspace ${workspaceUri.fsPath} wants to run "${replCommand}" to start GHCi.\n\nAllow if you understand this and trust it.`,
+                'Allow', 'Ignore'
+            ).then((value) => {
+                alreadyShown.delete(workspaceUri.fsPath);
+                if (value == 'Allow') {
+                    const trusted = config.get('trustedReplCommandConfigs');
+                    trusted[workspaceUri.fsPath] = replCommand;
+                    config.update('trustedReplCommandConfigs', trusted, vscode.ConfigurationTarget.Global);
+                }
+            })
+        }
+        return false;
+    }
+}
+
 /** Configuration for a custom command */
 async function customConfig(
     replScope: 'workspace' | 'file',
     replCommand: string,
     workspaceUri: vscode.Uri
-): Promise<Configuration> {
+): Promise<Configuration | null> {
+    if (! handleReplCommandTrust(workspaceUri, replCommand))
+        return null;
+
     if (replCommand.indexOf('$stack_ide_targets') !== -1) {
         const sit = await getStackIdeTargets(workspaceUri);
         replCommand.replace(/\$stack_ide_targets/g, sit.join(' '));
