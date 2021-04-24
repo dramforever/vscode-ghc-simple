@@ -2,6 +2,7 @@ import * as child_process from 'child_process';
 import * as vscode from 'vscode';
 import { getStackIdeTargets } from '../utils';
 import * as hie from './hie-bios';
+import * as path from 'path';
 
 /**
  * The key of a configuration, if applicable. Designed to be deterministically
@@ -144,8 +145,8 @@ async function customConfig(
 }
 
 function pathIsPrefix(a: string, b: string): boolean {
-    const aLevels = a.split('/');
-    const bLevels = b.split('/');
+    const aLevels = a.split(path.sep);
+    const bLevels = b.split(path.sep);
     if (aLevels.length > bLevels.length) return false;
 
     for (let i = 0; i < aLevels.length; i ++) {
