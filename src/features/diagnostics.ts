@@ -13,7 +13,7 @@ const regex = {
     // 7-10: variant 3: (line, col)
     message_base: /^(.+):(?:(\d+):(\d+)|(\d+):(\d+)-(\d+)|\((\d+),(\d+)\)-\((\d+),(\d+)\)): (.+)$/,
     single_line_error: /^error: (?:\[.+\] )?([^\[].*)$/,
-    single_line_warning: /^warning: \[(.+)\] (.+)$/,
+    single_line_warning: /^warning: \[(.+)\] ([^\[].*)$/,
     error: /^error:(?: \[.*\])?$/,
     warning: /^warning:(?: \[(.+)\])?$/
 };
