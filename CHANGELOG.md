@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.2.4
+
+- ([#98](https://github.com/dramforever/vscode-ghc-simple/issues/98)) Fix warning parsing for GHC >= 9.6.4.
+- Other minor fixes.
+
 ## v0.2.3
 
 - Security fix: A `ghcSimple.replCommand` configuration must be explicitly trusted by the user. Both the command and the workspace path have to match for it to be considered the same as a configuration trusted before. Otherwise, a malicious workspace could set it to an arbitrary command and the user would unknowingly run this command when a Haskell file is opened. Thanks to RyotaK for discovering this.
