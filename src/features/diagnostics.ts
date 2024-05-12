@@ -105,7 +105,7 @@ function parseMessages(messages: string[]):
                 while (messages.length > 0 && messages[0].startsWith('    ')) {
                     msgs.push(messages.shift().substr(4));
                 }
-                const msg = msgs.join('\n') + (msgs.length ? '\n' : '');
+                const msg = msgs.join('\n');
 
                 const severity: vscode.DiagnosticSeverity = (() => {
                     if (res_error !== null) {
