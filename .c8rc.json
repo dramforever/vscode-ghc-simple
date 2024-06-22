@@ -1,0 +1,16 @@
+{
+    "include": [
+        "src/**/*.ts",
+        "out/**/*.js"
+    ],
+    "exclude": [
+        "src/test/*",
+        "out/test/*"
+    ],
+    "reporter": [
+        "text-summary",
+        "html",
+        "lcov"
+    ],
+    "report-dir": ".coverage"
+}

@@ -26,7 +26,7 @@
         "onLanguage:haskell",
         "onLanguage:literate haskell"
     ],
-    "main": "./out/src/extension",
+    "main": "./out/extension",
     "contributes": {
         "commands": [
             {
@@ -231,14 +231,28 @@
     },
     "scripts": {
         "vscode:prepublish": "tsc -p ./",
-        "compile": "tsc -watch -p ./"
+        "precompile": "rm -rf ./out",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile",
+        "test": "mocha out/test/runTest.js",
+        "coverage": "c8 npm test",
+        "prepackage": "npm run compile",
+        "package": "vsce package",
+        "preupload": "npm run package"
     },
     "devDependencies": {
+        "@types/chai": "4.3.16",
         "@types/js-yaml": "^4.0.0",
+        "@types/mocha": "10.0.6",
         "@types/node": "^14.14.21",
         "@types/vscode": "^1.40.0",
         "typescript": "^4.1.3",
-        "@vscode/vsce": "^2.15.0"
+        "@vscode/test-electron": "2.3.9",
+        "@vscode/vsce": "^2.15.0",
+        "c8": "^10.1.2",
+        "chai": "4.4.1",
+        "mocha": "10.4.0"
     },
     "dependencies": {
         "js-yaml": "^4.0.0"
