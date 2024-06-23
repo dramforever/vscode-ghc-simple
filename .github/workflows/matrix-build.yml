@@ -1,0 +1,93 @@
+name: master
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  matrix-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        ghc:
+          - 8.10.7
+          - 9.0.2
+          - 9.6.5
+        env:
+          - { CODE_VERSION: 1.40.0, DISPLAY: ':99.0' }
+          - { CODE_VERSION: 'stable', DISPLAY: ':99.0' }
+    runs-on: ${{ matrix.os }}
+    env: ${{ matrix.env }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up npm
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install Haskell Stack
+      if: runner.os == 'macOS'
+      run: |
+        brew install llvm@12
+        echo "/opt/homebrew/opt/llvm@12/bin" >> $GITHUB_PATH
+        brew install haskell-stack
+
+    - name: Set up GHC ${{ matrix.ghc }} environment
+      run: |
+        echo "resolver: ghc-${{ matrix.ghc }}" > stack.yaml
+        echo "packages: []" >> stack.yaml
+        stack setup
+
+    - run: npm install
+
+    - name: Run npm test
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: npm test
+
+    - name: Add GHC extension output (on failure on Linux or MacOS)
+      if: failure() && runner.os != 'Windows'
+      run: find .vscode-test/udd/logs -name *GHC* -exec cat {} \;
+
+    - name: Add GHC extension output (on failure on Windows)
+      if: failure() && runner.os == 'Windows'
+      run: Get-ChildItem -Path .vscode-test -Include *GHC.log -File -Recurse | Get-Content
+
+  metrics:
+    runs-on: ubuntu-latest
+    env: { CODE_VERSION: 'stable', DISPLAY: ':99.0', GHC: 9.6.5 }
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up npm
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Set up GHC ${{ env.GHC }} environment
+      run: |
+        echo "resolver: ghc-${{ env.GHC }}" > stack.yaml
+        echo "packages: []" >> stack.yaml
+        stack setup
+  
+    - run: npm install
+
+    - name: Run tests with coverage
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: npm run coverage
+
+    - name: Publish coverage on Coveralls.io
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: .coverage/lcov.info
