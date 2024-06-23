@@ -162,7 +162,7 @@ async function checkHaskell(
             diagMap.get(path).push(diag.diagnostic);
         }
 
-        diagnosticCollection.clear();
+        diagnosticCollection.delete(document.uri);
 
         for (const [path, diags] of diagMap.entries()) {
             diagnosticCollection.set(vscode.Uri.file(path), diags);
