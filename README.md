@@ -7,6 +7,12 @@
 
 (Icon derived from logo on <http://haskell.org/>.)
 
+## Note on the maintenance status of vscode-ghc-simple
+
+I intend to continue publish bug fixes and compatibility fixes for vscode-ghc-simple. However, currently I do not personally use Haskell much at all due to a shift in my focus, and there will unlikely be significant feature developments in vscode-ghc-simple in the future.
+
+If you want a more comprehensive experience, consider using [the official language-server-based extension](https://marketplace.visualstudio.com/items?itemName=haskell.haskell). If you just want something simple, this should be enough.
+
 ## Shiny badges
 
 [![vscode-ghc-simple on Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/dramforever.vscode-ghc-simple.svg)](https://marketplace.visualstudio.com/items?itemName=dramforever.vscode-ghc-simple) [![CI](https://img.shields.io/github/workflow/status/dramforever/vscode-ghc-simple/CI.svg)](https://github.com/dramforever/vscode-ghc-simple/actions?query=workflow%3ACI)
