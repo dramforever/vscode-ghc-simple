@@ -1,5 +1,11 @@
 # Change Log
 
+## v0.2.5
+
+- ([#102](https://github.com/dramforever/vscode-ghc-simple/pull/102)) Fix extension dependency name. Thanks to [saitouena](https://github.com/saitouena)
+- Add maintenance status statement.
+- Other minor fixes.
+
 ## v0.2.4
 
 - ([#98](https://github.com/dramforever/vscode-ghc-simple/issues/98)) Fix warning parsing for GHC >= 9.6.4.
