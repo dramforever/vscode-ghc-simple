@@ -37,7 +37,7 @@ jobs:
         echo "::set-output name=name::$(echo vscode-ghc-simple-*.vsix)"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v3
       with:
         name: extension-package
         path: ${{ steps.get_package_name.outputs.name }}
